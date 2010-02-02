@@ -1,5 +1,11 @@
 
-int main(int argc, char **argv)
+#include <iostream>
+#include "CommandLineParser.h"
+
+using namespace std;
+
+int main(int argc, const char **argv)
 {
-	return 0;
+	CommandLineParser cmd(argc, argv);
+	return cmd.run(cout);
 }
