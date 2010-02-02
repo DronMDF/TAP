@@ -1,0 +1,9 @@
+syntax: glob
+CMakeFiles
+Testing
+CMakeCache.txt
+CTestTestfile.cmake
+cmake_install.cmake
+Makefile
+xap
+test_xap
