@@ -8,7 +8,7 @@
 
 class CommandLineParser {
 private:
-	virtual int callUp(int count);
+	virtual void callUp(int count);
 	void parse_options(const std::list<std::string> &args);
 
 protected:

@@ -76,55 +76,16 @@ int CommandLineParser::run(ostream &out)
 		return 0;
 	}
 
-	string server = "localhost:4433";
-	string cert = "user.cer";
-	string key = "user.key";
-	int num = 1;
-
-	while (!m_args.empty()) {
-		const string op = m_args.front();
-		m_args.pop_front();
-		
-		if (op[0] == '-') {
-			BOOST_ASSERT(!m_args.empty());
-			
-			switch (op[1]) {
-				case 's':
-					server = m_args.front();
-					if (server.find(':') == string::npos) {
-						server += ":4433";
-					}
-					break;
-					
-				case 'c':
-					cert = m_args.front();
-					break;
-
-				case 'k':
-					key = m_args.front();
-					break;
-
-				case 'n':
-					num = lexical_cast<uint32_t>(m_args.front());
-					break;
-				default:
-					cerr << "Неправильная опция: " << op << endl;
-					throw runtime_error("Неправильная опция");
-			}
-
-			m_args.pop_front();
-			continue;
-		}
-			
-		if (op == "load") {
-			return callUp(num);
-		}
+	if (m_args.front() == "load") {
+		int num = (m_options.find("num") != m_options.end()) ?
+				lexical_cast<int>(m_options["num"]) : 1;
+		callUp(num);
+		return 0;
 	}
 	
 	return -1;
 }
 
-int CommandLineParser::callUp(int count)
+void CommandLineParser::callUp(int count)
 {
-	return 0;
 }
