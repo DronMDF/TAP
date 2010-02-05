@@ -77,15 +77,15 @@ int CommandLineParser::run(ostream &out)
 	}
 
 	if (m_args.front() == "load") {
-		int num = (m_options.find("num") != m_options.end()) ?
-				lexical_cast<int>(m_options["num"]) : 1;
-		callUp(num);
+		//int num = (m_options.find("num") != m_options.end()) ?
+		//		lexical_cast<int>(m_options["num"]) : 1;
+		//callUp(num);
 		return 0;
 	}
 	
 	return -1;
 }
 
-void CommandLineParser::callUp(int count)
+void CommandLineParser::callUp(creator_callback_t creator)
 {
 }

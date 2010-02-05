@@ -3,8 +3,11 @@
 #include <stdexcept>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/utils/nullstream.hpp>
+#include <boost/function.hpp>
 
 #include "../CommandLineParser.h"
+#include "../Client.h"
+#include "../ClientHonest.h"
 #include "testUtility.h"
 
 using namespace std;
@@ -56,12 +59,10 @@ BOOST_AUTO_TEST_CASE(testCommands)
 	const string command = "load";
 	const char *argv[] = { "xap", "-n", "666", command.c_str() };
 
-	struct testCLP : public CommandLineParser, private visit_mock {
+	struct testCLP : public CommandLineParser {
 		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
-		void callUp(int num) { visit(); BOOST_REQUIRE_EQUAL(num, 666); }
 		using CommandLineParser::m_args;
 	} cmd(sizeof(argv) / sizeof(argv[0]), argv);
-	cmd.run(nullout);
 	
 	BOOST_REQUIRE_EQUAL(cmd.m_args.front(), command);
 }
@@ -75,6 +76,21 @@ BOOST_AUTO_TEST_CASE(testHelp)
 	cmd.run(out);
 
 	BOOST_REQUIRE_EQUAL(out.str(), CommandLineParser::help);
+}
+
+BOOST_AUTO_TEST_CASE(testLoadCreateHonest)
+{
+	const char *argv[] = { "xap", "-n", "666", "load" };
+
+	struct testCLP : public CommandLineParser, private visit_mock {
+		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
+		void callUp(creator_callback_t creator) {
+			visit();
+			Client *honest = creator(m_options);
+			BOOST_REQUIRE(dynamic_cast<ClientHonest *>(honest) != 0);
+		}
+	} cmd(sizeof(argv) / sizeof(argv[0]), argv);
+	cmd.run(nullout);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
