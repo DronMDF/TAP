@@ -2,15 +2,18 @@
 #pragma once
 
 #include <iosfwd>
-#include <list>
 #include <string>
+#include <list>
+#include <map>
 
 class CommandLineParser {
 private:
-	std::list<std::string> m_args;
+	virtual int callUp(int count);
+	void parse_options(const std::list<std::string> &args);
 
-	virtual int runLoad(const std::string &server,
-		const std::string &cert, const std::string &key, int count);
+protected:
+	std::map<std::string, std::string> m_options;
+	std::list<std::string> m_args;
 	
 public:
 	CommandLineParser(int argc, const char **argv);

@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <boost/assert.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
 
 #include "CommandLineParser.h"
 
@@ -22,10 +23,51 @@ const string CommandLineParser::help =
 	"\t-n <количество>\n";
 
 CommandLineParser::CommandLineParser(int argc, const char **argv)
-	: m_args(argv, argv + argc)
+	: m_options(), m_args()
 {
-	m_args.pop_front();
+	list<string> args(argv, argv + argc);
+	args.pop_front();
+	parse_options(args);
 }
+
+void CommandLineParser::parse_options(const list<string> &args)
+{
+	string op;
+	
+	BOOST_FOREACH(const string &arg, args) {
+		if (!op.empty()) {
+			m_options[op] = arg;
+			op.clear();
+			continue;
+		}
+
+		BOOST_ASSERT(op.empty());
+		if (arg[0] != '-') {
+			m_args.push_back(arg);
+			continue;
+		}
+		
+		switch (arg[1]) {
+			case 's': op = "server"; break;
+			case 'c': op = "certfile"; break;
+			case 'k': op = "keyfile"; break;
+			case 'n': op = "num"; break;
+			default: throw runtime_error("Неправильная опция");
+		}
+	}
+
+	if (!op.empty()) {
+		throw runtime_error("Неправильная опция");
+	}
+
+	if (m_options.find("server") != m_options.end()) {
+		// Постобработка сервера
+		if (m_options["server"].find(':') == string::npos) {
+			m_options["server"] += ":4433";
+		}
+	}
+}
+
 
 int CommandLineParser::run(ostream &out)
 {
@@ -75,15 +117,14 @@ int CommandLineParser::run(ostream &out)
 		}
 			
 		if (op == "load") {
-			return runLoad(server, cert, key, num);
+			return callUp(num);
 		}
 	}
 	
 	return -1;
 }
 
-int CommandLineParser::runLoad(const string &server,
-		const string &cert, const string &key, int count)
+int CommandLineParser::callUp(int count)
 {
 	return 0;
 }

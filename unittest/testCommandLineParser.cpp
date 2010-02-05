@@ -12,6 +12,8 @@ using namespace boost;
 
 BOOST_AUTO_TEST_SUITE(suiteCommandLineParser);
 
+static onullstream nullout;
+
 BOOST_AUTO_TEST_CASE(testHelp)
 {
 	const char *argv[] = { "xap", "help", };
@@ -23,22 +25,41 @@ BOOST_AUTO_TEST_CASE(testHelp)
 	BOOST_REQUIRE_EQUAL(out.str(), CommandLineParser::help);
 }
 
-BOOST_AUTO_TEST_CASE(testServer)
+BOOST_AUTO_TEST_CASE(testOptions)
 {
-	const char *argv[] = { "xap", "-s", "test:1234", "load", };
+	const string server = "test:1234";
+	const string cert = "cert.test";
+	const string key = "key.test";
+	const string num = "8000";
+	const char *argv[] = { "xap",
+		"-s", server.c_str(),
+		"-c", cert.c_str(),
+		"-k", key.c_str(),
+		"-n", num.c_str()
+	};
 	
 	struct testCLP : public CommandLineParser {
 		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
-		int runLoad(const string &server, const string &, const string &, int) {
-			throw runtime_error(server);
-		}
-		
-	} cmd(4, argv);
+		using CommandLineParser::m_options;
+	} cmd(sizeof(argv) / sizeof(argv[0]), argv);
 
-	onullstream out;
-	BOOST_REQUIRE_EXCEPTION(cmd.run(out), runtime_error,
-		check_exception_message(argv[2]));
+	BOOST_REQUIRE_EQUAL(cmd.m_options["server"], server);
+	BOOST_REQUIRE_EQUAL(cmd.m_options["certfile"], cert);
+	BOOST_REQUIRE_EQUAL(cmd.m_options["keyfile"], key);
+	BOOST_REQUIRE_EQUAL(cmd.m_options["num"], num);
 }
 
+BOOST_AUTO_TEST_CASE(testServerComplete)
+{
+	const string server = "test";
+	const char *argv[] = { "xap", "-s", server.c_str() };
+
+	struct testCLP : public CommandLineParser {
+		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
+		using CommandLineParser::m_options;
+	} cmd(sizeof(argv) / sizeof(argv[0]), argv);
+
+	BOOST_REQUIRE_EQUAL(cmd.m_options["server"], server + ":4433");
+}
 
 BOOST_AUTO_TEST_SUITE_END();

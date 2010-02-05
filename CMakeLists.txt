@@ -8,7 +8,7 @@ enable_testing()
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -O2 -fomit-frame-pointer -g0")
+set(CMAKE_CXX_FLAGS "-Wall -ggdb")
 
 # Главный бинарь
 file(GLOB SOURCES *.cpp *.h)
