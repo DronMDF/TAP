@@ -7,7 +7,8 @@
 #include <map>
 #include <boost/function.hpp>
 
-class Client;
+#include "Client.h"
+
 class ClientManager;
 
 class CommandLineParser {
@@ -18,7 +19,6 @@ private:
 	
 protected:
 	typedef std::map<std::string, std::string> options_map_t;
-	typedef boost::function<Client *()> client_creator_t;
 	
 	options_map_t m_options;
 	std::list<std::string> m_args;

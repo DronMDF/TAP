@@ -95,7 +95,7 @@ Client *CommandLineParser::createHonestClient() const
 
 ClientManager *CommandLineParser::createClientManager(client_creator_t creator, uint num) const
 {
-	return 0;
+	return new ClientManager(creator, num);
 }
 
 void CommandLineParser::manageClients(client_creator_t creator) const
