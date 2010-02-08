@@ -4,8 +4,10 @@
 #include <boost/assert.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+#include <boost/bind.hpp>
 
 #include "CommandLineParser.h"
+#include "ClientHonest.h"
 
 using namespace std;
 using namespace boost;
@@ -77,15 +79,18 @@ int CommandLineParser::run(ostream &out)
 	}
 
 	if (m_args.front() == "load") {
-		//int num = (m_options.find("num") != m_options.end()) ?
-		//		lexical_cast<int>(m_options["num"]) : 1;
-		//callUp(num);
+		callUp(bind(&CommandLineParser::HonestClientCreator, this));
 		return 0;
 	}
 	
 	return -1;
 }
 
-void CommandLineParser::callUp(creator_callback_t creator)
+Client *CommandLineParser::HonestClientCreator() const
+{
+	return new ClientHonest;
+}
+
+void CommandLineParser::callUp(client_creator_t creator)
 {
 }

@@ -13,14 +13,16 @@ class CommandLineParser {
 private:
 	void parse_options(const std::list<std::string> &args);
 
+	Client *HonestClientCreator() const;
+	
 protected:
 	typedef std::map<std::string, std::string> options_map_t;
-	typedef boost::function<Client *(const options_map_t &)> creator_callback_t;
+	typedef boost::function<Client *()> client_creator_t;
 	
 	options_map_t m_options;
 	std::list<std::string> m_args;
 	
-	virtual void callUp(creator_callback_t callback);
+	virtual void callUp(client_creator_t creator);
 	
 public:
 	CommandLineParser(int argc, const char **argv);

@@ -80,13 +80,13 @@ BOOST_AUTO_TEST_CASE(testHelp)
 
 BOOST_AUTO_TEST_CASE(testLoadCreateHonest)
 {
-	const char *argv[] = { "xap", "-n", "666", "load" };
+	const char *argv[] = { "xap", "load" };
 
 	struct testCLP : public CommandLineParser, private visit_mock {
 		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
-		void callUp(creator_callback_t creator) {
+		void callUp(client_creator_t creator) {
 			visit();
-			Client *honest = creator(m_options);
+			Client *honest = creator();
 			BOOST_REQUIRE(dynamic_cast<ClientHonest *>(honest) != 0);
 		}
 	} cmd(sizeof(argv) / sizeof(argv[0]), argv);
