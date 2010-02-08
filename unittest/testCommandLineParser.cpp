@@ -84,13 +84,28 @@ BOOST_AUTO_TEST_CASE(testLoadCreateHonest)
 
 	struct testCLP : public CommandLineParser, private visit_mock {
 		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
-		void callUp(client_creator_t creator) {
+		void manageClients(client_creator_t creator) const {
 			visit();
 			Client *honest = creator();
 			BOOST_REQUIRE(dynamic_cast<ClientHonest *>(honest) != 0);
 		}
 	} cmd(sizeof(argv) / sizeof(argv[0]), argv);
 	cmd.run(nullout);
+}
+
+BOOST_AUTO_TEST_CASE(testCreateManager)
+{
+	const char *argv[] = { "xap", "-n", "666", "load" };
+
+	struct testCLP : public CommandLineParser, private visit_mock {
+		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
+		ClientManager *createClientManager(client_creator_t, uint num) const {
+			visit();
+			BOOST_REQUIRE_EQUAL(num, uint(666));
+			throw runtime_error("no need return");
+		}
+	} cmd(sizeof(argv) / sizeof(argv[0]), argv);
+	BOOST_REQUIRE_THROW(cmd.run(nullout), runtime_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

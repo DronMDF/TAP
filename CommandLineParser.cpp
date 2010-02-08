@@ -5,9 +5,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 #include <boost/bind.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "CommandLineParser.h"
 #include "ClientHonest.h"
+#include "ClientManager.h"
 
 using namespace std;
 using namespace boost;
@@ -79,18 +81,27 @@ int CommandLineParser::run(ostream &out)
 	}
 
 	if (m_args.front() == "load") {
-		callUp(bind(&CommandLineParser::HonestClientCreator, this));
+		manageClients(bind(&CommandLineParser::createHonestClient, this));
 		return 0;
 	}
 	
 	return -1;
 }
 
-Client *CommandLineParser::HonestClientCreator() const
+Client *CommandLineParser::createHonestClient() const
 {
 	return new ClientHonest;
 }
 
-void CommandLineParser::callUp(client_creator_t creator)
+ClientManager *CommandLineParser::createClientManager(client_creator_t creator, uint num) const
 {
+	return 0;
+}
+
+void CommandLineParser::manageClients(client_creator_t creator) const
+{
+	options_map_t::const_iterator ni = m_options.find("num");
+	uint num = (ni != m_options.end()) ? lexical_cast<uint>(ni->second) : 1;
+	scoped_ptr<ClientManager> mgr(createClientManager(creator, num));
+	mgr->run();
 }
