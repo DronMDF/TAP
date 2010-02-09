@@ -16,5 +16,5 @@ protected:
 public:
 	ClientManager(client_creator_t creator, uint num);
 	virtual ~ClientManager() {}
-	void run() const;
+	virtual void run() const;
 };
