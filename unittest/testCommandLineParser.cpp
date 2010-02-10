@@ -20,20 +20,23 @@ static onullstream nullout;
 
 BOOST_AUTO_TEST_CASE(testHelp)
 {
-	const char *argv[] = { "xap", "help", };
-	CommandLineParser cmd(2, argv);
+	const char *argv[] = { "help", };
+	CommandLineParser cmd(sizeof(argv) / sizeof(argv[0]), argv);
 	ostringstream out;
 	cmd.run(out);
 	BOOST_REQUIRE_EQUAL(out.str(), CommandLineParser::help);
 }
 
 struct testCommandLineParser : public CommandLineParser {
+	testCommandLineParser()	: CommandLineParser(0, 0) {};
 	testCommandLineParser(int argc, const char **argv)
 		: CommandLineParser(argc, argv)
 	{};
 
 	using CommandLineParser::m_options;
 	using CommandLineParser::m_args;
+
+	using CommandLineParser::createClientHonest;
 };
 
 BOOST_AUTO_TEST_CASE(testOptions)
@@ -42,7 +45,7 @@ BOOST_AUTO_TEST_CASE(testOptions)
 	const string cert = "cert.test";
 	const string key = "key.test";
 	const string num = "8000";
-	const char *argv[] = { "xap",
+	const char *argv[] = {
 		"-s", server.c_str(),
 		"-c", cert.c_str(),
 		"-k", key.c_str(),
@@ -60,7 +63,7 @@ BOOST_AUTO_TEST_CASE(testOptions)
 BOOST_AUTO_TEST_CASE(testServerComplete)
 {
 	const string server = "test";
-	const char *argv[] = { "xap", "-s", server.c_str() };
+	const char *argv[] = { "-s", server.c_str() };
 	testCommandLineParser cmd(sizeof(argv) / sizeof(argv[0]), argv);
 	BOOST_REQUIRE_EQUAL(cmd.m_options["server"], server + ":4433");
 }
@@ -68,14 +71,14 @@ BOOST_AUTO_TEST_CASE(testServerComplete)
 BOOST_AUTO_TEST_CASE(testCommands)
 {
 	const string command = "load";
-	const char *argv[] = { "xap", "-n", "666", command.c_str() };
+	const char *argv[] = { "-n", "666", command.c_str() };
 	testCommandLineParser cmd(sizeof(argv) / sizeof(argv[0]), argv);
 	BOOST_REQUIRE_EQUAL(cmd.m_args.front(), command);
 }
 
 BOOST_AUTO_TEST_CASE(testLoadCreateHonest)
 {
-	const char *argv[] = { "xap", "load" };
+	const char *argv[] = { "-s", "test", "load" };
 	struct inlineCommandLineParser : public testCommandLineParser, private visit_mock {
 		inlineCommandLineParser(int argc, const char **argv) : testCommandLineParser(argc, argv) {};
 		void manageClients(client_creator_t creator) const {
@@ -89,7 +92,7 @@ BOOST_AUTO_TEST_CASE(testLoadCreateHonest)
 
 BOOST_AUTO_TEST_CASE(testCreateManager)
 {
-	const char *argv[] = { "xap", "-n", "666", "load" };
+	const char *argv[] = { "-n", "666", "load" };
 	struct testCLP : public CommandLineParser, private visit_mock {
 		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
 		ClientManager *createClientManager(client_creator_t, uint num) const {
@@ -103,7 +106,7 @@ BOOST_AUTO_TEST_CASE(testCreateManager)
 
 BOOST_AUTO_TEST_CASE(testCreateManagerDefaultSize)
 {
-	const char *argv[] = { "xap", "load" };
+	const char *argv[] = { "load" };
 	struct testCLP : public CommandLineParser, private visit_mock {
 		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
 		ClientManager *createClientManager(client_creator_t, uint num) const {
@@ -117,19 +120,27 @@ BOOST_AUTO_TEST_CASE(testCreateManagerDefaultSize)
 
 BOOST_AUTO_TEST_CASE(testCreateManagerRunning)
 {
-	const char *argv[] = { "xap", "load" };
-	struct testCLP : public CommandLineParser {
+	const char *argv[] = { "-s", "test", "load" };
+	struct testCLP : public CommandLineParser, private visit_mock {
 		testCLP(int argc, const char **argv) : CommandLineParser(argc, argv) {};
 		ClientManager *createClientManager(client_creator_t creator, uint) const {
+			visit();
 			struct testClientManager : public ClientManager, private visit_mock {
 				testClientManager(client_creator_t creator) : ClientManager(creator, 1) {}
 				void run() const { visit(); };
 			};
-			
 			return new testClientManager(creator);
 		}
 	} cmd(sizeof(argv) / sizeof(argv[0]), argv);
 	BOOST_REQUIRE_NO_THROW(cmd.run(nullout));
 }
+
+BOOST_AUTO_TEST_CASE(testCreateClientHonest)
+{
+	testCommandLineParser parser;
+	BOOST_REQUIRE_EXCEPTION(parser.createClientHonest(), runtime_error,
+		check_exception_message("Необходимо указать опцию --server"));
+}
+
 
 BOOST_AUTO_TEST_SUITE_END();

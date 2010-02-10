@@ -15,7 +15,7 @@ class CommandLineParser {
 private:
 	void parse_options(const std::list<std::string> &args);
 
-	Client *createHonestClient() const;
+	bool optionIsPresent(const std::string &op) const;
 	
 protected:
 	typedef std::map<std::string, std::string> options_map_t;
@@ -26,6 +26,8 @@ protected:
 	virtual ClientManager *createClientManager(client_creator_t creator, uint num) const;
 	virtual void manageClients(client_creator_t creator) const;
 	
+	Client *createClientHonest() const;
+
 public:
 	CommandLineParser(int argc, const char **argv);
 	virtual ~CommandLineParser() {};

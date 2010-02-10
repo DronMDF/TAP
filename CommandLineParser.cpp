@@ -30,8 +30,12 @@ CommandLineParser::CommandLineParser(int argc, const char **argv)
 	: m_options(), m_args()
 {
 	list<string> args(argv, argv + argc);
-	args.pop_front();
 	parse_options(args);
+}
+
+bool CommandLineParser::optionIsPresent(const std::string &op) const
+{
+	return m_options.find(op) != m_options.end();
 }
 
 void CommandLineParser::parse_options(const list<string> &args)
@@ -64,7 +68,7 @@ void CommandLineParser::parse_options(const list<string> &args)
 		throw runtime_error("Неправильная опция");
 	}
 
-	if (m_options.find("server") != m_options.end()) {
+	if (optionIsPresent("server")) {
 		// Постобработка сервера
 		if (m_options["server"].find(':') == string::npos) {
 			m_options["server"] += ":4433";
@@ -81,15 +85,19 @@ int CommandLineParser::run(ostream &out)
 	}
 
 	if (m_args.front() == "load") {
-		manageClients(bind(&CommandLineParser::createHonestClient, this));
+		manageClients(bind(&CommandLineParser::createClientHonest, this));
 		return 0;
 	}
 	
 	return -1;
 }
 
-Client *CommandLineParser::createHonestClient() const
+Client *CommandLineParser::createClientHonest() const
 {
+	if (!optionIsPresent("server")) {
+		throw runtime_error("Необходимо указать опцию --server");
+	}
+	
 	return new ClientHonest;
 }
 
