@@ -4,6 +4,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/utils/nullstream.hpp>
 #include <boost/function.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "../CommandLineParser.h"
 #include "../Client.h"
@@ -140,7 +141,10 @@ BOOST_AUTO_TEST_CASE(testCreateClientHonest)
 	testCommandLineParser parser;
 	BOOST_REQUIRE_EXCEPTION(parser.createClientHonest(), runtime_error,
 		check_exception_message("Необходимо указать опцию --server"));
-}
+	parser.m_options["server"] = "127.0.0.1:4433";
 
+	scoped_ptr<Client> client(parser.createClientHonest());
+	BOOST_REQUIRE(dynamic_cast<ClientHonest *>(client.get()) != 0);
+}
 
 BOOST_AUTO_TEST_SUITE_END();
