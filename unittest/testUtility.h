@@ -30,7 +30,7 @@ private:
 	mutable int m_order;
 public:
 	explicit order_mock() : m_order(0) {}
-	~order_mock() { BOOST_CHECK_EQUAL(m_order, callcount); }
+	virtual ~order_mock() { BOOST_CHECK_EQUAL(m_order, callcount); }
 
 	void order_next() const { ++m_order; }
 	void order(int n) const { BOOST_REQUIRE_EQUAL(++m_order, n); }
@@ -39,6 +39,7 @@ public:
 class visit_mock : private order_mock<1> {
 public:
 	void visit() const { order(1); }
+	virtual ~visit_mock() {}
 };
 
 

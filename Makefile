@@ -9,7 +9,7 @@ UTSOURCES=${wildcard ./unittest/*.cpp}
 UTOBJECTS=${call objname, ${UTSOURCES}}
 
 CXX=g++
-CXXFLAGS=-ggdb -O0
+CXXFLAGS=-ggdb -O0 -Wall -Wextra -Weffc++
 LIBS=
 
 .PHONY: begin depend clean test check

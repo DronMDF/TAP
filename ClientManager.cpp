@@ -1,4 +1,5 @@
 
+#include <boost/foreach.hpp>
 #include "ClientManager.h"
 
 // Клиент менеджер очень примитивен. он не знает что за клиенты у него в
@@ -17,4 +18,9 @@ ClientManager::ClientManager(client_creator_t creator, uint num)
 
 void ClientManager::run() const
 {
+	while (true) {
+		BOOST_FOREACH(clients_list_t::value_type client, m_clients) {
+			client->push();
+		}
+	}
 }

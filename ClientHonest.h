@@ -4,4 +4,6 @@
 #include "Client.h"
 
 class ClientHonest :  public Client {
+public:
+	virtual void push();
 };
