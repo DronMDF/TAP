@@ -6,7 +6,15 @@
 
 #include "Client.h"
 
+class Logger;
+
 class ClientManager {
+private:
+	Logger *m_logger;
+
+	ClientManager(const ClientManager &);
+	ClientManager &operator =(const ClientManager &);
+
 public:
 	typedef std::list<boost::shared_ptr<Client> > clients_list_t;
 
@@ -17,4 +25,8 @@ public:
 	ClientManager(client_creator_t creator, uint num);
 	virtual ~ClientManager() {}
 	virtual void run() const;
+
+	void setLogger(Logger *log);
+	
+	virtual void eventIteration() const;
 };

@@ -4,6 +4,9 @@
 
 #include "../Client.h"
 #include "../ClientManager.h"
+#include "../Logger.h"
+
+#include "testUtility.h"
 
 using namespace std;
 using namespace boost;
@@ -21,7 +24,8 @@ struct testClient : public Client {
 Client *createTestClient() { return new testClient; }
 
 struct testClientManager : public ClientManager {
-	testClientManager() : ClientManager(createTestClient, 10) {}
+	explicit testClientManager()
+		: ClientManager(createTestClient, 10) {}
 	using ClientManager::m_clients;
 };
 
@@ -37,6 +41,25 @@ BOOST_AUTO_TEST_CASE(testClientManagerRun)
 	testClientManager mgr;
 	push_count = mgr.m_clients.size() * 2;
 	BOOST_REQUIRE_THROW(mgr.run(), push_exception);
+}
+
+BOOST_AUTO_TEST_CASE(testClientManagerIterCallback)
+{
+	struct inlineClientManager : public testClientManager, private visit_mock {
+		void eventIteration() const { visit(); };
+	} mgr;
+	push_count = 1;	// Прерываем mgr.run()
+	BOOST_REQUIRE_THROW(mgr.run(), push_exception);
+}
+
+BOOST_AUTO_TEST_CASE(testClientManagerLogEventIteration)
+{
+	struct inlineLogger : public Logger, private visit_mock {
+		void logIteration() { visit(); };
+	} logger;
+	testClientManager mgr;
+	mgr.setLogger(&logger);
+	mgr.eventIteration();
 }
 
 BOOST_AUTO_TEST_SUITE_END();
