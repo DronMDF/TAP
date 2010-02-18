@@ -10,10 +10,10 @@
 // видно будет
 
 ClientManager::ClientManager(client_creator_t creator, uint num)
-	: m_logger(0), m_clients()
+	: m_logger(0), m_clients(num)
 {
-	while (m_clients.size() < num) {
-		m_clients.push_back(clients_list_t::value_type(creator()));
+	BOOST_FOREACH(clients_list_t::value_type &client, m_clients) {
+		client.reset(creator());
 	}
 }
 

@@ -10,6 +10,7 @@
 #include "CommandLineParser.h"
 #include "ClientHonest.h"
 #include "ClientManager.h"
+#include "Logger.h"
 
 using namespace std;
 using namespace boost;
@@ -111,5 +112,7 @@ void CommandLineParser::manageClients(client_creator_t creator) const
 	options_map_t::const_iterator ni = m_options.find("num");
 	uint num = (ni != m_options.end()) ? lexical_cast<uint>(ni->second) : 1;
 	scoped_ptr<ClientManager> mgr(createClientManager(creator, num));
+	Logger log;
+	mgr->setLogger(&log);
 	mgr->run();
 }

@@ -10,7 +10,7 @@ UTOBJECTS=${call objname, ${UTSOURCES}}
 
 CXX=g++
 CXXFLAGS=-ggdb -O0 -Wall -Wextra -Weffc++
-LIBS=
+LIBS=-lrt
 
 .PHONY: begin depend clean test check
 
