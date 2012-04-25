@@ -9,14 +9,12 @@ UTSOURCES=${wildcard ./unittest/*.cpp}
 UTOBJECTS=${call objname, ${UTSOURCES}}
 
 CXX=g++
-CXXFLAGS=-ggdb -O0 -Wall -Wextra -Weffc++
+CXXFLAGS=-std=c++0x -ggdb -O0 -Wall -Wextra -Weffc++
 LIBS=-lrt
 
 .PHONY: begin depend clean test check
 
-all: test xap
-
-xap: ${OBJECTS}
+tap: ${OBJECTS}
 	${CXX} -s -o $@ ${OBJECTS} ${LIBS}
 
 # Компиляция
@@ -29,22 +27,22 @@ xap: ${OBJECTS}
 	${CXX} ${CXXFLAGS} -c -o $@ $<
 
 # Тестирование
-test: .test/runner
+check test: .test/runner
 	.test/runner --random=1
 
-.test/runner: ${filter-out .obj/xap.o, ${OBJECTS}} ${UTOBJECTS}
+.test/runner: ${filter-out .obj/tap.o, ${OBJECTS}} ${UTOBJECTS}
 	@if [ ! -d .test ]; then mkdir .test; fi
-	${CXX} -o $@ ${filter-out .obj/xap.o, ${OBJECTS}} ${UTOBJECTS} \
+	${CXX} -o $@ ${filter-out .obj/tap.o, ${OBJECTS}} ${UTOBJECTS} \
 		${LIBS} -lboost_unit_test_framework
 
 # Генерация зависимостей
 depend: ${call depname, ${SOURCES} ${UTSOURCES}}
 
-.dep/%.d: %.cpp ${wildcards *.h}
+.dep/%.d: %.cpp
 	@if [ ! -d .dep ]; then mkdir .dep; fi
 	${CXX} ${CXXFLAGS} -MM -MT ${call objname, $<}  -MT ${call depname, $<} $< >$@
 
-.dep/%.d: unittest/%.cpp ${wildcards *.h unittest/*.h}
+.dep/%.d: unittest/%.cpp
 	@if [ ! -d .dep ]; then mkdir .dep; fi
 	${CXX} ${CXXFLAGS} -MM -MT ${call objname, $<} -MT ${call depname, $<} $< >$@
 
@@ -53,4 +51,4 @@ depend: ${call depname, ${SOURCES} ${UTSOURCES}}
 # Утилиты
 clean:
 	rm -rf .dep .obj .test
-	rm -f xap
+	rm -f tap

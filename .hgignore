@@ -2,4 +2,4 @@ syntax: glob
 .dep
 .obj
 .test
-xap
+tap
