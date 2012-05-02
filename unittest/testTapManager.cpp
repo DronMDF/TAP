@@ -10,6 +10,11 @@ class Client;
 
 BOOST_AUTO_TEST_SUITE(suiteTapManager);
 
+struct EmptyClientBuilder : public ClientBuilder {
+	virtual unsigned createSocket() const { return 0; }
+	virtual shared_ptr<Client> createClient() const { return shared_ptr<Client>(); }
+};
+
 BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 {
 	// Given
@@ -32,6 +37,18 @@ BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 	// Then
 	BOOST_REQUIRE_EQUAL(builder.socket_count, nth);
 	BOOST_REQUIRE_EQUAL(builder.client_count, nth);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldCallRecvAfterSignal)
+{
+	// Given
+	struct TestTapManager : public TapManager {
+		TestTapManager() : TapManager(3, EmptyClientBuilder()) {}
+		virtual list<unsigned> selectIn() { return { 1 }; }
+		virtual void receive(unsigned i) { throw i; }
+	} tam;
+	// Then
+	BOOST_REQUIRE_EXCEPTION(tam.pressure(), unsigned, [](unsigned i){ return i == 1; });
 }
 
 BOOST_AUTO_TEST_SUITE_END();
