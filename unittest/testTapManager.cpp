@@ -1,8 +1,9 @@
 
 #include <memory>
 #include <boost/test/unit_test.hpp>
-#include "../TapManager.h"
+#include "../Client.h"
 #include "../ClientBuilder.h"
+#include "../TapManager.h"
 
 using namespace std;
 
@@ -10,9 +11,10 @@ class Client;
 
 BOOST_AUTO_TEST_SUITE(suiteTapManager);
 
-struct EmptyClientBuilder : public ClientBuilder {
-	virtual unsigned createSocket() const { return 0; }
-	virtual shared_ptr<Client> createClient() const { return shared_ptr<Client>(); }
+template <typename C>
+struct TestClientBuilder : public ClientBuilder {
+	virtual unsigned createSocket() const { return 66; }
+	virtual shared_ptr<Client> createClient() const { return make_shared<C>(); }
 };
 
 BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
@@ -39,16 +41,18 @@ BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 	BOOST_REQUIRE_EQUAL(builder.client_count, nth);
 }
 
-BOOST_AUTO_TEST_CASE(ShouldCallRecvAfterSignal)
+BOOST_AUTO_TEST_CASE(ShouldWakeupClientAtFirst)
 {
 	// Given
+	struct wakeuped {};
+	struct TestClient : public Client {
+		virtual void wakeup() { throw wakeuped(); };
+	};
 	struct TestTapManager : public TapManager {
-		TestTapManager() : TapManager(3, EmptyClientBuilder()) {}
-		virtual list<unsigned> selectIn() { return { 1 }; }
-		virtual void receive(unsigned i) { throw i; }
+		TestTapManager() : TapManager(1, TestClientBuilder<TestClient>()) {}
 	} tam;
 	// Then
-	BOOST_REQUIRE_EXCEPTION(tam.pressure(), unsigned, [](unsigned i){ return i == 1; });
+	BOOST_REQUIRE_THROW(tam.pressure(), wakeuped);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

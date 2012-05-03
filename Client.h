@@ -1,19 +1,14 @@
 
 #pragma once
+#include <functional>
 
-#include <boost/function.hpp>
-
-// Сокеты должны быть отдельно от клиентов, чтобы клиентов можно было бы
-// прокачивать тестовыми данными, возможно с разбивкой на пакеты. Сокеты живут
-// в менеджере, организуются в очереди для пуллинга, причем пуллинг может быть
-// двусторонний, как на чтение, так и на запись, если клиент хочет что-то записать.
-// А вышеуказанное что-то может быть отправлено тоже без участия клиента как такового.
-
-// Абстрактный клиент СД
+// Абстрактный клиент нагрузки
 class Client {
 public:
 	virtual ~Client() {}
-	virtual void push() = 0;
+	virtual void wakeup() = 0;
+	
+	virtual void push() __attribute__((deprecated)) {};
 };
 
-typedef boost::function<Client *()> client_creator_t;
+typedef std::function<Client *()> client_creator_t __attribute__((deprecated));

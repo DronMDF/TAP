@@ -20,6 +20,7 @@ struct testClient : public Client {
 	void push() {
 		if (--push_count <= 0) throw push_exception();
 	}
+	virtual void wakeup() {};
 };
 Client *createTestClient() { return new testClient; }
 

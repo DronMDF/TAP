@@ -6,4 +6,5 @@
 class ClientHonest :  public Client {
 public:
 	virtual void push();
+	virtual void wakeup() {};
 };

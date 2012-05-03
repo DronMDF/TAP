@@ -1,22 +1,33 @@
 
 #include <boost/foreach.hpp>
-#include "TapManager.h"
+#include "Client.h"
 #include "ClientBuilder.h"
+#include "TapManager.h"
 
 using namespace std;
 
 TapManager::TapManager(unsigned nth, const ClientBuilder &builder)
+	: pollfds(nth), timeouts(nth, 0), clients(nth)
 {
+	BOOST_FOREACH(auto &p, pollfds) {
+		p.fd = builder.createSocket();
+	}
+	
 	for (unsigned i = 0; i < nth; i++) {
-		builder.createSocket();
-		builder.createClient();
+		clients[i] = builder.createClient();
 	}
 }
 
 void TapManager::pressure()
 {
-	BOOST_FOREACH(auto &i, selectIn()) {
-		receive(i);
+	while (true) {
+		time_t now = time(0);
+		
+		for (unsigned i = 0; i < clients.size(); i++) {
+			if (timeouts[i] < now) {
+				clients[i]->wakeup();
+			}
+		}
 	}
 }
 
