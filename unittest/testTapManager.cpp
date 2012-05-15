@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 	} builder;
 	const unsigned nth = 1000;
 	// When
-	TapManager tam(nth, builder);
+	TapManager tam(nth, [](int){ return shared_ptr<Selector>(); }, builder);
 	// Then
 	BOOST_REQUIRE_EQUAL(builder.socket_count, nth);
 	BOOST_REQUIRE_EQUAL(builder.client_count, nth);
@@ -49,7 +49,8 @@ BOOST_AUTO_TEST_CASE(ShouldWakeupClientAtFirst)
 		virtual void wakeup() { throw wakeuped(); };
 	};
 	struct TestTapManager : public TapManager {
-		TestTapManager() : TapManager(1, TestClientBuilder<TestClient>()) {}
+		TestTapManager() : TapManager(1, [](int){ return shared_ptr<Selector>(); }, 
+					      TestClientBuilder<TestClient>()) {}
 	} tam;
 	// Then
 	BOOST_REQUIRE_THROW(tam.pressure(), wakeuped);

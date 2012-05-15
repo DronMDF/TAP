@@ -6,11 +6,14 @@
 
 using namespace std;
 
-TapManager::TapManager(unsigned nth, const ClientBuilder &builder)
-	: pollfds(nth), timeouts(nth, 0), clients(nth)
+TapManager::TapManager(unsigned nth, function<shared_ptr<Selector> (int)> create_selector, 
+		const ClientBuilder &builder)
+	: main_ds(create_selector(nth)), extra_ds(create_selector(nth)), timeouts(nth, 0), clients(nth)
 {
-	BOOST_FOREACH(auto &p, pollfds) {
-		p.fd = builder.createSocket();
+// 	BOOST_FOREACH(auto &p, pollfds) {
+	// TODO: проинициализировать сокеты
+	for (unsigned i = 0; i < nth; i++) {
+ 		builder.createSocket();
 	}
 	
 	for (unsigned i = 0; i < nth; i++) {

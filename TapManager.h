@@ -7,17 +7,24 @@
 
 class Client;
 class ClientBuilder;
+class Selector;
 
 class TapManager {
 public:
-	TapManager(unsigned nth, const ClientBuilder &builder);
+	TapManager(unsigned nth, std::function<std::shared_ptr<Selector> (int)> create_selector,
+		const ClientBuilder &builder);
 	virtual ~TapManager() {};
 	
 	void pressure();
 	
 private:
-	std::vector<pollfd> pollfds;
+	// Основной набор дескрипторов - открывается при создании
+	std::shared_ptr<Selector> main_ds;
+	// Вспомогательный набор дескрипторов - открывается по инициативе клиентов.
+	std::shared_ptr<Selector> extra_ds;
+	// Время реакции клиента
 	std::vector<unsigned> timeouts;
+	// Список клиентов
 	std::vector<std::shared_ptr<Client>> clients;
 	
 	virtual std::list<unsigned> selectIn();
