@@ -1,5 +1,6 @@
 syntax: glob
-.dep
 .obj
-.test
+test
 tap
+tap_http
+

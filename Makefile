@@ -1,31 +1,44 @@
 
 export CXX = g++
-export CXXFLAGS = -std=c++0x -ggdb -O0 -Wall -Wextra -Weffc++ -I ${shell pwd}
+export CXXFLAGS = -std=c++0x -ggdb -O0 -Wall -Wextra -Weffc++ -I.
 export LD = ld
 export LDFLAGS =
-export OBJDIR = ${shell pwd}/.obj
+export OBJDIR = .obj
 
-OBJECTS = .obj/core.o
+OBJECTS = 
 LIBS=-lrt
 
-tap: ${OBJECTS}
-	${CXX} -s -o $@ ${OBJECTS} ${LIBS}
-
-# Компиляция
-${OBJDIR}:
-	mkdir ${OBJDIR}
-
-${OBJDIR}/%.o : .obj
-	./build.py $@ ${basename ${notdir $@}}
+#tap: ${OBJECTS}
+#	${CXX} -s -o $@ ${OBJECTS} ${LIBS}
+	
+tap_http: ${OBJDIR}/core.o ${OBJDIR}/http_client.o
+	${CXX} ${CXXFLAGS} -s -o $@ tap_http.cpp \
+		${OBJDIR}/core.o ${OBJDIR}/http_client.o ${LIBS}
 
 # Тестирование
 check: test
 	./test --random=1
 
-test: ${OBJECTS} ${OBJDIR}/unittest.o
+test: ${OBJDIR}/core.o ${OBJDIR}/unittest.o
 	${CXX} -o $@ ${OBJECTS} ${OBJDIR}/unittest.o ${LIBS} -lboost_unit_test_framework
 
 # Утилиты
 clean:
-	rm -rf .obj
+	rm -rf ${OBJDIR}
 	rm -f tap test
+
+# Компиляция
+${OBJDIR}:
+	mkdir ${OBJDIR}
+
+.PHONY: ${OBJDIR}/core.o
+${OBJDIR}/core.o : ${OBJDIR}
+	./build.py $@ ${basename ${notdir $@}}
+
+.PHONY: ${OBJDIR}/unittest.o
+${OBJDIR}/unittest.o : ${OBJDIR}
+	./build.py $@ ${basename ${notdir $@}}
+
+.PHONY: ${OBJDIR}/http_client.o
+${OBJDIR}/http_client.o : ${OBJDIR}
+	./build.py $@ ${basename ${notdir $@}}

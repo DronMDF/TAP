@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_SUITE(suiteTapManager);
 
 template <typename C>
 struct TestClientBuilder : public ClientBuilder {
-	virtual unsigned createSocket() const { return 66; }
+	virtual int createSocket() const { return 66; }
 	virtual shared_ptr<Client> createClient() const { return make_shared<C>(); }
 };
 
@@ -22,10 +22,10 @@ BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 {
 	// Given
 	struct TestClientBuilder : public ClientBuilder {
-		mutable unsigned socket_count;
-		mutable unsigned client_count;
+		mutable int socket_count;
+		mutable int client_count;
 		TestClientBuilder() : socket_count(0), client_count(0) {}
-		virtual unsigned createSocket() const {
+		virtual int createSocket() const {
 			++socket_count;
 			return socket_count;
 		}
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 			return shared_ptr<Client>();
 		}
 	} builder;
-	const unsigned nth = 1000;
+	const int nth = 1000;
 	// When
 	TapManager tam(nth, [](int){ return make_shared<SelectorTest>(); }, builder);
 	// Then
