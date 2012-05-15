@@ -1,6 +1,5 @@
 
 #pragma once
-#include <poll.h>
 #include <list>
 #include <vector>
 #include <memory>
