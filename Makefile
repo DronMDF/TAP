@@ -19,8 +19,9 @@ tap_http: ${OBJDIR}/core.o ${OBJDIR}/http_client.o
 check: test
 	./test --random=1
 
-test: ${OBJDIR}/core.o ${OBJDIR}/unittest.o
-	${CXX} -o $@ ${OBJECTS} ${OBJDIR}/unittest.o ${LIBS} -lboost_unit_test_framework
+test: ${OBJDIR}/core.o ${OBJDIR}/http_client.o ${OBJDIR}/unittest.o
+	${CXX} -o $@ ${OBJDIR}/core.o ${OBJDIR}/http_client.o ${OBJDIR}/unittest.o \
+		${LIBS} -lboost_unit_test_framework
 
 # Утилиты
 clean:

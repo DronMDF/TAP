@@ -31,8 +31,12 @@ TapManager::TapManager(unsigned nth, function<shared_ptr<Selector> (int)> create
 
 void TapManager::pressure()
 {
+	time_t status = 0;
+	
 	while (true) {
 		time_t now = time(0);
+
+		
 		
 		for (unsigned i = 0; i < clients.size(); i++) {
 			if (timeouts[i] < now) {
