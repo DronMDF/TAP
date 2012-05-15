@@ -3,6 +3,7 @@
 #include "Client.h"
 #include "ClientBuilder.h"
 #include "TapManager.h"
+#include "Selector.h"
 
 using namespace std;
 
@@ -10,13 +11,8 @@ TapManager::TapManager(unsigned nth, function<shared_ptr<Selector> (int)> create
 		const ClientBuilder &builder)
 	: main_ds(create_selector(nth)), extra_ds(create_selector(nth)), timeouts(nth, 0), clients(nth)
 {
-// 	BOOST_FOREACH(auto &p, pollfds) {
-	// TODO: проинициализировать сокеты
 	for (unsigned i = 0; i < nth; i++) {
- 		builder.createSocket();
-	}
-	
-	for (unsigned i = 0; i < nth; i++) {
+ 		main_ds->setDescriptor(i, builder.createSocket());
 		clients[i] = builder.createClient();
 	}
 }
