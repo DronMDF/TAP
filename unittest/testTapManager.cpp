@@ -1,9 +1,9 @@
 
 #include <memory>
 #include <boost/test/unit_test.hpp>
-#include "../Client.h"
-#include "../ClientBuilder.h"
-#include "../TapManager.h"
+#include <core/Client.h>
+#include <core/ClientBuilder.h>
+#include <core/TapManager.h>
 #include "SelectorTest.h"
 
 using namespace std;

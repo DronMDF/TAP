@@ -1,6 +1,7 @@
 
+#include <memory.h>
 #include <boost/test/unit_test.hpp>
-#include "../SelectorPoll.h"
+#include <core/SelectorPoll.h>
 
 using namespace std;
 

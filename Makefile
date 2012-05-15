@@ -1,54 +1,31 @@
 
-objname=${addprefix .obj/, ${addsuffix .o, ${basename ${notdir ${1}}}}}
-depname=${addprefix .dep/, ${addsuffix .d, ${basename ${notdir ${1}}}}}
+export CXX = g++
+export CXXFLAGS = -std=c++0x -ggdb -O0 -Wall -Wextra -Weffc++ -I ${shell pwd}
+export LD = ld
+export LDFLAGS =
+export OBJDIR = ${shell pwd}/.obj
 
-SOURCES=${wildcard ./*.cpp}
-OBJECTS=${call objname, ${SOURCES}}
-
-UTSOURCES=${wildcard ./unittest/*.cpp}
-UTOBJECTS=${call objname, ${UTSOURCES}}
-
-CXX=g++
-CXXFLAGS=-std=c++0x -ggdb -O0 -Wall -Wextra -Weffc++
+OBJECTS = .obj/core.o
 LIBS=-lrt
-
-.PHONY: begin depend clean test check
 
 tap: ${OBJECTS}
 	${CXX} -s -o $@ ${OBJECTS} ${LIBS}
 
 # Компиляция
-.obj/%.o: %.cpp .dep/%.d
-	@if [ ! -d .obj ]; then mkdir .obj; fi
-	${CXX} ${CXXFLAGS} -c -o $@ $<
+${OBJDIR}:
+	mkdir ${OBJDIR}
 
-.obj/%.o: unittest/%.cpp .dep/%.d
-	@if [ ! -d .obj ]; then mkdir .obj; fi
-	${CXX} ${CXXFLAGS} -c -o $@ $<
+${OBJDIR}/%.o : .obj
+	./build.py $@ ${basename ${notdir $@}}
 
 # Тестирование
-check test: .test/runner
-	.test/runner --random=1
+check: test
+	./test --random=1
 
-.test/runner: ${filter-out .obj/tap.o, ${OBJECTS}} ${UTOBJECTS}
-	@if [ ! -d .test ]; then mkdir .test; fi
-	${CXX} -o $@ ${filter-out .obj/tap.o, ${OBJECTS}} ${UTOBJECTS} \
-		${LIBS} -lboost_unit_test_framework
-
-# Генерация зависимостей
-depend: ${call depname, ${SOURCES} ${UTSOURCES}}
-
-.dep/%.d: %.cpp
-	@if [ ! -d .dep ]; then mkdir .dep; fi
-	${CXX} ${CXXFLAGS} -MM -MT ${call objname, $<}  -MT ${call depname, $<} $< >$@
-
-.dep/%.d: unittest/%.cpp
-	@if [ ! -d .dep ]; then mkdir .dep; fi
-	${CXX} ${CXXFLAGS} -MM -MT ${call objname, $<} -MT ${call depname, $<} $< >$@
-
--include ${call depname, ${SOURCES} ${UTSOURCES}}
+test: ${OBJECTS} ${OBJDIR}/unittest.o
+	${CXX} -o $@ ${OBJECTS} ${OBJDIR}/unittest.o ${LIBS} -lboost_unit_test_framework
 
 # Утилиты
 clean:
-	rm -rf .dep .obj .test
-	rm -f tap
+	rm -rf .obj
+	rm -f tap test
