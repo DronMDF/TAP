@@ -36,6 +36,9 @@ int ClientHttp::createMainDescriptor()
 		throw runtime_error("Не могу подключиться к сокету");
 	}
 	
+	state_changer(state, CONNECTING);
+	state = CONNECTING;
+	
 	return fd;
 }
 
@@ -44,7 +47,14 @@ void ClientHttp::readFromMain()
 	vector<uint8_t> buf(4096);
 	int rv = read(fd, &buf[0], buf.size());
 	if (rv == -1) {
+		state_changer(state, OFFLINE);
+		state = OFFLINE;
 		throw runtime_error("Ошибка при выполнении read");
+	}
+
+	if (rv > 0) {
+		state_changer(state, ONLINE);
+		state = ONLINE;
 	}
 }
 

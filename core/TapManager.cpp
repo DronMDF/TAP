@@ -6,14 +6,17 @@
 #include "Selector.h"
 
 using namespace std;
+using namespace std::placeholders;
 
 TapManager::TapManager(unsigned nth, 
 		       function<shared_ptr<Selector> (int)> create_selector,
 		       function<shared_ptr<Client> ()> create_client)
-	: main_ds(create_selector(nth)), extra_ds(create_selector(nth)), timeouts(nth, 0), clients(nth)
+	: main_ds(create_selector(nth)), extra_ds(create_selector(nth)), timeouts(nth, 0), 
+	  clients(nth), stats()
 {
 	for (unsigned i = 0; i < nth; i++) {
 		clients[i] = create_client();
+		clients[i]->setStatsChanger(bind(&Statistic::changeState, &stats, _1, _2));
 	}
 }
 
@@ -88,9 +91,9 @@ void TapManager::pressure()
 		const time_t now = time(0);
 		
 		if (status + interval < now) {
-			cout << "Offline: " << /*offline*/0
-				<< ", Connecting: " << /*connecting*/0
-				<< ", Online: " << /*online*/0 << endl;
+			cout << "Offline: " << stats.offline
+				<< ", Connecting: " << stats.connecting
+				<< ", Online: " << stats.online << endl;
 			status = now;
 		}
 		

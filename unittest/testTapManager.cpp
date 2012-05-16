@@ -13,6 +13,7 @@ BOOST_AUTO_TEST_SUITE(suiteTapManager);
 
 struct ClientStub : public Client {
 	virtual int createMainDescriptor() { return -1; };
+	virtual void readFromMain() {};
 	virtual void wakeup() {};
 };
 
@@ -21,7 +22,7 @@ BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 	// Given
 	int actual = 0;
 	auto create_selector = [](int){ return make_shared<SelectorTest>(); };
-	auto create_client = [&actual](){ actual++; return shared_ptr<Client>(); };
+	auto create_client = [&actual](){ actual++; return make_shared<ClientStub>(); };
 
 	const int nth = 1000;
 	// When

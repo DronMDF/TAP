@@ -3,6 +3,7 @@
 #include <list>
 #include <vector>
 #include <memory>
+#include "Statistic.h"
 
 class Client;
 class Selector;
@@ -26,6 +27,8 @@ private:
 	std::vector<unsigned> timeouts;
 	// Список клиентов
 	std::vector<std::shared_ptr<Client>> clients;
+	
+	Statistic stats;
 	
 	virtual std::list<unsigned> selectIn();
 	virtual void receive(unsigned i);
