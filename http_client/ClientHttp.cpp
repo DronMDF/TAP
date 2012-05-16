@@ -1,7 +1,9 @@
 
 #include <string.h>
 #include <sys/socket.h>
+#include <iostream>
 #include <stdexcept>
+#include <vector>
 #include "ClientHttp.h"
 
 using namespace std;
@@ -35,6 +37,15 @@ int ClientHttp::createMainDescriptor()
 	}
 	
 	return fd;
+}
+
+void ClientHttp::readFromMain()
+{
+	vector<uint8_t> buf(4096);
+	int rv = read(fd, &buf[0], buf.size());
+	if (rv == -1) {
+		throw runtime_error("Ошибка при выполнении read");
+	}
 }
 
 void ClientHttp::wakeup()

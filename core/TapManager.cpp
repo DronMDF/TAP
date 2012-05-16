@@ -20,24 +20,24 @@ TapManager::TapManager(unsigned nth,
 
 bool TapManager::selectAllFromMain(time_t deadline)
 {
-//	while (true) {
-//		const int rc = main_ds->selectRead();
-//		if (rc == -1) {
-//			break;
-//		}
-//		
-//		try {
-//			client[rc]->readFromMain();
-//		} catch (const std::exception &) {
-//			// Проблема с сокетом, пересоздать
-//			main_ds.setDescriptor(rc, client[rc]->createMainDescriptor());
-//		}
-//		
-//		if (deadline < time(0)) {
-//			// Прерываемся на вывод статистики
-//			return false;
-//		}
-//	}
+	while (true) {
+		const int rc = main_ds->selectRead();
+		if (rc == -1) {
+			break;
+		}
+		
+		try {
+			clients[rc]->readFromMain();
+		} catch (const std::exception &) {
+			// Проблема с сокетом, пересоздать
+			main_ds->setDescriptor(rc, clients[rc]->createMainDescriptor());
+		}
+		
+		if (deadline < time(0)) {
+			// Прерываемся на вывод статистики
+			return false;
+		}
+	}
 	
 	return true;
 }

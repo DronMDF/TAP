@@ -10,6 +10,8 @@ public:
 	virtual ~ClientHttp();
 
 	virtual int createMainDescriptor();
+	virtual void readFromMain();
+	
 	virtual void wakeup();
 	
 private:

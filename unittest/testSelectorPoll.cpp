@@ -11,7 +11,16 @@ struct piper {
 	int in;
 	int out;
 	piper() : in(-1), out(-1) {
-		pipe(reinterpret_cast<int *>(this));
+		int fd[2];
+		if (pipe(fd) == 0) {
+			in = fd[0];
+			out = fd[1];
+		}
+		
+		if (pipe(fd) == 0) {
+			in = fd[0];
+			out = fd[1];
+		}
 	}
 	~piper() {
 		close(in);
@@ -35,7 +44,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEvent)
 	SelectorPoll selector(10);
 	vector<piper> pipers(10);
 	for (int i = 0; i < 10; i++) {
-		selector.setDescriptor(i, pipers[i].in);
+		selector.setDescriptor(i, 1);
 	}
 	// When
 	int rv = selector.selectRead();
@@ -46,13 +55,19 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEvent)
 BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
 {
 	// Given
-	piper p;
 	SelectorPoll selector(10);
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, 1);
+	}
+	// первый круг она проходит без вызова poll
+	BOOST_REQUIRE_EQUAL(selector.selectRead(), -1);
+	piper p;
 	selector.setDescriptor(5, p.in);
 	write(p.out, "X", 1);
+	// When
+	int rv = selector.selectRead();
 	// Then
-	BOOST_REQUIRE_EQUAL(selector.select(), 5);
+	BOOST_REQUIRE_EQUAL(rv, 5);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END();

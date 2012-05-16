@@ -8,6 +8,7 @@ public:
 	virtual ~Client() {}
 
 	virtual int createMainDescriptor() = 0;
+	virtual void readFromMain() = 0;
 	
 	virtual void wakeup() = 0;
 };
