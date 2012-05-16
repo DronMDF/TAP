@@ -6,9 +6,8 @@
 class Client {
 public:
 	virtual ~Client() {}
-	virtual void wakeup() = 0;
-	
-	virtual void push() __attribute__((deprecated)) {};
-};
 
-typedef std::function<Client *()> client_creator_t __attribute__((deprecated));
+	virtual int createMainDescriptor() = 0;
+	
+	virtual void wakeup() = 0;
+};

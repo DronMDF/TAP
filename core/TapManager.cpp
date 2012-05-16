@@ -15,8 +15,8 @@ TapManager::TapManager(unsigned nth, function<shared_ptr<Selector> (int)> create
 	time_t start = time(0);
 	time_t left = start;
 	for (unsigned i = 0; i < nth; i++) {
- 		main_ds->setDescriptor(i, builder.createSocket());
 		clients[i] = builder.createClient();
+ 		main_ds->setDescriptor(i, clients[i]->createMainDescriptor());
 
 		if (i > 0 and time(0) != left) {
 			left = time(0);
@@ -79,7 +79,7 @@ bool TapManager::selectAllToMain(time_t deadline)
 // 		write(fd, data[wc].front());
 		// Не зацикливаемся надолго, оставляем время для статистики.
 
-		if (readline < time(0)) {
+		if (deadline < time(0)) {
 			// Прерываемся на вывод статистики
 			return false;
 		}
@@ -97,9 +97,9 @@ void TapManager::pressure()
 		const time_t now = time(0);
 		
 		if (status + interval < now) {
-			cout << "Offline: " << offline 
-				<< ", Connecting: " << connecting 
-				<< ", Online: " << online << endl;
+			cout << "Offline: " << /*offline*/0
+				<< ", Connecting: " << /*connecting*/0
+				<< ", Online: " << /*online*/0 << endl;
 			status = now;
 		}
 		

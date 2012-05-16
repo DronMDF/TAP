@@ -12,6 +12,11 @@ class Client;
 
 BOOST_AUTO_TEST_SUITE(suiteTapManager);
 
+struct ClientStub : public Client {
+	virtual int createMainDescriptor() { return -1; };
+	virtual void wakeup() {};
+};
+
 template <typename C>
 struct TestClientBuilder : public ClientBuilder {
 	virtual int createSocket() const { return 66; }
@@ -22,23 +27,20 @@ BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 {
 	// Given
 	struct TestClientBuilder : public ClientBuilder {
-		mutable int socket_count;
 		mutable int client_count;
-		TestClientBuilder() : socket_count(0), client_count(0) {}
+		TestClientBuilder() : client_count(0) {}
 		virtual int createSocket() const {
-			++socket_count;
-			return socket_count;
+			return -1;
 		}
 		virtual shared_ptr<Client> createClient() const {
 			++client_count;
-			return shared_ptr<Client>();
+			return make_shared<ClientStub>();
 		}
 	} builder;
 	const int nth = 1000;
 	// When
 	TapManager tam(nth, [](int){ return make_shared<SelectorTest>(); }, builder);
 	// Then
-	BOOST_REQUIRE_EQUAL(builder.socket_count, nth);
 	BOOST_REQUIRE_EQUAL(builder.client_count, nth);
 }
 
@@ -46,7 +48,7 @@ BOOST_AUTO_TEST_CASE(ShouldWakeupClientAtFirst)
 {
 	// Given
 	struct wakeuped {};
-	struct TestClient : public Client {
+	struct TestClient : public ClientStub {
 		virtual void wakeup() { throw wakeuped(); };
 	};
 	struct TestTapManager : public TapManager {

@@ -33,5 +33,5 @@ int ClientBuilderHttp::createSocket() const
 
 shared_ptr<Client> ClientBuilderHttp::createClient() const
 {
-	return make_shared<ClientHttp>(request);
+	return make_shared<ClientHttp>(addr, port, request);
 }
