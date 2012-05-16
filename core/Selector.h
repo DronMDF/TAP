@@ -8,4 +8,5 @@ public:
 	virtual void setDescriptor(unsigned idx, int fd) = 0;
 	virtual int getDescriptor(unsigned idx) const = 0;
 	virtual int select() = 0;
+	virtual int selectRead() = 0;
 };

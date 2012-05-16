@@ -11,7 +11,11 @@ public:
 	virtual void setDescriptor(unsigned idx, int fd);
 	virtual int getDescriptor(unsigned idx) const;
 	virtual int select();
+	virtual int selectRead();
 	
 private:
 	std::vector<pollfd> fds;
+	unsigned read_cursor;
+
+	int findActual(int status);
 };
