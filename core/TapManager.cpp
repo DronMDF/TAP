@@ -2,7 +2,6 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 #include "Client.h"
-#include "ClientBuilder.h"
 #include "TapManager.h"
 #include "Selector.h"
 
