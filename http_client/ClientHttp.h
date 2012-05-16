@@ -1,6 +1,7 @@
 
 #pragma once
 #include <string>
+#include <arpa/inet.h>
 #include <core/Client.h>
 
 class ClientHttp: public Client {

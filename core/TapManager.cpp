@@ -8,82 +8,74 @@
 
 using namespace std;
 
-TapManager::TapManager(unsigned nth, function<shared_ptr<Selector> (int)> create_selector, 
-		const ClientBuilder &builder)
+TapManager::TapManager(unsigned nth, 
+		       function<shared_ptr<Selector> (int)> create_selector,
+		       function<shared_ptr<Client> ()> create_client)
 	: main_ds(create_selector(nth)), extra_ds(create_selector(nth)), timeouts(nth, 0), clients(nth)
 {
-	time_t start = time(0);
-	time_t left = start;
 	for (unsigned i = 0; i < nth; i++) {
-		clients[i] = builder.createClient();
- 		main_ds->setDescriptor(i, clients[i]->createMainDescriptor());
-
-		if (i > 0 and time(0) != left) {
-			left = time(0);
-			int lt = (left - start) * (nth - i) / i;
-			cout << "Инициализация, осталось " << lt << " сек.   \r";
-			cout.flush();
-		}
+		clients[i] = create_client();
 	}
-	
-	cout << endl;
 }
 
 
 bool TapManager::selectAllFromMain(time_t deadline)
 {
-	while (true) {
-// 		const int rc = main_ds->selectRead();
-// 		if (rc == -1) {
-			break;
-// 		}
-		
-// 		int fd = main_ds->getDescriptor(rc);
-// 		data = read(fd);
-// 		client[rc]->push(data);
-		
-		if (deadline < time(0)) {
-			// Прерываемся на вывод статистики
-			return false;
-		}
-	}
+//	while (true) {
+//		const int rc = main_ds->selectRead();
+//		if (rc == -1) {
+//			break;
+//		}
+//		
+//		try {
+//			client[rc]->readFromMain();
+//		} catch (const std::exception &) {
+//			// Проблема с сокетом, пересоздать
+//			main_ds.setDescriptor(rc, client[rc]->createMainDescriptor());
+//		}
+//		
+//		if (deadline < time(0)) {
+//			// Прерываемся на вывод статистики
+//			return false;
+//		}
+//	}
 	
 	return true;
 }
 
 bool TapManager::checkTimeouts(time_t deadline)
 {
-	for (unsigned i = 0; i < clients.size(); i++) {
-		if (timeouts[i] < time(0)) {
-			clients[i]->wakeup();
-		}
-
-		if (deadline < time(0)) {
-			// Прерываемся на вывод статистики
-			return false;
-		}
-	}
+// 	for (unsigned i = 0; i < clients.size(); i++) {
+// 		if (timeouts[i] < time(0)) {
+// 			clients[i]->wakeup();
+// 		}
+// 
+// 		if (deadline < time(0)) {
+// 			// Прерываемся на вывод статистики
+// 			return false;
+// 		}
+// 	}
 	
 	return true;
 }
 
 bool TapManager::selectAllToMain(time_t deadline)
 {
-	while (true) {
+// 	while (true) {
 // 		const int wc = main_ds->selectWrite()
 // 		if (wc == -1) {
- 			break;
+//  			break;
 // 		}
-		
+//
 // 		int fd = main_ds->getDescriptor(wc);
 // 		write(fd, data[wc].front());
-		// Не зацикливаемся надолго, оставляем время для статистики.
-
-		if (deadline < time(0)) {
-			// Прерываемся на вывод статистики
-			return false;
-		}
-	}
+// 		// Не зацикливаемся надолго, оставляем время для статистики.
+// 
+// 		if (deadline < time(0)) {
+// 			// Прерываемся на вывод статистики
+// 			return false;
+// 		}
+// 	}
 
 	return true;
 }

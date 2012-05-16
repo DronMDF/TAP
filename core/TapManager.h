@@ -5,19 +5,20 @@
 #include <memory>
 
 class Client;
-class ClientBuilder;
 class Selector;
 
 class TapManager {
 public:
-	TapManager(unsigned nth, std::function<std::shared_ptr<Selector> (int)> create_selector,
-		const ClientBuilder &builder);
+	TapManager(unsigned nth, 
+		   std::function<std::shared_ptr<Selector>(int)> create_selector,
+		   std::function<std::shared_ptr<Client>()> create_client);
+	
 	virtual ~TapManager() {};
 	
 	void pressure();
 	
 private:
-	// Основной набор дескрипторов - открывается при создании
+	// Основной набор дескрипторов
 	std::shared_ptr<Selector> main_ds;
 	// Вспомогательный набор дескрипторов - открывается по инициативе клиентов.
 	std::shared_ptr<Selector> extra_ds;
