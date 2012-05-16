@@ -23,16 +23,24 @@ BOOST_AUTO_TEST_CASE(ShouldReturnFirstUninitialized)
 {
 	// Given
 	SelectorPoll selector(10);
+	// When
+	int rv = selector.selectRead();
 	// Then
-	BOOST_REQUIRE_EQUAL(selector.selectRead(), 0);
+	BOOST_REQUIRE_EQUAL(rv, 0);
 }
 
-BOOST_AUTO_TEST_CASE(ShouldCreateEmptySet)
+BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEvent)
 {
 	// Given
 	SelectorPoll selector(10);
+	vector<piper> pipers(10);
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, pipers[i].in);
+	}
+	// When
+	int rv = selector.selectRead();
 	// Then
-	BOOST_REQUIRE_EQUAL(selector.select(), -1);
+	BOOST_REQUIRE_EQUAL(rv, -1);
 }
 
 BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
