@@ -16,11 +16,6 @@ struct piper {
 			in = fd[0];
 			out = fd[1];
 		}
-		
-		if (pipe(fd) == 0) {
-			in = fd[0];
-			out = fd[1];
-		}
 	}
 	~piper() {
 		close(in);
@@ -28,14 +23,24 @@ struct piper {
 	}
 };
 
-BOOST_AUTO_TEST_CASE(ShouldReturnFirstUninitialized)
+BOOST_AUTO_TEST_CASE(ShouldReturnNegativeUninitialized)
 {
 	// Given
 	SelectorPoll selector(10);
 	// When
 	int rv = selector.selectRead();
 	// Then
-	BOOST_REQUIRE_EQUAL(rv, 0);
+	BOOST_REQUIRE_EQUAL(rv, -1);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldReturnNegativeUninitializedOnWrite)
+{
+	// Given
+	SelectorPoll selector(10);
+	// When
+	int rv = selector.selectWrite();
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, -1);
 }
 
 BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEvent)
@@ -59,8 +64,6 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
 	for (int i = 0; i < 10; i++) {
 		selector.setDescriptor(i, 1);
 	}
-	// первый круг она проходит без вызова poll
-	BOOST_REQUIRE_EQUAL(selector.selectRead(), -1);
 	piper p;
 	selector.setDescriptor(5, p.in);
 	write(p.out, "X", 1);
@@ -68,6 +71,48 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
 	int rv = selector.selectRead();
 	// Then
 	BOOST_REQUIRE_EQUAL(rv, 5);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoWrite)
+{
+	// Given
+	SelectorPoll selector(10);
+	piper p;
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, p.in);
+	}
+	// When
+	// Then
+	BOOST_REQUIRE_EQUAL(selector.selectWrite(), -1);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfWritableDescriptor)
+{
+	// Given
+	SelectorPoll selector(10);
+	piper p;
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, (i == 5) ? p.out : p.in);
+	}
+	// When
+	int rv = selector.selectWrite();
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, 5);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldReturnNegativeAfterLast)
+{
+	// Given
+	SelectorPoll selector(10);
+	piper p;
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, (i == 9) ? p.out : p.in);
+	}
+	BOOST_REQUIRE_EQUAL(selector.selectWrite(), 9);
+	// When
+	int rv = selector.selectWrite();
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, -1);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

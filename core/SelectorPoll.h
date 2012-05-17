@@ -10,12 +10,13 @@ public:
 	
 	virtual void setDescriptor(unsigned idx, int fd);
 	virtual int getDescriptor(unsigned idx) const;
-	virtual int select();
 	virtual int selectRead();
+	virtual int selectWrite();
 	
 private:
 	std::vector<pollfd> fds;
-	unsigned read_cursor;
+	int read_cursor;
+	int write_cursor;
 
-	int findActual(int status);
+	int findActual(unsigned cursor, int status);
 };

@@ -1,12 +1,14 @@
 
 #pragma once
 #include <list>
-#include <vector>
 #include <memory>
+#include <queue>
+#include <vector>
 #include "Statistic.h"
 
 class Client;
 class Selector;
+class Tracer;
 
 class TapManager {
 public:
@@ -16,6 +18,10 @@ public:
 	
 	virtual ~TapManager() {};
 	
+	void setTracer(unsigned n, Tracer *tracer);
+	void setTimeout(unsigned n, unsigned timeout);
+	void writeToMain(unsigned n, const std::vector<uint8_t> &data);
+	
 	void pressure();
 	
 private:
@@ -23,10 +29,12 @@ private:
 	std::shared_ptr<Selector> main_ds;
 	// Вспомогательный набор дескрипторов - открывается по инициативе клиентов.
 	std::shared_ptr<Selector> extra_ds;
-	// Время реакции клиента
-	std::vector<unsigned> timeouts;
 	// Список клиентов
 	std::vector<std::shared_ptr<Client>> clients;
+	// Очереди на отправку
+	std::vector<std::queue<std::vector<uint8_t>>> queues;
+	// Время реакции клиента
+	std::vector<unsigned> timeouts;
 	
 	Statistic stats;
 	

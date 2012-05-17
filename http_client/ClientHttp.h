@@ -9,17 +9,14 @@ public:
 	ClientHttp(const in_addr &server, int port, const std::string &request);
 	virtual ~ClientHttp();
 
-	virtual int createMainDescriptor();
-	virtual void readFromMain();
-	
-	virtual void wakeup();
+	virtual int createMainDescriptor(ClientControl *control);
+	virtual void readFromMain(ClientControl *control);
+	virtual void timeout(ClientControl *control);
 
-	void setTracer(std::function<void (const std::string &)> tracer);
-	
 private:
 	const in_addr addr;
 	int port;
+	const std::string request;
+
 	int fd;
-	
-	std::function<void (const std::string &)> tracer;
 };

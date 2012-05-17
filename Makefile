@@ -12,7 +12,7 @@ LIBS=-lrt
 #	${CXX} -s -o $@ ${OBJECTS} ${LIBS}
 	
 tap_http: ${OBJDIR}/core.o ${OBJDIR}/http_client.o
-	${CXX} ${CXXFLAGS} -s -o $@ tap_http.cpp \
+	${CXX} ${CXXFLAGS} -o $@ tap_http.cpp \
 		${OBJDIR}/core.o ${OBJDIR}/http_client.o ${LIBS}
 
 # Тестирование
@@ -26,7 +26,7 @@ test: ${OBJDIR}/core.o ${OBJDIR}/http_client.o ${OBJDIR}/unittest.o
 # Утилиты
 clean:
 	rm -rf ${OBJDIR}
-	rm -f tap test
+	rm -f tap tap_http test
 
 # Компиляция
 ${OBJDIR}:

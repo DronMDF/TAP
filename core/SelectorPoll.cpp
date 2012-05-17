@@ -8,7 +8,7 @@
 using namespace std;
 
 SelectorPoll::SelectorPoll(int n)
-	: fds(n), read_cursor(0)
+	: fds(n), read_cursor(-1), write_cursor(-1)
 {
 	BOOST_FOREACH(auto &p, fds) {
 		p.fd = -1;
@@ -29,35 +29,20 @@ int SelectorPoll::getDescriptor(unsigned idx) const
 	return fds[idx].fd;
 }
 
-int SelectorPoll::select()
+int SelectorPoll::findActual(unsigned cursor, int status)
 {
-	// TODO: Возвращаем дескрипторы без системного вызова, если они в нужном состоянии
-	// TODO: различать готовность на чтение и на запись (два разных вызова?)
-	int rv = poll(&fds[0], fds.size(), 0);
-	if (rv > 0) {
-		for (unsigned i = 0; i < fds.size(); i++) {
-			if (fds[i].revents != 0) {
-				fds[i].revents = 0;
-				return i;
-			}
-		}
-	}
-	
-	return -1;
-}
-
-int SelectorPoll::findActual(int status)
-{
-	while (read_cursor < fds.size()) {
-		const int i = read_cursor++;
-		if (fds[i].fd == -1) {
-			return i;
+	while (cursor < fds.size()) {
+		if (fds[cursor].fd == -1) {
+			return cursor;
 		}
 		
-		if ((fds[i].revents & (status | POLLERR | POLLHUP)) != 0) {
-			fds[i].revents &= ~status;
-			return i;
+		if ((fds[cursor].revents & (status | POLLERR | POLLHUP | POLLNVAL)) != 0) {
+			// TODO: Это не понадобиьтся, когда мы будем сканировать на write
+			fds[cursor].revents &= ~status;
+			return cursor;
 		}
+		
+		cursor++;
 	}
 	
 	return -1;
@@ -65,17 +50,23 @@ int SelectorPoll::findActual(int status)
 
 int SelectorPoll::selectRead()
 {
-	if (read_cursor < fds.size()) {
-		int idx = findActual(POLLIN);
-		if (idx < int(fds.size())) {
-			return idx;
-		}
-		
-		// Дошли до конца набора - выйдет чтобы была возможность отработать райт
+	if (read_cursor == int(fds.size())) {
+		read_cursor = -1;
 		return -1;
 	}
 	
-	read_cursor = 0;
+	if (read_cursor >= 0) {
+		int idx = findActual(read_cursor, POLLIN);
+		if (idx >= 0) {
+			read_cursor = idx + 1;
+			return idx;
+		}
+
+		// Дошли до конца набора - выйдем чтобы была возможность отработать райт
+		read_cursor = -1;
+		return -1;
+	}
+	
 	int rv = poll(&fds[0], fds.size(), 0);
 	if (rv < 0) {
 		cerr << "poll failed: " << strerror(errno) << endl;
@@ -83,10 +74,50 @@ int SelectorPoll::selectRead()
 	}
 
 	if (rv > 0) {
-		int idx = findActual(POLLIN);
-		if (idx < int(fds.size())) {
+		int idx = findActual(0, POLLIN);
+		if (idx >= 0) {
+			read_cursor = idx + 1;
 			return idx;
 		}
+		
+		read_cursor = -1;
+	}
+
+	return -1;
+}
+
+int SelectorPoll::selectWrite()
+{
+	if (write_cursor == int(fds.size())) {
+		write_cursor = -1;
+		return -1;
+	}
+	
+	if (write_cursor >= 0) {
+		int idx = findActual(write_cursor, POLLOUT);
+		if (idx >= 0) {
+			write_cursor = idx + 1;
+			return idx;
+		}
+		
+		write_cursor = -1;
+		return -1;
+	}
+	
+	int rv = poll(&fds[0], fds.size(), 0);
+	if (rv < 0) {
+		cerr << "poll failed: " << strerror(errno) << endl;
+		throw runtime_error("Ошибка при выполнении poll");
+	}
+
+	if (rv > 0) {
+		int idx = findActual(0, POLLOUT);
+		if (idx >= 0) {
+			write_cursor = idx + 1;
+			return idx;
+		}
+		
+		write_cursor = -1;
 	}
 
 	return -1;

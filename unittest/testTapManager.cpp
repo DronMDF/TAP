@@ -12,9 +12,9 @@ class Client;
 BOOST_AUTO_TEST_SUITE(suiteTapManager);
 
 struct ClientStub : public Client {
-	virtual int createMainDescriptor() { return -1; };
-	virtual void readFromMain() {};
-	virtual void wakeup() {};
+	virtual int createMainDescriptor(ClientControl *) { return -1; };
+	virtual void readFromMain(ClientControl *) {};
+	virtual void timeout(ClientControl *) {};
 };
 
 BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)

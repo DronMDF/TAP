@@ -1,4 +1,5 @@
 
+#include <assert.h>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -6,6 +7,7 @@
 #include "Client.h"
 #include "TapManager.h"
 #include "Selector.h"
+#include "ClientControl.h"
 
 using namespace std;
 using namespace std::placeholders;
@@ -13,13 +15,31 @@ using namespace std::placeholders;
 TapManager::TapManager(unsigned nth, 
 		       function<shared_ptr<Selector> (int)> create_selector,
 		       function<shared_ptr<Client> ()> create_client)
-	: main_ds(create_selector(nth)), extra_ds(create_selector(nth)), timeouts(nth, 0), 
-	  clients(nth), stats()
+	: main_ds(create_selector(nth)), extra_ds(create_selector(nth)), 
+	  clients(nth), queues(nth), timeouts(nth, 0), stats()
 {
 	for (unsigned i = 0; i < nth; i++) {
 		clients[i] = create_client();
 		clients[i]->setStatsChanger(bind(&Statistic::changeState, &stats, _1, _2));
 	}
+}
+
+void TapManager::setTracer(unsigned n, Tracer *tracer)
+{
+	assert(n < clients.size());
+	clients[n]->setTracer(tracer);
+}
+
+void TapManager::setTimeout(unsigned n, unsigned timeout)
+{
+	assert(n < clients.size());
+	timeouts[n] = time(0) + timeout;
+}
+
+void TapManager::writeToMain(unsigned n, const std::vector<uint8_t> &data)
+{
+	assert(n < clients.size());
+	queues[n].push(data);
 }
 
 void TapManager::showStatistics() const
@@ -49,11 +69,12 @@ bool TapManager::selectAllFromMain(time_t deadline)
 			break;
 		}
 		
+		ClientControl control(this, rc);
 		try {
-			clients[rc]->readFromMain();
+			clients[rc]->readFromMain(&control);
 		} catch (const std::exception &) {
 			// Проблема с сокетом, пересоздать
-			main_ds->setDescriptor(rc, clients[rc]->createMainDescriptor());
+			main_ds->setDescriptor(rc, clients[rc]->createMainDescriptor(&control));
 		}
 		
 		if (deadline < time(0)) {
@@ -67,37 +88,49 @@ bool TapManager::selectAllFromMain(time_t deadline)
 
 bool TapManager::checkTimeouts(time_t deadline)
 {
-// 	for (unsigned i = 0; i < clients.size(); i++) {
-// 		if (timeouts[i] < time(0)) {
-// 			clients[i]->wakeup();
-// 		}
-// 
-// 		if (deadline < time(0)) {
-// 			// Прерываемся на вывод статистики
-// 			return false;
-// 		}
-// 	}
+	for (unsigned i = 0; i < clients.size(); i++) {
+		if (timeouts[i] < time(0)) {
+			ClientControl control(this, i);
+			clients[i]->timeout(&control);
+		}
+
+		if (deadline < time(0)) {
+			// Прерываемся на вывод статистики
+			return false;
+		}
+	}
 	
 	return true;
 }
 
 bool TapManager::selectAllToMain(time_t deadline)
 {
-// 	while (true) {
-// 		const int wc = main_ds->selectWrite()
-// 		if (wc == -1) {
-//  			break;
-// 		}
-//
-// 		int fd = main_ds->getDescriptor(wc);
-// 		write(fd, data[wc].front());
-// 		// Не зацикливаемся надолго, оставляем время для статистики.
-// 
-// 		if (deadline < time(0)) {
-// 			// Прерываемся на вывод статистики
-// 			return false;
-// 		}
-// 	}
+	while (true) {
+		const int wc = main_ds->selectWrite();
+		if (wc == -1) {
+			break;
+		}
+
+		if (queues[wc].empty()) {
+			continue;
+		}
+		
+		int fd = main_ds->getDescriptor(wc);
+		vector<uint8_t> data = queues[wc].front();
+		queues[wc].pop();
+		
+		if (write(fd, &data[0], data.size()) != int(data.size())) {
+			// Проблема с сокетом, пересоздать
+			ClientControl control(this, wc);
+			main_ds->setDescriptor(wc, clients[wc]->createMainDescriptor(&control));
+		}
+
+		// Не зацикливаемся надолго, оставляем время для статистики.
+		if (deadline < time(0)) {
+			// Прерываемся на вывод статистики
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -119,13 +152,31 @@ void TapManager::pressure()
 			continue;
 		}
 		
+		//cout << "Пытаемся протаймаутить кого нибудь..." << endl;
 		if (!checkTimeouts(status + interval)) {
 			continue;
 		}
 		
+		// cout << "Пытаемся записать что нибудь..." << endl;
 		if (!selectAllToMain(status + interval)) {
 			continue;
 		}
+		
+		// Попытаемся создать недостающих
+		for (unsigned i = 0; i < clients.size(); i++) {
+			if (main_ds->getDescriptor(i) == -1) {
+				ClientControl control(this, i);
+				main_ds->setDescriptor(i, clients[i]->createMainDescriptor(&control));
+			}
+			
+			// Не зацикливаемся надолго, оставляем время для статистики.
+			if (status + interval < time(0)) {
+				// Прерываемся на вывод статистики
+				break;
+			}
+		}
+		
+		// sleep(1);
 	}
 }
 
