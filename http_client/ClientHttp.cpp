@@ -9,7 +9,7 @@
 using namespace std;
 
 ClientHttp::ClientHttp(const in_addr &server, int port, const string &request)
-	: addr(server), port(port), fd(-1)
+	: addr(server), port(port), fd(-1), tracer([](const string &){})
 {
 }
 
@@ -36,9 +36,7 @@ int ClientHttp::createMainDescriptor()
 		throw runtime_error("Не могу подключиться к сокету");
 	}
 	
-	state_changer(state, CONNECTING);
-	state = CONNECTING;
-	
+	setState(CONNECTING);
 	return fd;
 }
 
@@ -46,16 +44,12 @@ void ClientHttp::readFromMain()
 {
 	vector<uint8_t> buf(4096);
 	int rv = read(fd, &buf[0], buf.size());
-	if (rv == -1) {
-		state_changer(state, OFFLINE);
-		state = OFFLINE;
+	if (rv <= 0) {
+		setState(OFFLINE);
 		throw runtime_error("Ошибка при выполнении read");
 	}
 
-	if (rv > 0) {
-		state_changer(state, ONLINE);
-		state = ONLINE;
-	}
+	setState(ONLINE);
 }
 
 void ClientHttp::wakeup()

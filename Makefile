@@ -1,6 +1,6 @@
 
 export CXX = g++
-export CXXFLAGS = -std=c++0x -ggdb -O0 -Wall -Wextra -Weffc++ -I.
+export CXXFLAGS = -std=c++0x -ggdb3 -O0 -Wall -Wextra -Weffc++ -I.
 export LD = ld
 export LDFLAGS =
 export OBJDIR = .obj

@@ -13,9 +13,13 @@ public:
 	virtual void readFromMain();
 	
 	virtual void wakeup();
+
+	void setTracer(std::function<void (const std::string &)> tracer);
 	
 private:
 	const in_addr addr;
 	int port;
 	int fd;
+	
+	std::function<void (const std::string &)> tracer;
 };

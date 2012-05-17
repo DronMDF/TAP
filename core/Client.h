@@ -18,6 +18,9 @@ public:
 	virtual void wakeup() = 0;
 	
 protected:
+	void setState(int new_state);
+	
+private:
 	std::function<void (int, int)> state_changer;
 	int state;
 };

@@ -1,4 +1,6 @@
 
+#include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <boost/foreach.hpp>
 #include "Client.h"
@@ -20,6 +22,24 @@ TapManager::TapManager(unsigned nth,
 	}
 }
 
+void TapManager::showStatistics() const
+{
+	const auto ts = time(0);
+	// TODO: Новый стандарт, пока не реализовано в gcc
+	// cout << put_time(localtime(&ts), "%T")
+
+	// TODO: Поэтому приходится мучаться
+	char tsstr[100] = {0};
+	if (strftime(tsstr, 100, "%T", localtime(&ts))) {
+		cout << tsstr;
+	} else {
+		cout << ts;
+	}
+
+	cout	<< ": Offline: " << stats.offline
+		<< ", Connecting: " << stats.connecting
+		<< ", Online: " << stats.online << endl;
+}
 
 bool TapManager::selectAllFromMain(time_t deadline)
 {
@@ -91,9 +111,7 @@ void TapManager::pressure()
 		const time_t now = time(0);
 		
 		if (status + interval < now) {
-			cout << "Offline: " << stats.offline
-				<< ", Connecting: " << stats.connecting
-				<< ", Online: " << stats.online << endl;
+			showStatistics();
 			status = now;
 		}
 		
