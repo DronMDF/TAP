@@ -8,7 +8,8 @@ public:
 	TracerStream(std::ostream *out);
 	
 	virtual void trace(const std::string &msg) const;
-	
+	virtual void trace_throughput(unsigned bytes_per_sec) const;
+
 private:
 	std::ostream *out;
 	

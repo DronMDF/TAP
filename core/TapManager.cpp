@@ -105,30 +105,29 @@ bool TapManager::checkTimeouts(time_t deadline)
 
 bool TapManager::selectAllToMain(time_t deadline)
 {
-	while (true) {
-		const int wc = main_ds->selectWrite();
-		if (wc == -1) {
-			break;
-		}
-
-		if (queues[wc].empty()) {
+	for (unsigned i = 0; i < queues.size(); i++) {
+		if (queues[i].empty()) {
 			continue;
 		}
 		
-		int fd = main_ds->getDescriptor(wc);
-		vector<uint8_t> data = queues[wc].front();
-		queues[wc].pop();
-		
-		if (write(fd, &data[0], data.size()) != int(data.size())) {
-			// Проблема с сокетом, пересоздать
-			ClientControl control(this, wc);
-			main_ds->setDescriptor(wc, clients[wc]->createMainDescriptor(&control));
-		}
-
 		// Не зацикливаемся надолго, оставляем время для статистики.
 		if (deadline < time(0)) {
 			// Прерываемся на вывод статистики
 			return false;
+		}
+		
+		if (!main_ds->selectWrite(i)) {
+			continue;
+		}
+		
+		int fd = main_ds->getDescriptor(i);
+		vector<uint8_t> data = queues[i].front();
+		queues[i].pop();
+		
+		if (write(fd, &data[0], data.size()) != int(data.size())) {
+			// Проблема с сокетом, пересоздать
+			ClientControl control(this, i);
+			main_ds->setDescriptor(i, clients[i]->createMainDescriptor(&control));
 		}
 	}
 

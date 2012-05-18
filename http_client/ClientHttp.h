@@ -17,6 +17,10 @@ private:
 	const in_addr addr;
 	int port;
 	const std::string request;
+	bool request_sended;
 
+	time_t rx_start;
+	unsigned rx_bytes;
+	
 	int fd;
 };

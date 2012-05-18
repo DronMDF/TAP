@@ -12,7 +12,8 @@
 using namespace std;
 
 ClientHttp::ClientHttp(const in_addr &server, int port, const string &request)
-	: addr(server), port(port), request(request), fd(-1)
+	: addr(server), port(port), request(request), request_sended(false), 
+	  rx_start(time(0)), rx_bytes(0), fd(-1)
 {
 }
 
@@ -39,9 +40,11 @@ int ClientHttp::createMainDescriptor(ClientControl *control)
 		throw runtime_error("Не могу подключиться к сокету");
 	}
 	
-	tracer->trace("Создан основной дескриптор");
 	tracer->trace("Клиент в состоянии connecting");
 	setState(CONNECTING);
+	rx_start = time(0);
+	rx_bytes = 0;
+	request_sended = false;
 	return fd;
 }
 
@@ -49,7 +52,6 @@ void ClientHttp::readFromMain(ClientControl *control)
 {
 	vector<uint8_t> buf(4096);
 	int rv = read(fd, &buf[0], buf.size());
-	//tracer->trace((boost::format("Результат чтения из сокета: %1%") % rv).str());
 	
 	if (rv <= 0) {
 		tracer->trace("Клиент в состоянии offline");
@@ -63,14 +65,30 @@ void ClientHttp::readFromMain(ClientControl *control)
 		setState(ONLINE);
 	}
 	
+	rx_bytes += rv;
+	if (rx_bytes > 64 * 1024) {
+		time_t now = time(0);
+		tracer->trace_throughput(rx_bytes / (now - rx_start));
+		rx_start = now;
+		rx_bytes = 0;
+	}
+	
 	control->setTimeout(600);
 }
 
 void ClientHttp::timeout(ClientControl *control)
 {
-	if (fd != -1) {
+	if (fd == -1) {
+		return;
+	}
+	
+	if (!request_sended) {
 		tracer->trace("Таймаут, шлем запрос");
 		control->writeToMain(vector<uint8_t>(request.begin(), request.end()));
-		control->setTimeout(600);
+		request_sended = true;
+	} else {
+		tracer->trace("Просто таймаут, запрос уже слали, поэтому ничего не шлем.");
 	}
+	
+	control->setTimeout(600);
 }
