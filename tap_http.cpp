@@ -29,7 +29,7 @@ int main(int /*argc*/, const char **/*argv*/)
 
 	TracerStream tracer(&cout);
 	
-	TapManager tapm(10000,
+	TapManager tapm(1000,
 			[](int n){ return make_shared<SelectorPoll>(n); }, 
 			[server, request](){ return make_shared<ClientHttp>(server, 80, request); });
 	
