@@ -73,46 +73,47 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
 	BOOST_REQUIRE_EQUAL(rv, 5);
 }
 
-// BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoWrite)
-// {
-// 	// Given
-// 	SelectorPoll selector(10);
-// 	piper p;
-// 	for (int i = 0; i < 10; i++) {
-// 		selector.setDescriptor(i, p.in);
-// 	}
-// 	// When
-// 	// Then
-// 	BOOST_REQUIRE_EQUAL(selector.selectWrite(), -1);
-// }
-// 
-// BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfWritableDescriptor)
-// {
-// 	// Given
-// 	SelectorPoll selector(10);
-// 	piper p;
-// 	for (int i = 0; i < 10; i++) {
-// 		selector.setDescriptor(i, (i == 5) ? p.out : p.in);
-// 	}
-// 	// When
-// 	int rv = selector.selectWrite();
-// 	// Then
-// 	BOOST_REQUIRE_EQUAL(rv, 5);
-// }
-// 
-// BOOST_AUTO_TEST_CASE(ShouldReturnNegativeAfterLast)
-// {
-// 	// Given
-// 	SelectorPoll selector(10);
-// 	piper p;
-// 	for (int i = 0; i < 10; i++) {
-// 		selector.setDescriptor(i, (i == 9) ? p.out : p.in);
-// 	}
-// 	BOOST_REQUIRE_EQUAL(selector.selectWrite(), 9);
-// 	// When
-// 	int rv = selector.selectWrite();
-// 	// Then
-// 	BOOST_REQUIRE_EQUAL(rv, -1);
-// }
+BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoWrite)
+{
+	// Given
+	SelectorPoll selector(10);
+	piper p;
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, p.in);
+	}
+	// When
+	int rv = selector.selectWrite({3, 5, 7});
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, -1);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfWritableDescriptor)
+{
+	// Given
+	SelectorPoll selector(10);
+	piper p;
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, (i == 5) ? p.out : p.in);
+	}
+	// When
+	int rv = selector.selectWrite({3, 5, 7});
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, 5);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldReturnNegativeAfterLast)
+{
+	// Given
+	SelectorPoll selector(10);
+	piper p;
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, (i == 9) ? p.out : p.in);
+	}
+	BOOST_REQUIRE_EQUAL(selector.selectWrite({3, 5, 7, 9}), 9);
+	// When
+	int rv = selector.selectWrite({});
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, -1);
+}
 
 BOOST_AUTO_TEST_SUITE_END();
