@@ -38,6 +38,12 @@ void TapManager::setTimeout(unsigned n, unsigned timeout)
 	timeouts[n] = time(0) + timeout;
 }
 
+void TapManager::setMainDescriptor(unsigned n, int fd)
+{
+	assert(n < clients.size());
+	main_ds->setDescriptor(n, fd);
+}
+
 void TapManager::writeToMain(unsigned n, const std::vector<uint8_t> &data)
 {
 	assert(n < clients.size());
@@ -72,12 +78,7 @@ bool TapManager::selectAllFromMain(time_t deadline)
 		}
 		
 		ClientControl control(this, rc);
-		try {
-			clients[rc]->readFromMain(&control);
-		} catch (const std::exception &) {
-			// Проблема с сокетом, пересоздать
-			main_ds->setDescriptor(rc, clients[rc]->createMainDescriptor(&control));
-		}
+		clients[rc]->readFromMain(&control);
 		
 		if (deadline <= time(0)) {
 			// Прерываемся на вывод статистики
@@ -134,12 +135,11 @@ bool TapManager::selectAllToMain(time_t deadline)
 		
 		int fd = main_ds->getDescriptor(rv);
 		vector<uint8_t> data = queues[rv].front();
-		queues[rv].pop();
 		
-		if (write(fd, &data[0], data.size()) != int(data.size())) {
-			// Проблема с сокетом, пересоздать
-			ClientControl control(this, rv);
-			main_ds->setDescriptor(rv, clients[rv]->createMainDescriptor(&control));
+		// TODO: write may be protocol specific, move in client
+		if (write(fd, &data[0], data.size()) == int(data.size())) {
+			// Remove if success
+			queues[rv].pop();
 		}
 	}
 
@@ -177,7 +177,8 @@ void TapManager::pressure()
 		for (unsigned i = 0; i < clients.size(); i++) {
 			if (main_ds->getDescriptor(i) == -1) {
 				ClientControl control(this, i);
-				main_ds->setDescriptor(i, clients[i]->createMainDescriptor(&control));
+				// descriptor created in
+				clients[i]->readFromMain(&control);
 			}
 			
 			// Не зацикливаемся надолго, оставляем время для статистики.

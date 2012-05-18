@@ -23,14 +23,11 @@ ClientHttp::~ClientHttp()
 	close(fd);
 }
 
-int ClientHttp::createMainDescriptor(ClientControl *control)
+int ClientHttp::createMainDescriptor() const
 {
-	close(fd);
-	
-	fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (fd == -1) {
+	int f = socket(AF_INET, SOCK_STREAM, 0);
+	if (f == -1) {
 		cerr << "Cannot create socket: " << strerror(errno) << endl;
-		control->setTimeout(0);
 		return -1;
 	}
 	
@@ -39,24 +36,15 @@ int ClientHttp::createMainDescriptor(ClientControl *control)
 	sa.sin_family = AF_INET;
 	sa.sin_port = htons(port);
 	sa.sin_addr = addr;
-	if (connect(fd, (sockaddr *)&sa, sizeof(sa)) == -1) {
+	if (connect(f, (sockaddr *)&sa, sizeof(sa)) == -1) {
 		cerr << "Cannot connect socket: " << strerror(errno) << endl;
-		control->setTimeout(0);
-		close(fd);
-		fd = -1;
+		close(f);
 		return -1;
 	}
 	
-	int flags = fcntl(fd, F_GETFL, 0);
-	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-	
-	tracer->trace("Клиент в состоянии connecting");
-	setState(CONNECTING);
-	rx_start = time(0);
-	rx_bytes = 0;
-	request_sended = false;
-	control->setTimeout(0);
-	return fd;
+	int flags = fcntl(f, F_GETFL, 0);
+	fcntl(f, F_SETFL, flags | O_NONBLOCK);
+	return f;
 }
 
 void ClientHttp::readFromMain(ClientControl *control)
@@ -65,10 +53,18 @@ void ClientHttp::readFromMain(ClientControl *control)
 	int rv = read(fd, &buf[0], buf.size());
 	
 	if (rv <= 0) {
-		tracer->trace("Клиент в состоянии offline");
-		control->setTimeout(0);
-		setState(OFFLINE);
-		throw runtime_error("Ошибка при выполнении read");
+		close(fd);
+		fd = createMainDescriptor();
+		if (fd != -1) {
+			tracer->trace("Клиент в состоянии connecting");
+			rx_start = time(0);
+			rx_bytes = 0;
+			request_sended = false;
+			control->setMainDescriptor(fd);
+			control->setTimeout(0);
+		}
+		
+		return;
 	}
 
 	if (getState() != ONLINE) {

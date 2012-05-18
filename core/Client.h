@@ -13,7 +13,6 @@ public:
 	Client();
 	virtual ~Client();
 
-	virtual int createMainDescriptor(ClientControl *control) = 0;
 	virtual void readFromMain(ClientControl *control) = 0;
 	virtual void timeout(ClientControl *control) = 0;
 	

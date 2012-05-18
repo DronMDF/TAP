@@ -7,6 +7,11 @@ ClientControl::ClientControl(TapManager *tapm, unsigned n)
 {
 }
 
+void ClientControl::setMainDescriptor(int fd) const
+{
+	tapm->setMainDescriptor(n, fd);
+}
+
 void ClientControl::writeToMain(const std::vector<uint8_t> &data) const
 {
 	tapm->writeToMain(n, data);

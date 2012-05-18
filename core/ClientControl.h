@@ -9,6 +9,7 @@ class ClientControl {
 public:
 	ClientControl(TapManager *tapm, unsigned n);
 
+	void setMainDescriptor(int fd) const;
 	void writeToMain(const std::vector<uint8_t> &data) const;
 	void setTimeout(unsigned timeout) const;
 	

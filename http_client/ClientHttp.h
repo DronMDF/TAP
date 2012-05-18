@@ -9,11 +9,12 @@ public:
 	ClientHttp(const in_addr &server, int port, const std::string &request);
 	virtual ~ClientHttp();
 
-	virtual int createMainDescriptor(ClientControl *control);
 	virtual void readFromMain(ClientControl *control);
 	virtual void timeout(ClientControl *control);
 
 private:
+	int createMainDescriptor() const;
+	
 	const in_addr addr;
 	int port;
 	const std::string request;

@@ -20,6 +20,9 @@ public:
 	
 	void setTracer(unsigned n, Tracer *tracer);
 	void setTimeout(unsigned n, unsigned timeout);
+
+	void setMainDescriptor(unsigned n, int fd);
+	
 	void writeToMain(unsigned n, const std::vector<uint8_t> &data);
 	
 	void pressure();
