@@ -47,18 +47,8 @@ int SelectorPoll::selectRead()
 		for (unsigned i = 0; i < rfds.size(); i++) {
 			rfds[i].revents = 0;
 		}
-		return -1;
 	}
 
-	if (rv > 0) {
-		for (unsigned i = 0; i < rfds.size(); i++) {
-			if (rfds[i].revents != 0) {
-				rfds[i].revents = 0;
-				return i;
-			}
-		}
-	}
-	
 	return -1;
 }
 
@@ -71,6 +61,7 @@ int SelectorPoll::selectWrite(const set<unsigned> &intrest)
 		BOOST_FOREACH(auto &i, intrest) {
 			wfds[i].fd = rfds[i].fd;
 		}
+
 		int rv = poll(&wfds[0], wfds.size(), 0);
 		if (rv < 0) {
 			cerr << "poll failed: " << strerror(errno) << endl;

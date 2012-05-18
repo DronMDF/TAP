@@ -1,4 +1,5 @@
 
+#include <fcntl.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <iostream>
@@ -40,11 +41,15 @@ int ClientHttp::createMainDescriptor(ClientControl *control)
 		throw runtime_error("Не могу подключиться к сокету");
 	}
 	
+	int flags = fcntl(fd, F_GETFL, 0);
+	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+	
 	tracer->trace("Клиент в состоянии connecting");
 	setState(CONNECTING);
 	rx_start = time(0);
 	rx_bytes = 0;
 	request_sended = false;
+	control->setTimeout(60);
 	return fd;
 }
 
@@ -73,7 +78,7 @@ void ClientHttp::readFromMain(ClientControl *control)
 		rx_bytes = 0;
 	}
 	
-	control->setTimeout(600);
+	control->setTimeout(60);
 }
 
 void ClientHttp::timeout(ClientControl *control)
@@ -90,5 +95,5 @@ void ClientHttp::timeout(ClientControl *control)
 		tracer->trace("Просто таймаут, запрос уже слали, поэтому ничего не шлем.");
 	}
 	
-	control->setTimeout(600);
+	control->setTimeout(60);
 }

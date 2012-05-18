@@ -1,5 +1,6 @@
 
 #include <assert.h>
+#include <sched.h>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -78,7 +79,7 @@ bool TapManager::selectAllFromMain(time_t deadline)
 			main_ds->setDescriptor(rc, clients[rc]->createMainDescriptor(&control));
 		}
 		
-		if (deadline < time(0)) {
+		if (deadline <= time(0)) {
 			// Прерываемся на вывод статистики
 			return false;
 		}
@@ -95,7 +96,7 @@ bool TapManager::checkTimeouts(time_t deadline)
 			clients[i]->timeout(&control);
 		}
 
-		if (deadline < time(0)) {
+		if (deadline <= time(0)) {
 			// Прерываемся на вывод статистики
 			return false;
 		}
@@ -119,7 +120,7 @@ bool TapManager::selectAllToMain(time_t deadline)
 	
 	while (true) {
 		// Не зацикливаемся надолго, оставляем время для статистики.
-		if (deadline < time(0)) {
+		if (deadline <= time(0)) {
 			// Прерываемся на вывод статистики
 			return false;
 		}
@@ -180,12 +181,12 @@ void TapManager::pressure()
 			}
 			
 			// Не зацикливаемся надолго, оставляем время для статистики.
-			if (status + interval < time(0)) {
+			if (status + interval <= time(0)) {
 				// Прерываемся на вывод статистики
 				break;
 			}
 		}
 		
-		// sleep(1);
+		sched_yield();
 	}
 }

@@ -67,6 +67,8 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
 	piper p;
 	selector.setDescriptor(5, p.in);
 	write(p.out, "X", 1);
+	// After poll return -1 always
+	BOOST_REQUIRE_EQUAL(selector.selectRead(), -1);
 	// When
 	int rv = selector.selectRead();
 	// Then
