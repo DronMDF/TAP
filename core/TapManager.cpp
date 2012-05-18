@@ -3,11 +3,12 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <set>
 #include <boost/foreach.hpp>
 #include "Client.h"
-#include "TapManager.h"
-#include "Selector.h"
 #include "ClientControl.h"
+#include "Selector.h"
+#include "TapManager.h"
 
 using namespace std;
 using namespace std::placeholders;
@@ -105,29 +106,39 @@ bool TapManager::checkTimeouts(time_t deadline)
 
 bool TapManager::selectAllToMain(time_t deadline)
 {
+	set<unsigned> intrest;
 	for (unsigned i = 0; i < queues.size(); i++) {
-		if (queues[i].empty()) {
-			continue;
+		if (!queues[i].empty()) {
+			intrest.insert(i);
 		}
-		
+	}
+	
+	if (intrest.empty()) {
+		return true;
+	}
+	
+	while (true) {
 		// Не зацикливаемся надолго, оставляем время для статистики.
 		if (deadline < time(0)) {
 			// Прерываемся на вывод статистики
 			return false;
 		}
 		
-		if (!main_ds->selectWrite(i)) {
-			continue;
+		int rv = main_ds->selectWrite(intrest);
+		if (rv == -1) {
+			return true;
 		}
+		// Indexes is not need in the future
+		intrest.clear();
 		
-		int fd = main_ds->getDescriptor(i);
-		vector<uint8_t> data = queues[i].front();
-		queues[i].pop();
+		int fd = main_ds->getDescriptor(rv);
+		vector<uint8_t> data = queues[rv].front();
+		queues[rv].pop();
 		
 		if (write(fd, &data[0], data.size()) != int(data.size())) {
 			// Проблема с сокетом, пересоздать
-			ClientControl control(this, i);
-			main_ds->setDescriptor(i, clients[i]->createMainDescriptor(&control));
+			ClientControl control(this, rv);
+			main_ds->setDescriptor(rv, clients[rv]->createMainDescriptor(&control));
 		}
 	}
 

@@ -33,15 +33,15 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeUninitialized)
 	BOOST_REQUIRE_EQUAL(rv, -1);
 }
 
-// BOOST_AUTO_TEST_CASE(ShouldReturnNegativeUninitializedOnWrite)
-// {
-// 	// Given
-// 	SelectorPoll selector(10);
-// 	// When
-// 	int rv = selector.selectWrite();
-// 	// Then
-// 	BOOST_REQUIRE_EQUAL(rv, -1);
-// }
+BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoIntrest)
+{
+	// Given
+	SelectorPoll selector(10);
+	// When
+	int rv = selector.selectWrite({});
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, -1);
+}
 
 BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEvent)
 {

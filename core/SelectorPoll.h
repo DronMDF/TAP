@@ -11,8 +11,9 @@ public:
 	virtual void setDescriptor(unsigned idx, int fd);
 	virtual int getDescriptor(unsigned idx) const;
 	virtual int selectRead();
-	virtual bool selectWrite(unsigned idx);
+	virtual int selectWrite(const std::set<unsigned> &intrest);
 	
 private:
 	std::vector<pollfd> rfds;
+	std::vector<pollfd> wfds;
 };

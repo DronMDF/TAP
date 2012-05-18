@@ -8,12 +8,15 @@
 using namespace std;
 
 SelectorPoll::SelectorPoll(int n)
-	: rfds(n)
+	: rfds(n), wfds(n)
 {
 	for (int i = 0; i < n; i++) {
 		rfds[i].fd = -1;
 		rfds[i].events = POLLIN;
 		rfds[i].revents = 0;
+		
+		wfds[i].events = POLLOUT;
+		wfds[i].revents = 0;
 	}
 }
 
@@ -39,12 +42,12 @@ int SelectorPoll::selectRead()
 	}
 	
 	int rv = poll(&rfds[0], rfds.size(), 0);
-	//cout << "read poll " << rv << endl;
 	if (rv < 0) {
 		cerr << "poll failed: " << strerror(errno) << endl;
 		for (unsigned i = 0; i < rfds.size(); i++) {
 			rfds[i].revents = 0;
 		}
+		return -1;
 	}
 
 	if (rv > 0) {
@@ -59,9 +62,32 @@ int SelectorPoll::selectRead()
 	return -1;
 }
 
-bool SelectorPoll::selectWrite(unsigned i)
+int SelectorPoll::selectWrite(const set<unsigned> &intrest)
 {
-	pollfd wfds = { rfds[i].fd, POLLOUT, 0 };
-	int rv = poll(&wfds, 1, 0);
-	return rv > 0 and wfds.revents != 0;
+	if (!intrest.empty()) {
+		BOOST_FOREACH(auto &p, wfds) {
+			p.fd = -1;
+		}
+		BOOST_FOREACH(auto &i, intrest) {
+			wfds[i].fd = rfds[i].fd;
+		}
+		int rv = poll(&wfds[0], wfds.size(), 0);
+		if (rv < 0) {
+			cerr << "poll failed: " << strerror(errno) << endl;
+			for (unsigned i = 0; i < wfds.size(); i++) {
+				wfds[i].revents = 0;
+			}
+			
+			return -1;
+		}
+	}
+	
+	for (unsigned i = 0; i < wfds.size(); i++) {
+		if (wfds[i].revents != 0) {
+			wfds[i].revents = 0;
+			return i;
+		}
+	}
+	
+	return -1;
 }
