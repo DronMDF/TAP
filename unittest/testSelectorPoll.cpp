@@ -57,21 +57,21 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEvent)
 	BOOST_REQUIRE_EQUAL(rv, -1);
 }
 
-// BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
-// {
-// 	// Given
-// 	SelectorPoll selector(10);
-// 	for (int i = 0; i < 10; i++) {
-// 		selector.setDescriptor(i, 1);
-// 	}
-// 	piper p;
-// 	selector.setDescriptor(5, p.in);
-// 	write(p.out, "X", 1);
-// 	// When
-// 	int rv = selector.selectRead();
-// 	// Then
-// 	BOOST_REQUIRE_EQUAL(rv, 5);
-// }
+BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
+{
+	// Given
+	SelectorPoll selector(10);
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, 1);
+	}
+	piper p;
+	selector.setDescriptor(5, p.in);
+	write(p.out, "X", 1);
+	// When
+	int rv = selector.selectRead();
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, 5);
+}
 
 // BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoWrite)
 // {

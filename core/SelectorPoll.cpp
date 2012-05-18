@@ -46,6 +46,15 @@ int SelectorPoll::selectRead()
 			rfds[i].revents = 0;
 		}
 	}
+
+	if (rv > 0) {
+		for (unsigned i = 0; i < rfds.size(); i++) {
+			if (rfds[i].revents != 0) {
+				rfds[i].revents = 0;
+				return i;
+			}
+		}
+	}
 	
 	return -1;
 }
