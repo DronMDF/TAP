@@ -178,12 +178,3 @@ void TapManager::pressure()
 		// sleep(1);
 	}
 }
-
-list<unsigned> TapManager::selectIn()
-{
-	return {};
-}
-
-void TapManager::receive(unsigned i)
-{
-}

@@ -38,9 +38,6 @@ private:
 	
 	Statistic stats;
 	
-	virtual std::list<unsigned> selectIn();
-	virtual void receive(unsigned i);
-	
 	void showStatistics() const;
 	bool selectAllFromMain(time_t deadline);
 	bool checkTimeouts(time_t deadline);

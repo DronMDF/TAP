@@ -7,5 +7,5 @@ public:
 	virtual void setDescriptor(unsigned, int) {};
 	virtual int getDescriptor(unsigned) const { return -1; };
 	virtual int selectRead() { return -1; };
-	virtual int selectWrite() { return -1; };
+	virtual bool selectWrite(unsigned) { return -1; };
 };
