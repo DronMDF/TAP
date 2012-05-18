@@ -77,9 +77,10 @@ void ClientHttp::readFromMain(ClientControl *control)
 	}
 	
 	rx_bytes += rv;
-	if (rx_bytes > 64 * 1024) {
+	if (rx_bytes > 1024 * 1024) {
 		time_t now = time(0);
-		tracer->trace_throughput(rx_bytes / (now - rx_start));
+		time_t delta = now - rx_start;
+		tracer->trace_throughput(delta > 0 ? (rx_bytes / delta) : rx_bytes);
 		rx_start = now;
 		rx_bytes = 0;
 	}
