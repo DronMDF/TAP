@@ -25,11 +25,11 @@ int main(int /*argc*/, const char **/*argv*/)
 	//string request = "GET porn HTTP/1.0\r\n\r\n";
 
 	in_addr server = { inet_addr("127.0.0.1") };
-	string request = "GET /FreeBSD-9.0-RELEASE-amd64-dvd1.iso HTTP/1.0\n\r\n\r";
+	string request = "GET /garbage.bin HTTP/1.0\n\r\n\r";
 
 	TracerStream tracer(&cout);
 	
-	TapManager tapm(25000,
+	TapManager tapm(10000,
 			[](int n){ return make_shared<SelectorPoll>(n); }, 
 			[server, request](){ return make_shared<ClientHttp>(server, 80, request); });
 	
