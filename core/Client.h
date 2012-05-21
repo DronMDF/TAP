@@ -1,6 +1,7 @@
 
 #pragma once
 #include <functional>
+#include <vector>
 
 class Tracer;
 class ClientControl;
@@ -13,7 +14,9 @@ public:
 	Client();
 	virtual ~Client();
 
+	virtual int getMain() const = 0;
 	virtual void readFromMain(ClientControl *control) = 0;
+	virtual bool writeToMain(ClientControl *control, const std::vector<uint8_t> &data);
 	virtual void timeout(ClientControl *control) = 0;
 	
 	void setStatsChanger(std::function<void (int, int)> state_changer);

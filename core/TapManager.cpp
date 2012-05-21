@@ -132,12 +132,9 @@ bool TapManager::selectAllToMain(time_t deadline)
 		}
 		// Indexes is not need in the future
 		intrest.clear();
-		
-		int fd = main_ds->getDescriptor(rv);
-		vector<uint8_t> data = queues[rv].front();
-		
-		// TODO: write may be protocol specific, move in client
-		if (write(fd, &data[0], data.size()) == int(data.size())) {
+	
+		ClientControl control(this, rv);
+		if (clients[rv]->writeToMain(&control, queues[rv].front())) {
 			// Remove if success
 			queues[rv].pop();
 		}

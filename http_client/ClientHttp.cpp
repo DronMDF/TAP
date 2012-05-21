@@ -47,6 +47,11 @@ int ClientHttp::createMainDescriptor() const
 	return f;
 }
 
+int ClientHttp::getMain() const
+{
+	return fd;
+}
+
 void ClientHttp::readFromMain(ClientControl *control)
 {
 	vector<uint8_t> buf(4096);

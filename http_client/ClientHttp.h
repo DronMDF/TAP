@@ -13,6 +13,7 @@ public:
 	virtual void timeout(ClientControl *control);
 
 private:
+	int getMain() const;
 	int createMainDescriptor() const;
 	
 	const in_addr addr;

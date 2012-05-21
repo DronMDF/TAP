@@ -17,6 +17,13 @@ Client::~Client()
 	setState(OFFLINE);
 }
 
+bool Client::writeToMain(ClientControl *, const vector<uint8_t> &data)
+{
+	// TODO: Interrupt safe
+	int fd = getMain();
+	return write(fd, &data[0], data.size()) == int(data.size());
+}
+
 void Client::setStatsChanger(function<void (int, int)> state_changer)
 {
 	this->state_changer = state_changer;
