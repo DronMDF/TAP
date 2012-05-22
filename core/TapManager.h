@@ -30,14 +30,12 @@ public:
 private:
 	// Основной набор дескрипторов
 	std::shared_ptr<Selector> main_ds;
-	// Вспомогательный набор дескрипторов - открывается по инициативе клиентов.
-	std::shared_ptr<Selector> extra_ds;
 	// Список клиентов
 	std::vector<std::shared_ptr<Client>> clients;
 	// Очереди на отправку
 	std::vector<std::queue<std::vector<uint8_t>>> queues;
 	// Время реакции клиента
-	std::vector<unsigned> timeouts;
+	std::vector<time_t> timeouts;
 	
 	Statistic stats;
 	

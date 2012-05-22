@@ -17,8 +17,7 @@ using namespace std::placeholders;
 TapManager::TapManager(unsigned nth, 
 		       function<shared_ptr<Selector> (int)> create_selector,
 		       function<shared_ptr<Client> ()> create_client)
-	: main_ds(create_selector(nth)), extra_ds(create_selector(nth)), 
-	  clients(nth), queues(nth), timeouts(nth, 0), stats()
+	: main_ds(create_selector(nth)), clients(nth), queues(nth), timeouts(nth, 0), stats()
 {
 	for (unsigned i = 0; i < nth; i++) {
 		clients[i] = create_client();
