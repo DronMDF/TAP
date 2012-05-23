@@ -17,16 +17,11 @@ int main(int /*argc*/, const char **/*argv*/)
 	
 	rlimit nofile = { 100000, 100000 };
 	if (setrlimit(RLIMIT_NOFILE, &nofile) == -1) {
-		cerr << "ïÛÉÂËÁ ÕÓÔÁÎÏ×ËÉ RLIMIT_NOFILE: " << strerror(errno) << endl;
+		cerr << "ÐžÑˆÐ¸Ð±ÐºÐ° ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ¸ RLIMIT_NOFILE: " << strerror(errno) << endl;
 	}
 		
-	//in_addr server = { inet_addr("10.4.2.91") };
-	//string request = "GET hgwebdir.cgi/tap/archive/tip.tar.bz2 HTTP/1.0\r\n\r\n";
-	//string request = "GET porn HTTP/1.0\r\n\r\n";
-
 	in_addr server = { inet_addr("127.0.0.1") };
-	//string request = "GET /garbage.bin HTTP/1.0\n\r\n\r";
-	string request = "GET /FreeBSD-9.0-RELEASE-amd64-dvd1.iso HTTP/1.0\n\r\n\r";
+	string request = "GET /garbage.bin HTTP/1.0\n\r\n\r";
 
 	TracerStream tracer(&cout);
 	

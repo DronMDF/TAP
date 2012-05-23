@@ -8,13 +8,14 @@
 using namespace std;
 
 SelectorPoll::SelectorPoll(int n)
-	: rfds(n), wfds(n)
+	: rfds(n), rcursor(n), wfds(n), wcursor(n)
 {
 	for (int i = 0; i < n; i++) {
 		rfds[i].fd = -1;
 		rfds[i].events = POLLIN;
 		rfds[i].revents = 0;
 		
+		wfds[i].fd = -1;
 		wfds[i].events = POLLOUT;
 		wfds[i].revents = 0;
 	}
@@ -34,7 +35,8 @@ int SelectorPoll::getDescriptor(unsigned idx) const
 
 int SelectorPoll::selectRead()
 {
-	for (unsigned i = 0; i < rfds.size(); i++) {
+	while (rcursor < rfds.size()) {
+		const int i = rcursor++;
 		if (rfds[i].revents != 0) {
 			rfds[i].revents = 0;
 			return i;
@@ -47,6 +49,10 @@ int SelectorPoll::selectRead()
 		for (unsigned i = 0; i < rfds.size(); i++) {
 			rfds[i].revents = 0;
 		}
+	}
+	
+	if (rv > 0) {
+		rcursor = 0;
 	}
 
 	return -1;
@@ -71,9 +77,14 @@ int SelectorPoll::selectWrite(const set<unsigned> &intrest)
 			
 			return -1;
 		}
+		
+		if (rv > 0) {
+			wcursor = 0;
+		}
 	}
 	
-	for (unsigned i = 0; i < wfds.size(); i++) {
+	while (wcursor < wfds.size()) {
+		const int i = wcursor++;
 		if (wfds[i].revents != 0) {
 			wfds[i].revents = 0;
 			return i;
@@ -82,3 +93,4 @@ int SelectorPoll::selectWrite(const set<unsigned> &intrest)
 	
 	return -1;
 }
+
