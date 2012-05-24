@@ -6,7 +6,6 @@ using namespace std;
 
 BOOST_AUTO_TEST_SUITE(suiteTracerStream);
 
-// TODO: Трассировка должна сопровождаться временными метками, их надо исключить из тестирования
 BOOST_AUTO_TEST_CASE(ShouldOutString)
 {
 	// Given

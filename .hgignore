@@ -2,5 +2,5 @@ syntax: glob
 .obj
 test
 tap
-tap_http
+tap-http
 
