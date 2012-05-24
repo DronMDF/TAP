@@ -6,7 +6,7 @@ using namespace std;
 
 BOOST_AUTO_TEST_SUITE(suiteTracerStream);
 
-// TODO: Трассировка должна сопровождаться временными метками, их надо исключить из тестирования
+// TODO: п╒я─п╟я│я│п╦я─п╬п╡п╨п╟ п╢п╬п╩п╤п╫п╟ я│п╬п©я─п╬п╡п╬п╤п╢п╟я┌я▄я│я▐ п╡я─п╣п╪п╣п╫п╫я▀п╪п╦ п╪п╣я┌п╨п╟п╪п╦, п╦я┘ п╫п╟п╢п╬ п╦я│п╨п╩я▌я┤п╦я┌я▄ п╦п╥ я┌п╣я│я┌п╦я─п╬п╡п╟п╫п╦я▐
 BOOST_AUTO_TEST_CASE(ShouldOutString)
 {
 	// Given
@@ -16,6 +16,17 @@ BOOST_AUTO_TEST_CASE(ShouldOutString)
 	tracer.trace("hello");
 	// Then
 	BOOST_REQUIRE_EQUAL(out.str(), "hello\n");
+}
+
+BOOST_AUTO_TEST_CASE(ShouldPrintTimestampBeforeString)
+{
+	// Given
+	ostringstream out;
+	TracerStream tracer(&out, [](){ return "[timestamp] "; });
+	// When
+	tracer.trace("hello");
+	// Then
+	BOOST_REQUIRE_EQUAL(out.str(), "[timestamp] hello\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END();
