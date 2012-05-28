@@ -40,9 +40,9 @@ private:
 	Statistic stats;
 	
 	void showStatistics() const;
-	bool selectAllFromMain(time_t deadline);
-	bool checkTimeouts(time_t deadline);
-	bool selectAllToMain(time_t deadline);
+	bool selectAllFromMain(time_t now);
+	bool checkTimeouts(time_t now);
+	bool selectAllToMain(time_t now);
 	bool needToAction(time_t now);
 };
 

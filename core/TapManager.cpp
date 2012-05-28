@@ -68,7 +68,7 @@ void TapManager::showStatistics() const
 		<< ", Online: " << stats.online << endl;
 }
 
-bool TapManager::selectAllFromMain(time_t deadline)
+bool TapManager::selectAllFromMain(time_t now)
 {
 	while (true) {
 		const int rc = main_ds->selectRead();
@@ -79,8 +79,7 @@ bool TapManager::selectAllFromMain(time_t deadline)
 		ClientControl control(this, rc);
 		clients[rc]->readFromMain(&control);
 		
-		if (deadline <= time(0)) {
-			// Прерываемся на вывод статистики
+		if (now != time(0)) {
 			return false;
 		}
 	}
@@ -88,7 +87,7 @@ bool TapManager::selectAllFromMain(time_t deadline)
 	return true;
 }
 
-bool TapManager::checkTimeouts(time_t deadline)
+bool TapManager::checkTimeouts(time_t now)
 {
 	for (unsigned i = 0; i < clients.size(); i++) {
 		if (timeouts[i] < time(0)) {
@@ -96,8 +95,7 @@ bool TapManager::checkTimeouts(time_t deadline)
 			clients[i]->timeout(&control);
 		}
 
-		if (deadline <= time(0)) {
-			// Прерываемся на вывод статистики
+		if (now != time(0)) {
 			return false;
 		}
 	}
@@ -105,7 +103,7 @@ bool TapManager::checkTimeouts(time_t deadline)
 	return true;
 }
 
-bool TapManager::selectAllToMain(time_t deadline)
+bool TapManager::selectAllToMain(time_t now)
 {
 	set<unsigned> intrest;
 	for (unsigned i = 0; i < queues.size(); i++) {
@@ -119,9 +117,7 @@ bool TapManager::selectAllToMain(time_t deadline)
 	}
 	
 	while (true) {
-		// Не зацикливаемся надолго, оставляем время для статистики.
-		if (deadline <= time(0)) {
-			// Прерываемся на вывод статистики
+		if (now != time(0)) {
 			return false;
 		}
 		
@@ -129,6 +125,7 @@ bool TapManager::selectAllToMain(time_t deadline)
 		if (rv == -1) {
 			return true;
 		}
+		
 		// Indexes is not need in the future
 		intrest.clear();
 	
@@ -148,7 +145,7 @@ bool TapManager::needToAction(time_t now)
 		ClientControl control(this, i);
 		clients[i]->action(&control);
 		
-		if (now < time(0)) {
+		if (now != time(0)) {
 			return false;
 		}
 	}
@@ -169,33 +166,20 @@ void TapManager::pressure()
 			status = now;
 		}
 		
-		if (!selectAllFromMain(status + interval)) {
+		if (!selectAllFromMain(now)) {
 			continue;
 		}
 		
-		if (!checkTimeouts(status + interval)) {
+		if (!checkTimeouts(now)) {
 			continue;
 		}
 		
-		if (!selectAllToMain(status + interval)) {
+		if (!selectAllToMain(now)) {
 			continue;
 		}
 		
 		if (!needToAction(now)) {
 			continue;
-		}
-
-		// TODO: move to action
-		for (unsigned i = 0; i < clients.size(); i++) {
-			if (main_ds->getDescriptor(i) == -1) {
-				ClientControl control(this, i);
-				// descriptor created in
-				clients[i]->readFromMain(&control);
-			}
-			
-			if (status + interval <= time(0)) {
-				break;
-			}
 		}
 		
 		sched_yield();
