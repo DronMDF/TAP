@@ -13,8 +13,7 @@
 using namespace std;
 
 ClientHttp::ClientHttp(const in_addr &server, int port, const string &request)
-	: addr(server), port(port), request(request), request_sended(false), 
-	  rx_start(time(0)), rx_bytes(0), fd(-1)
+	: addr(server), port(port), request(request), rx_start(time(0)), rx_bytes(0), fd(-1)
 {
 }
 
@@ -58,22 +57,16 @@ void ClientHttp::readFromMain(ClientControl *control)
 	int rv = read(fd, &buf[0], buf.size());
 	
 	if (rv <= 0) {
+		tracer->trace("Closing connection by terminate");
 		close(fd);
-		fd = createMainDescriptor();
-		if (fd != -1) {
-			tracer->trace("Клиент в состоянии connecting");
-			rx_start = time(0);
-			rx_bytes = 0;
-			request_sended = false;
-			control->setMainDescriptor(fd);
-			control->setTimeout(0);
-		}
-		
+		fd = -1;
+		control->setMainDescriptor(fd);
+		setState(OFFLINE);
 		return;
 	}
 
 	if (getState() != ONLINE) {
-		tracer->trace("Клиент в состоянии online");
+		tracer->trace("Client online");
 		setState(ONLINE);
 	}
 	
@@ -91,17 +84,26 @@ void ClientHttp::readFromMain(ClientControl *control)
 
 void ClientHttp::timeout(ClientControl *control)
 {
-	if (fd == -1) {
-		return;
-	}
-	
-	if (!request_sended) {
-		tracer->trace("Таймаут, шлем запрос");
-		control->writeToMain(vector<uint8_t>(request.begin(), request.end()));
-		request_sended = true;
-	} else {
-		tracer->trace("Просто таймаут, запрос уже слали, поэтому ничего не шлем.");
-	}
-	
-	control->setTimeout(60);
+	tracer->trace("Closing connection by timeout");
+	close(fd);
+	fd = -1;
+	control->setMainDescriptor(fd);
+	setState(OFFLINE);
 }
+
+void ClientHttp::action(ClientControl *control)
+{
+	if (fd == -1) {
+		tracer->trace("Create connection");
+		fd = createMainDescriptor();
+		rx_start = time(0);
+		rx_bytes = 0;
+		control->setMainDescriptor(fd);
+		
+		tracer->trace("Send HTTP request");
+		control->writeToMain(vector<uint8_t>(request.begin(), request.end()));
+		
+		control->setTimeout(60);
+	}
+}
+

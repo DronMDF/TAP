@@ -11,6 +11,7 @@ public:
 
 	virtual void readFromMain(ClientControl *control);
 	virtual void timeout(ClientControl *control);
+	virtual void action(ClientControl *control);
 
 private:
 	int getMain() const;
@@ -19,7 +20,6 @@ private:
 	const in_addr addr;
 	int port;
 	const std::string request;
-	bool request_sended;
 
 	time_t rx_start;
 	unsigned rx_bytes;
