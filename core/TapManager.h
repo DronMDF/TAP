@@ -43,4 +43,6 @@ private:
 	bool selectAllFromMain(time_t deadline);
 	bool checkTimeouts(time_t deadline);
 	bool selectAllToMain(time_t deadline);
+	bool needToAction(time_t now);
 };
+

@@ -24,6 +24,10 @@ bool Client::writeToMain(ClientControl *, const vector<uint8_t> &data)
 	return write(fd, &data[0], data.size()) == int(data.size());
 }
 
+void Client::action(ClientControl *control)
+{
+}
+
 void Client::setStatsChanger(function<void (int, int)> state_changer)
 {
 	this->state_changer = state_changer;
@@ -44,3 +48,4 @@ void Client::setTracer(Tracer *tracer)
 {
 	this->tracer = tracer;
 }
+

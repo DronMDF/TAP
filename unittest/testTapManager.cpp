@@ -31,21 +31,18 @@ BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 	BOOST_REQUIRE_EQUAL(actual, nth);
 }
 
-// BOOST_AUTO_TEST_CASE(ShouldWakeupClientAtFirst)
-// {
-// 	// Given
-// 	struct wakeuped {};
-// 	struct TestClient : public ClientStub {
-// 		virtual void wakeup() { throw wakeuped(); };
-// 	};
-// 	struct TestTapManager : public TapManager {
-// 		TestTapManager() 
-// 			: TapManager(1, [](int){ return make_shared<SelectorTest>(); }, 
-// 				TestClientBuilder<TestClient>()) 
-// 		{ }
-// 	} tam;
-// 	// Then
-// 	BOOST_REQUIRE_THROW(tam.pressure(), wakeuped);
-// }
+BOOST_AUTO_TEST_CASE(ShouldCallActivate)
+{
+	// Given
+	struct was_action {};
+	struct TestClient : public ClientStub {
+		virtual void action(ClientControl *) { throw was_action(); };
+	};
+	// When
+	TapManager tam(1, [](int){ return make_shared<SelectorTest>(); }, 
+		[](){ return make_shared<TestClient>(); });
+	// Then
+	BOOST_REQUIRE_THROW(tam.pressure(), was_action);
+}
 
 BOOST_AUTO_TEST_SUITE_END();

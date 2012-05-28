@@ -142,6 +142,20 @@ bool TapManager::selectAllToMain(time_t deadline)
 	return true;
 }
 
+bool TapManager::needToAction(time_t now)
+{
+	for (unsigned i = 0; i < clients.size(); i++) {
+		ClientControl control(this, i);
+		clients[i]->action(&control);
+		
+		if (now < time(0)) {
+			return false;
+		}
+	}
+	
+	return true;
+}
+
 void TapManager::pressure()
 {
 	time_t status = 0;
@@ -159,17 +173,19 @@ void TapManager::pressure()
 			continue;
 		}
 		
-		//cout << "Пытаемся протаймаутить кого нибудь..." << endl;
 		if (!checkTimeouts(status + interval)) {
 			continue;
 		}
 		
-		// cout << "Пытаемся записать что нибудь..." << endl;
 		if (!selectAllToMain(status + interval)) {
 			continue;
 		}
 		
-		// Попытаемся создать недостающих
+		if (!needToAction(now)) {
+			continue;
+		}
+
+		// TODO: move to action
 		for (unsigned i = 0; i < clients.size(); i++) {
 			if (main_ds->getDescriptor(i) == -1) {
 				ClientControl control(this, i);
@@ -177,9 +193,7 @@ void TapManager::pressure()
 				clients[i]->readFromMain(&control);
 			}
 			
-			// Не зацикливаемся надолго, оставляем время для статистики.
 			if (status + interval <= time(0)) {
-				// Прерываемся на вывод статистики
 				break;
 			}
 		}
