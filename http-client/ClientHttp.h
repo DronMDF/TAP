@@ -16,6 +16,7 @@ public:
 private:
 	int getMain() const;
 	int createMainDescriptor() const;
+	void setTimeout(ClientControl *control, unsigned sec) const;
 	
 	const in_addr addr;
 	int port;

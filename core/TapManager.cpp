@@ -45,7 +45,7 @@ void TapManager::setMainDescriptor(unsigned n, int fd)
 	main_ds->setDescriptor(n, fd);
 }
 
-void TapManager::writeToMain(unsigned n, const std::vector<uint8_t> &data)
+void TapManager::writeToMain(unsigned n, const vector<uint8_t> &data)
 {
 	assert(n < clients.size());
 	queues[n].push(data);

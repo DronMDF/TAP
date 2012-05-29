@@ -1,4 +1,6 @@
 
+#include "ClientHttp.h"
+
 #include <fcntl.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -8,7 +10,6 @@
 #include <boost/format.hpp>
 #include <core/Tracer.h>
 #include <core/ClientControl.h>
-#include "ClientHttp.h"
 
 using namespace std;
 
@@ -46,6 +47,12 @@ int ClientHttp::createMainDescriptor() const
 	return f;
 }
 
+void ClientHttp::setTimeout(ClientControl *control, unsigned sec) const
+{
+	const auto wakeup_time = chrono::high_resolution_clock::now() + chrono::seconds(sec);
+	control->setWakeupTime(wakeup_time);
+}
+
 int ClientHttp::getMain() const
 {
 	return fd;
@@ -79,7 +86,7 @@ void ClientHttp::readFromMain(ClientControl *control)
 		rx_bytes = 0;
 	}
 	
-	control->setTimeout(60);
+	setTimeout(control, 60);
 }
 
 void ClientHttp::timeout(ClientControl *control)
@@ -105,7 +112,7 @@ void ClientHttp::action(ClientControl *control)
 		tracer->trace("Send HTTP request");
 		control->writeToMain(vector<uint8_t>(request.begin(), request.end()));
 		
-		control->setTimeout(60);
+		setTimeout(control, 60);
 	}
 }
 

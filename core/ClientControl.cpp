@@ -21,9 +21,8 @@ void ClientControl::writeToMain(const vector<uint8_t> &data) const
 	tapm->writeToMain(n, data);
 }
 
-void ClientControl::setTimeout(unsigned timeout) const
+void ClientControl::setWakeupTime(const time_point &wakeup_time) const
 {
-	const auto wakeup_time = chrono::high_resolution_clock::now() + chrono::seconds(timeout);
 	tapm->setTimeout(n, wakeup_time);
 }
 
