@@ -18,7 +18,8 @@ using namespace std::placeholders;
 TapManager::TapManager(unsigned nth, 
 		       function<shared_ptr<Selector> (int)> create_selector,
 		       function<shared_ptr<Client> ()> create_client)
-	: main_ds(create_selector(nth)), clients(nth), queues(nth), timeouts(nth, 0), stats()
+	: main_ds(create_selector(nth)), clients(nth), queues(nth), 
+	  timeouts(nth, time_point::max()), stats()
 {
 	for (unsigned i = 0; i < nth; i++) {
 		clients[i] = create_client();
@@ -32,10 +33,10 @@ void TapManager::setTracer(unsigned n, Tracer *tracer)
 	clients[n]->setTracer(tracer);
 }
 
-void TapManager::setTimeout(unsigned n, unsigned timeout)
+void TapManager::setTimeout(unsigned n, const time_point &wakeup_time)
 {
 	assert(n < clients.size());
-	timeouts[n] = time(0) + timeout;
+	timeouts[n] = wakeup_time;
 }
 
 void TapManager::setMainDescriptor(unsigned n, int fd)
@@ -91,13 +92,14 @@ bool TapManager::selectAllFromMain(const time_point &endtime)
 bool TapManager::checkTimeouts(const time_point &endtime)
 {
 	for (unsigned i = 0; i < clients.size(); i++) {
-		if (timeouts[i] < time(0)) {
+		const auto now = chrono::high_resolution_clock::now();
+		if (now > endtime) {
+			return false;
+		}
+		
+		if (timeouts[i] < now) {
 			ClientControl control(this, i);
 			clients[i]->timeout(&control);
-		}
-
-		if (chrono::high_resolution_clock::now() > endtime) {
-			return false;
 		}
 	}
 	

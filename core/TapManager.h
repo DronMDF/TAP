@@ -12,6 +12,8 @@ class Selector;
 class Tracer;
 
 class TapManager {
+	typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
+
 public:
 	TapManager(unsigned nth, 
 		   std::function<std::shared_ptr<Selector>(int)> create_selector,
@@ -20,7 +22,7 @@ public:
 	virtual ~TapManager() {};
 	
 	void setTracer(unsigned n, Tracer *tracer);
-	void setTimeout(unsigned n, unsigned timeout);
+	void setTimeout(unsigned n, const time_point &wakeup_time);
 
 	void setMainDescriptor(unsigned n, int fd);
 	
@@ -32,11 +34,9 @@ private:
 	std::shared_ptr<Selector> main_ds;
 	std::vector<std::shared_ptr<Client>> clients;
 	std::vector<std::queue<std::vector<uint8_t>>> queues;
-	std::vector<time_t> timeouts;
+	std::vector<time_point> timeouts;
 	
 	Statistic stats;
-	
-	typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 	
 	void showStatistics() const;
 	bool selectAllFromMain(const time_point &endtime);
