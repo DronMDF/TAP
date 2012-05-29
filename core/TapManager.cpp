@@ -1,4 +1,6 @@
 
+#include "TapManager.h"
+
 #include <assert.h>
 #include <sched.h>
 #include <chrono>
@@ -9,7 +11,6 @@
 #include "Client.h"
 #include "ClientControl.h"
 #include "Selector.h"
-#include "TapManager.h"
 
 using namespace std;
 using namespace std::placeholders;
@@ -52,10 +53,10 @@ void TapManager::writeToMain(unsigned n, const std::vector<uint8_t> &data)
 void TapManager::showStatistics() const
 {
 	const auto ts = time(0);
-	// TODO: Новый стандарт, пока не реализовано в gcc
+	// TODO: Not implement in gcc-4.5
 	// cout << put_time(localtime(&ts), "%T")
 
-	// TODO: Поэтому приходится мучаться
+	// TODO: old style formatter
 	char tsstr[100] = {0};
 	if (strftime(tsstr, 100, "%T", localtime(&ts))) {
 		cout << tsstr;
@@ -68,7 +69,7 @@ void TapManager::showStatistics() const
 		<< ", Online: " << stats.online << endl;
 }
 
-bool TapManager::selectAllFromMain(time_t now)
+bool TapManager::selectAllFromMain(const time_point &endtime)
 {
 	while (true) {
 		const int rc = main_ds->selectRead();
@@ -79,7 +80,7 @@ bool TapManager::selectAllFromMain(time_t now)
 		ClientControl control(this, rc);
 		clients[rc]->readFromMain(&control);
 		
-		if (now != time(0)) {
+		if (chrono::high_resolution_clock::now() > endtime) {
 			return false;
 		}
 	}
@@ -87,7 +88,7 @@ bool TapManager::selectAllFromMain(time_t now)
 	return true;
 }
 
-bool TapManager::checkTimeouts(time_t now)
+bool TapManager::checkTimeouts(const time_point &endtime)
 {
 	for (unsigned i = 0; i < clients.size(); i++) {
 		if (timeouts[i] < time(0)) {
@@ -95,7 +96,7 @@ bool TapManager::checkTimeouts(time_t now)
 			clients[i]->timeout(&control);
 		}
 
-		if (now != time(0)) {
+		if (chrono::high_resolution_clock::now() > endtime) {
 			return false;
 		}
 	}
@@ -103,7 +104,7 @@ bool TapManager::checkTimeouts(time_t now)
 	return true;
 }
 
-bool TapManager::selectAllToMain(time_t now)
+bool TapManager::selectAllToMain(const time_point &endtime)
 {
 	set<unsigned> intrest;
 	for (unsigned i = 0; i < queues.size(); i++) {
@@ -117,7 +118,7 @@ bool TapManager::selectAllToMain(time_t now)
 	}
 	
 	while (true) {
-		if (now != time(0)) {
+		if (chrono::high_resolution_clock::now() > endtime) {
 			return false;
 		}
 		
@@ -139,13 +140,13 @@ bool TapManager::selectAllToMain(time_t now)
 	return true;
 }
 
-bool TapManager::needToAction(time_t now)
+bool TapManager::needToAction(const time_point &endtime)
 {
 	for (unsigned i = 0; i < clients.size(); i++) {
 		ClientControl control(this, i);
 		clients[i]->action(&control);
 		
-		if (now != time(0)) {
+		if (chrono::high_resolution_clock::now() > endtime) {
 			return false;
 		}
 	}
@@ -155,30 +156,34 @@ bool TapManager::needToAction(time_t now)
 
 void TapManager::pressure()
 {
-	time_t status = 0;
-	const int interval = 10;
+	chrono::time_point<chrono::high_resolution_clock> status;
 	
 	while (true) {
-		const time_t now = time(0);
+		const auto now = chrono::high_resolution_clock::now();
+		const auto endtime = now + chrono::seconds(1);
 		
-		if (status + interval < now) {
+		if (now > status) {
 			showStatistics();
-			status = now;
+			status = now + chrono::seconds(10);
 		}
 		
-		if (!selectAllFromMain(now)) {
+		if (!selectAllFromMain(endtime)) {
+			cout << "break on read" << endl;
 			continue;
 		}
 		
-		if (!checkTimeouts(now)) {
+		if (!checkTimeouts(endtime)) {
+			cout << "break on check timeout" << endl;
 			continue;
 		}
 		
-		if (!selectAllToMain(now)) {
+		if (!selectAllToMain(endtime)) {
+			cout << "break on write" << endl;
 			continue;
 		}
 		
-		if (!needToAction(now)) {
+		if (!needToAction(endtime)) {
+			cout << "break on action" << endl;
 			continue;
 		}
 		

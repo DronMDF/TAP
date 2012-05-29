@@ -1,5 +1,6 @@
 
 #pragma once
+#include <chrono>
 #include <list>
 #include <memory>
 #include <queue>
@@ -28,21 +29,19 @@ public:
 	void pressure();
 	
 private:
-	// Основной набор дескрипторов
 	std::shared_ptr<Selector> main_ds;
-	// Список клиентов
 	std::vector<std::shared_ptr<Client>> clients;
-	// Очереди на отправку
 	std::vector<std::queue<std::vector<uint8_t>>> queues;
-	// Время реакции клиента
 	std::vector<time_t> timeouts;
 	
 	Statistic stats;
 	
+	typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
+	
 	void showStatistics() const;
-	bool selectAllFromMain(time_t now);
-	bool checkTimeouts(time_t now);
-	bool selectAllToMain(time_t now);
-	bool needToAction(time_t now);
+	bool selectAllFromMain(const time_point &endtime);
+	bool checkTimeouts(const time_point &endtime);
+	bool selectAllToMain(const time_point &endtime);
+	bool needToAction(const time_point &endtime);
 };
 

@@ -84,11 +84,13 @@ void ClientHttp::readFromMain(ClientControl *control)
 
 void ClientHttp::timeout(ClientControl *control)
 {
-	tracer->trace("Closing connection by timeout");
-	close(fd);
-	fd = -1;
-	control->setMainDescriptor(fd);
-	setState(OFFLINE);
+	if (fd > 0) {
+		tracer->trace("Closing connection by timeout");
+		close(fd);
+		fd = -1;
+		control->setMainDescriptor(fd);
+		setState(OFFLINE);
+	}
 }
 
 void ClientHttp::action(ClientControl *control)
