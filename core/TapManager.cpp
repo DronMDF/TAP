@@ -158,7 +158,7 @@ bool TapManager::needToAction(const time_point &endtime)
 
 void TapManager::pressure()
 {
-	chrono::time_point<chrono::high_resolution_clock> status;
+	time_point status;
 	
 	while (true) {
 		const auto now = chrono::high_resolution_clock::now();

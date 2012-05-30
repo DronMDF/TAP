@@ -1,19 +1,17 @@
 
 #pragma once
-#include <chrono>
 #include <list>
 #include <memory>
 #include <queue>
 #include <vector>
 #include "Statistic.h"
+#include "TimePoint.h"
 
 class Client;
 class Selector;
 class Tracer;
 
 class TapManager {
-	typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
-
 public:
 	TapManager(unsigned nth, 
 		   std::function<std::shared_ptr<Selector>(int)> create_selector,

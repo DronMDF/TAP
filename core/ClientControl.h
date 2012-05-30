@@ -1,13 +1,12 @@
 
 #pragma once
-#include <chrono>
 #include <cstdint>
 #include <vector>
+#include "TimePoint.h"
 
 class TapManager;
 
 class ClientControl {
-	typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 public:
 	ClientControl(TapManager *tapm, unsigned n);
 
