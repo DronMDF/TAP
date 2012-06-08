@@ -14,7 +14,8 @@ void TracerStream::trace(const string &msg) const
 	(*out) << timestamp() << msg << endl;
 }
 
-void TracerStream::trace_throughput(unsigned bytes_per_sec) const
+void TracerStream::trace(const std::string &key, unsigned value) const
 {
-	(*out) << timestamp() << "Throughput: " << bytes_per_sec << "bps" << endl;
+	(*out) << timestamp() << key << ": " << value << endl;
 }
+
