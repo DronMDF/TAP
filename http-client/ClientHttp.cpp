@@ -64,7 +64,7 @@ void ClientHttp::readFromMain(ClientControl *control)
 	int rv = read(fd, &buf[0], buf.size());
 	
 	if (rv <= 0) {
-		tracer->trace("Closing connection by terminate");
+		control->trace("Closing connection by terminate");
 		close(fd);
 		fd = -1;
 		control->setMainDescriptor(fd);
@@ -73,7 +73,7 @@ void ClientHttp::readFromMain(ClientControl *control)
 	}
 
 	if (getState() != ONLINE) {
-		tracer->trace("Client online");
+		control->trace("Client online");
 		setState(ONLINE);
 	}
 	
@@ -81,7 +81,7 @@ void ClientHttp::readFromMain(ClientControl *control)
 	if (rx_bytes > 1024 * 1024) {
 		time_t now = time(0);
 		time_t delta = now - rx_start;
-		tracer->trace("throughput (bps)", delta > 0 ? (rx_bytes / delta) : rx_bytes);
+		control->trace("throughput (bps)", delta > 0 ? (rx_bytes / delta) : rx_bytes);
 		rx_start = now;
 		rx_bytes = 0;
 	}
@@ -92,7 +92,7 @@ void ClientHttp::readFromMain(ClientControl *control)
 void ClientHttp::timeout(ClientControl *control)
 {
 	if (fd > 0) {
-		tracer->trace("Closing connection by timeout");
+		control->trace("Closing connection by timeout");
 		close(fd);
 		fd = -1;
 		control->setMainDescriptor(fd);
@@ -103,13 +103,13 @@ void ClientHttp::timeout(ClientControl *control)
 void ClientHttp::action(ClientControl *control)
 {
 	if (fd == -1) {
-		tracer->trace("Create connection");
+		control->trace("Create connection");
 		fd = createMainDescriptor();
 		rx_start = time(0);
 		rx_bytes = 0;
 		control->setMainDescriptor(fd);
 		
-		tracer->trace("Send HTTP request");
+		control->trace("Send HTTP request");
 		control->writeToMain(vector<uint8_t>(request.begin(), request.end()));
 		
 		setTimeout(control, 60);

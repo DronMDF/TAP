@@ -1,14 +1,11 @@
 
 #include <boost/format.hpp>
 #include "Client.h"
-#include "Tracer.h"
 
 using namespace std;
 
-Tracer Client::null_tracer;
-
 Client::Client()
-	: tracer(&null_tracer), state_changer([](int, int) {}), state(OFFLINE)
+	: state_changer([](int, int) {}), state(OFFLINE)
 {
 }
 
@@ -42,10 +39,5 @@ void Client::setState(int new_state)
 int Client::getState() const
 {
 	return state;
-}
-
-void Client::setTracer(Tracer *tracer)
-{
-	this->tracer = tracer;
 }
 

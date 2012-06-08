@@ -22,14 +22,11 @@ public:
 	virtual void action(ClientControl *control);
 		
 	void setStatsChanger(std::function<void (int, int)> state_changer);
-	void setTracer(Tracer *tracer);
 	
 	int getState() const;
 	
 protected:
 	void setState(int new_state);
-	
-	Tracer *tracer;
 
 private:
 	Client(const Client&) = delete;
@@ -39,6 +36,4 @@ private:
 	
 	std::function<void (int, int)> state_changer;
 	int state;
-	
-	static Tracer null_tracer;
 };

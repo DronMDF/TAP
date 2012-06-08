@@ -35,7 +35,6 @@ void TapManager::setTracer(unsigned n, Tracer *tracer)
 {
 	assert(n < clients.size());
 	tracers[n] = tracer;
-	clients[n]->setTracer(tracer);
 }
 
 void TapManager::setTimeout(unsigned n, const time_point &wakeup_time)
