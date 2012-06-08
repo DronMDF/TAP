@@ -34,6 +34,9 @@ private:
 	std::vector<std::queue<std::vector<uint8_t>>> queues;
 	std::vector<time_point> timeouts;
 	
+	static Tracer nulltracer;
+	std::vector<Tracer *> tracers;
+	
 	Statistic stats;
 	
 	void showStatistics() const;

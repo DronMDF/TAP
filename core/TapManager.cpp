@@ -16,13 +16,14 @@
 using namespace std;
 using namespace std::placeholders;
 
-static Tracer tracer;
+
+Tracer TapManager::nulltracer;
 
 TapManager::TapManager(unsigned nth, 
 		       function<shared_ptr<Selector> (int)> create_selector,
 		       function<shared_ptr<Client> ()> create_client)
 	: main_ds(create_selector(nth)), clients(nth), queues(nth), 
-	  timeouts(nth, time_point::max()), stats()
+	  timeouts(nth, time_point::max()), tracers(nth, &nulltracer), stats()
 {
 	for (unsigned i = 0; i < nth; i++) {
 		clients[i] = create_client();
@@ -33,6 +34,7 @@ TapManager::TapManager(unsigned nth,
 void TapManager::setTracer(unsigned n, Tracer *tracer)
 {
 	assert(n < clients.size());
+	tracers[n] = tracer;
 	clients[n]->setTracer(tracer);
 }
 
@@ -81,7 +83,7 @@ bool TapManager::selectAllFromMain(const time_point &endtime)
 			break;
 		}
 		
-		ClientControl control(this, rc, &tracer);
+		ClientControl control(this, rc, tracers[rc]);
 		clients[rc]->readFromMain(&control);
 		
 		if (chrono::high_resolution_clock::now() > endtime) {
@@ -101,7 +103,7 @@ bool TapManager::checkTimeouts(const time_point &endtime)
 		}
 		
 		if (timeouts[i] < now) {
-			ClientControl control(this, i, &tracer);
+			ClientControl control(this, i, tracers[i]);
 			clients[i]->timeout(&control);
 		}
 	}
@@ -135,7 +137,7 @@ bool TapManager::selectAllToMain(const time_point &endtime)
 		// Indexes is not need in the future
 		intrest.clear();
 	
-		ClientControl control(this, rv, &tracer);
+		ClientControl control(this, rv, tracers[rv]);
 		if (clients[rv]->writeToMain(&control, queues[rv].front())) {
 			// Remove if success
 			queues[rv].pop();
@@ -148,7 +150,7 @@ bool TapManager::selectAllToMain(const time_point &endtime)
 bool TapManager::needToAction(const time_point &endtime)
 {
 	for (unsigned i = 0; i < clients.size(); i++) {
-		ClientControl control(this, i, &tracer);
+		ClientControl control(this, i, tracers[i]);
 		clients[i]->action(&control);
 		
 		if (chrono::high_resolution_clock::now() > endtime) {
