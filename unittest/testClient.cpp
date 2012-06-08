@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(ShouldWriteDataToMain)
 		virtual void readFromMain(ClientControl *) {};
 		virtual void timeout(ClientControl *) {};
 	} client;
-	ClientControl cc(0, 0);
+	ClientControl cc(0, 0, 0);
 	vector<uint8_t> expected = {'x', 'x', 'x'};
 	piper p;
 	// When
@@ -43,3 +43,4 @@ BOOST_AUTO_TEST_CASE(ShouldWriteDataToMain)
 }
 	
 BOOST_AUTO_TEST_SUITE_END();
+

@@ -11,9 +11,12 @@
 #include "Client.h"
 #include "ClientControl.h"
 #include "Selector.h"
+#include "Tracer.h"
 
 using namespace std;
 using namespace std::placeholders;
+
+static Tracer tracer;
 
 TapManager::TapManager(unsigned nth, 
 		       function<shared_ptr<Selector> (int)> create_selector,
@@ -78,7 +81,7 @@ bool TapManager::selectAllFromMain(const time_point &endtime)
 			break;
 		}
 		
-		ClientControl control(this, rc);
+		ClientControl control(this, rc, &tracer);
 		clients[rc]->readFromMain(&control);
 		
 		if (chrono::high_resolution_clock::now() > endtime) {
@@ -98,7 +101,7 @@ bool TapManager::checkTimeouts(const time_point &endtime)
 		}
 		
 		if (timeouts[i] < now) {
-			ClientControl control(this, i);
+			ClientControl control(this, i, &tracer);
 			clients[i]->timeout(&control);
 		}
 	}
@@ -132,7 +135,7 @@ bool TapManager::selectAllToMain(const time_point &endtime)
 		// Indexes is not need in the future
 		intrest.clear();
 	
-		ClientControl control(this, rv);
+		ClientControl control(this, rv, &tracer);
 		if (clients[rv]->writeToMain(&control, queues[rv].front())) {
 			// Remove if success
 			queues[rv].pop();
@@ -145,7 +148,7 @@ bool TapManager::selectAllToMain(const time_point &endtime)
 bool TapManager::needToAction(const time_point &endtime)
 {
 	for (unsigned i = 0; i < clients.size(); i++) {
-		ClientControl control(this, i);
+		ClientControl control(this, i, &tracer);
 		clients[i]->action(&control);
 		
 		if (chrono::high_resolution_clock::now() > endtime) {
@@ -192,3 +195,4 @@ void TapManager::pressure()
 		sched_yield();
 	}
 }
+
