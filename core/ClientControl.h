@@ -17,6 +17,7 @@ public:
 	void setWakeupTime(const time_point &wakeup_time) const;
 	
 	void trace(const std::string &message) const;
+	void trace(const std::string &key, unsigned value) const;
 	
 private:
 	TapManager *tapm;
