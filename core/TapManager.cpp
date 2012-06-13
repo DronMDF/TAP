@@ -49,6 +49,11 @@ void TapManager::setMainDescriptor(unsigned n, int fd)
 	main_ds->setDescriptor(n, fd);
 }
 
+void TapManager::setState(unsigned n, int state)
+{
+	// TODO: implement local list of client state
+}
+
 void TapManager::writeToMain(unsigned n, const vector<uint8_t> &data)
 {
 	assert(n < clients.size());

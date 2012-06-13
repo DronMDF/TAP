@@ -2,9 +2,12 @@
 #include <core/ClientControl.h>
 
 #include <boost/test/unit_test.hpp>
+#include <core/Client.h>
+#include <core/TapManager.h>
 #include <core/TracerStream.h>
 
 using namespace std;
+class Selector;
 
 BOOST_AUTO_TEST_SUITE(suiteClientControl);
 
@@ -44,16 +47,26 @@ BOOST_AUTO_TEST_CASE(ShouldPassKeyValueToTracer)
 	BOOST_REQUIRE_EQUAL(tracer.value, value);
 }
 
-// TODO: Old state keep in Client, need pass it
-// BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClient)
-// {
-// 	TapManager tapm(2, [](int n){ return shared_ptr<Selector>(); },
-// 		[](){ return shared_ptr<Client>(); });
-// 	ClientControl cc(&tapm, 1);
-// 	
-// 	cc->setState(Client::CONNECTING);
-// 	BOOST_REQUIRE_EQUAL(tamp.getStatistic().connecting, 1);
-// 
-// }
+BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClient)
+{
+	struct testTapManager : public TapManager {
+		unsigned n;
+		int state;
+		testTapManager() 
+			: TapManager(0, [](int){ return shared_ptr<Selector>(); }, 
+				[](){ return shared_ptr<Client>(); }), 
+			  n(0), state(-1) 
+		{};
+		virtual void setState(unsigned n, int state) {
+			this->n = n;
+			this->state = state;
+		}
+	} tapm;
+	ClientControl cc(&tapm, 42, 0);
+	
+	cc.setState(8);
+	BOOST_REQUIRE_EQUAL(tapm.n, 42);
+	BOOST_REQUIRE_EQUAL(tapm.state, 8);
+}
 	
 BOOST_AUTO_TEST_SUITE_END();

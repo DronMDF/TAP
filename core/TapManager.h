@@ -21,6 +21,7 @@ public:
 	
 	void setTracer(unsigned n, Tracer *tracer);
 	void setTimeout(unsigned n, const time_point &wakeup_time);
+	virtual void setState(unsigned n, int state);
 
 	void setMainDescriptor(unsigned n, int fd);
 	
