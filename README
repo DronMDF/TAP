@@ -1,0 +1,13 @@
+
+Network load testing framework. Provides loads of up to tens of thousands of parallel connections.
+
+Prerequesties:
+
+	gcc-4.5 or above
+	
+Building:
+
+	make
+	make check
+	
+

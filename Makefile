@@ -19,20 +19,22 @@ clean:
 	rm -f libtap.a test
 
 libtap.a: ${OBJECTS}
-	${AR} r $@ $^
-	ranlib $@
+	${AR} -r $@ $^
+	${AR} -s $@
 
 test: ${TEST_OBJECTS}
 	${CXX} -o $@ $^ -L. -ltap -lboost_unit_test_framework
 
 
-${OBJDIR}/%.o : core/%.cpp
-	@test -e ${OBJDIR} || mkdir ${OBJDIR}
+${OBJDIR}/%.o : core/%.cpp ${OBJDIR}
 	${CXX} ${CXXFLAGS} -c -o $@ $<
 
-${OBJDIR}/%.o : unittest/%.cpp
-	@test -e ${OBJDIR} || mkdir ${OBJDIR}
+${OBJDIR}/%.o : unittest/%.cpp ${OBJDIR}
 	${CXX} ${CXXFLAGS} -c -o $@ $<
+
+
+${OBJDIR}:
+	mkdir ${OBJDIR}
 
 # TODO: move to example
 #tap-http: ${OBJDIR}/core.o ${OBJDIR}/http-client.o
