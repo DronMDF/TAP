@@ -1,46 +1,41 @@
 
-export CXX = g++
-export CXXFLAGS = -std=c++0x -ggdb3 -O0 -Wall -Wextra -Weffc++ -I.
-export LD = ld
-export LDFLAGS =
-export OBJDIR = .obj
+CXX ?= g++
+CXXFLAGS ?= -std=c++0x -ggdb3 -O0 -Wall -Wextra -Weffc++ -I.
 
-OBJECTS = 
-LIBS=
+OBJDIR = .obj
+OBJECTS = ${patsubst core/%.cpp,${OBJDIR}/%.o,${wildcard core/*.cpp}}
+TEST_OBJECTS = ${patsubst unittest/%.cpp,${OBJDIR}/%.o,${wildcard unittest/*.cpp}}
 
-#tap: ${OBJECTS}
-#	${CXX} -s -o $@ ${OBJECTS} ${LIBS}
-	
-tap-http: ${OBJDIR}/core.o ${OBJDIR}/http-client.o
-	${CXX} ${CXXFLAGS} -o $@ tap-http.cpp \
-		${OBJDIR}/core.o ${OBJDIR}/http-client.o ${LIBS}
+all: libtap.a
 
-# Тестирование
-check: test
+check: libtap.a test
 	./test --random=1
 
-test: ${OBJDIR}/core.o ${OBJDIR}/http-client.o ${OBJDIR}/unittest.o
-	${CXX} -o $@ ${OBJDIR}/core.o ${OBJDIR}/http-client.o ${OBJDIR}/unittest.o \
-		${LIBS} -lboost_unit_test_framework
+install:
+	@echo TODO: implement
 
-# Утилиты
 clean:
 	rm -rf ${OBJDIR}
-	rm -f tap-http test
+	rm -f libtap.a test
 
-# Компиляция
-${OBJDIR}:
-	mkdir ${OBJDIR}
+libtap.a: ${OBJECTS}
+	${AR} r $@ $^
+	ranlib $@
 
-.PHONY: ${OBJDIR}/core.o
-${OBJDIR}/core.o : ${OBJDIR}
-	./build.py $@ ${basename ${notdir $@}}
+test: ${TEST_OBJECTS}
+	${CXX} -o $@ $^ -L. -ltap -lboost_unit_test_framework
 
-.PHONY: ${OBJDIR}/unittest.o
-${OBJDIR}/unittest.o : ${OBJDIR}
-	./build.py $@ ${basename ${notdir $@}}
 
-.PHONY: ${OBJDIR}/http_client.o
-${OBJDIR}/http-client.o : ${OBJDIR}
-	./build.py $@ ${basename ${notdir $@}}
+${OBJDIR}/%.o : core/%.cpp
+	@test -e ${OBJDIR} || mkdir ${OBJDIR}
+	${CXX} ${CXXFLAGS} -c -o $@ $<
+
+${OBJDIR}/%.o : unittest/%.cpp
+	@test -e ${OBJDIR} || mkdir ${OBJDIR}
+	${CXX} ${CXXFLAGS} -c -o $@ $<
+
+# TODO: move to example
+#tap-http: ${OBJDIR}/core.o ${OBJDIR}/http-client.o
+#	${CXX} ${CXXFLAGS} -o $@ tap-http.cpp \
+#		${OBJDIR}/core.o ${OBJDIR}/http-client.o ${LIBS}
 

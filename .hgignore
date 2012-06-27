@@ -1,6 +1,5 @@
 syntax: glob
 .obj
+libtap.a
 test
-tap
-tap-http
 
