@@ -37,9 +37,3 @@ ${OBJDIR}/.keep:
 	test -d ${OBJDIR} || mkdir ${OBJDIR}
 	touch $@
 
-
-# TODO: move to example
-#tap-http: ${OBJDIR}/core.o ${OBJDIR}/http-client.o
-#	${CXX} ${CXXFLAGS} -o $@ tap-http.cpp \
-#		${OBJDIR}/core.o ${OBJDIR}/http-client.o ${LIBS}
-

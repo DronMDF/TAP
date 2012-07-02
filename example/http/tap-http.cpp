@@ -10,7 +10,7 @@
 #include <core/SelectorPoll.h>
 #include <core/TapManager.h>
 #include <core/TracerStream.h>
-#include <http-client/ClientHttp.h>
+#include "ClientHttp.h"
 
 using namespace std;
 
