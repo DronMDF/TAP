@@ -1,6 +1,6 @@
 
 CXX ?= g++
-CXXFLAGS ?= -std=c++0x -ggdb3 -O0 -Wall -Wextra -Weffc++ -I.
+CXXFLAGS ?= -std=c++0x -Wall -Wextra -Weffc++ -I.
 
 OBJDIR = .obj
 OBJECTS = ${patsubst core/%.cpp,${OBJDIR}/%.o,${wildcard core/*.cpp}}
@@ -18,6 +18,7 @@ clean:
 	rm -rf ${OBJDIR}
 	rm -f libtap.a test
 
+
 libtap.a: ${OBJECTS}
 	${AR} -r $@ $^
 	${AR} -s $@
@@ -26,15 +27,16 @@ test: ${TEST_OBJECTS}
 	${CXX} -o $@ $^ -L. -ltap -lboost_unit_test_framework
 
 
-${OBJDIR}/%.o : core/%.cpp ${OBJDIR}
+${OBJDIR}/%.o : core/%.cpp ${OBJDIR}/.keep
 	${CXX} ${CXXFLAGS} -c -o $@ $<
 
-${OBJDIR}/%.o : unittest/%.cpp ${OBJDIR}
+${OBJDIR}/%.o : unittest/%.cpp ${OBJDIR}/.keep
 	${CXX} ${CXXFLAGS} -c -o $@ $<
 
+${OBJDIR}/.keep:
+	test -d ${OBJDIR} || mkdir ${OBJDIR}
+	touch $@
 
-${OBJDIR}:
-	mkdir ${OBJDIR}
 
 # TODO: move to example
 #tap-http: ${OBJDIR}/core.o ${OBJDIR}/http-client.o
