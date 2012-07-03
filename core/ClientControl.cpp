@@ -37,7 +37,7 @@ void ClientControl::trace(const string &message) const
 	tracer->trace(message);
 }
 
-void ClientControl::trace(const std::string &key, unsigned value) const
+void ClientControl::trace(const string &key, unsigned value) const
 {
 	tracer->trace(key, value);
 }

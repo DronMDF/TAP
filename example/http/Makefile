@@ -13,7 +13,7 @@ clean:
 	rm -rf ${OBJDIR}
 	
 tap-http: ${OBJECTS}
-	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap
+	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex
 	
 ${OBJDIR}/%.o : %.cpp ${OBJDIR}/.keep
 	${CXX} ${CXXFLAGS} -c -o $@ $<
