@@ -63,7 +63,7 @@ void TapManager::writeToMain(unsigned n, const vector<uint8_t> &data)
 void TapManager::showStatistics() const
 {
 	const auto ts = time(0);
-	// TODO: Not implement in gcc-4.5
+	// TODO: Not implement in gcc-4.6
 	// cout << put_time(localtime(&ts), "%T")
 
 	// TODO: old style formatter

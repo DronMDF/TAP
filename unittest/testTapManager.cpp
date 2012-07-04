@@ -7,8 +7,6 @@
 
 using namespace std;
 
-class Client;
-
 BOOST_AUTO_TEST_SUITE(suiteTapManager);
 
 struct ClientStub : public Client {
@@ -43,6 +41,23 @@ BOOST_AUTO_TEST_CASE(ShouldCallActivate)
 		[](){ return make_shared<TestClient>(); });
 	// Then
 	BOOST_REQUIRE_THROW(tam.pressure(), was_action);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldInitAllClientAsOffline)
+{
+	struct testTapManager : public TapManager {
+		testTapManager() : TapManager(10, 
+			[](int){ return shared_ptr<Selector>(); }, 
+			[](){ return shared_ptr<Client>(); })
+		{}
+		// TODO: override not implement in gcc 4.5, 4.6
+		virtual void ShowStatistic(int offline, int connecting, int online) /*override*/ {
+			throw offline;
+		}
+	} tam;
+
+	// Replace showStatistic and throw int!
+	BOOST_REQUIRE_EXCEPTION(tam.pressure(), int, [](int n){ return n == 10; });
 }
 
 BOOST_AUTO_TEST_SUITE_END();
