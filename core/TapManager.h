@@ -27,6 +27,9 @@ public:
 	
 	void writeToMain(unsigned n, const std::vector<uint8_t> &data);
 	
+	void setShowStatistic(std::function<void (int, int, int)> show_statistic, 
+		const std::chrono::seconds &interval);
+	
 	void pressure();
 	
 private:
@@ -40,7 +43,13 @@ private:
 	
 	Statistic stats;
 	
-	void showStatistics() const;
+	enum { OFFLINE, CONNECTING, ONLINE };
+	std::vector<int> clients_states;
+	std::function<void (int, int, int)> show_statistic;
+	time_point stats_time;
+	std::chrono::seconds stats_interval;
+	
+	void showStatistics();
 	bool selectAllFromMain(const time_point &endtime);
 	bool checkTimeouts(const time_point &endtime);
 	bool selectAllToMain(const time_point &endtime);

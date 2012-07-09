@@ -23,11 +23,12 @@ TapManager::TapManager(unsigned nth,
 		       function<shared_ptr<Selector> (int)> create_selector,
 		       function<shared_ptr<Client> ()> create_client)
 	: main_ds(create_selector(nth)), clients(nth), queues(nth), 
-	  timeouts(nth, time_point::max()), tracers(nth, &nulltracer), stats()
+	  timeouts(nth, time_point::max()), tracers(nth, &nulltracer), stats(),
+	  clients_states(nth, OFFLINE), show_statistic([](int, int, int){}), 
+	  stats_time(time_point::max()), stats_interval(std::chrono::seconds::max())
 {
-	for (unsigned i = 0; i < nth; i++) {
-		clients[i] = create_client();
-		clients[i]->setStatsChanger(bind(&Statistic::changeState, &stats, _1, _2));
+	for (auto &client: clients) {
+		client = create_client();
 	}
 }
 
@@ -60,23 +61,35 @@ void TapManager::writeToMain(unsigned n, const vector<uint8_t> &data)
 	queues[n].push(data);
 }
 
-void TapManager::showStatistics() const
+void TapManager::setShowStatistic(function<void (int, int, int)> show, 
+	const chrono::seconds &interval)
 {
-	const auto ts = time(0);
-	// TODO: Not implement in gcc-4.6
-	// cout << put_time(localtime(&ts), "%T")
+	this->show_statistic = show;
+	stats_time = time_point::min();
+	stats_interval = interval;
+}
 
-	// TODO: old style formatter
-	char tsstr[100] = {0};
-	if (strftime(tsstr, 100, "%T", localtime(&ts))) {
-		cout << tsstr;
-	} else {
-		cout << ts;
+void TapManager::showStatistics()
+{
+	const auto now = chrono::high_resolution_clock::now();
+	if (now < stats_time) {
+		return;
+	}
+	
+	int offline = 0;
+	int connecting = 0;
+	int online = 0;
+	for (auto i: clients_states) {
+		switch (i) {
+			case OFFLINE: offline++; break;
+			case CONNECTING: connecting++; break;
+			case ONLINE: online++; break;
+			default: assert(i);
+		}
 	}
 
-	cout	<< ": Offline: " << stats.offline
-		<< ", Connecting: " << stats.connecting
-		<< ", Online: " << stats.online << endl;
+	show_statistic(offline, stats.connecting, stats.online);
+	stats_time = chrono::high_resolution_clock::now() + stats_interval;
 }
 
 bool TapManager::selectAllFromMain(const time_point &endtime)
@@ -173,10 +186,7 @@ void TapManager::pressure()
 		const auto now = chrono::high_resolution_clock::now();
 		const auto endtime = now + chrono::seconds(1);
 		
-		if (now > status) {
-			showStatistics();
-			status = now + chrono::seconds(10);
-		}
+		showStatistics();
 		
 		if (!selectAllFromMain(endtime)) {
 			cout << "break on read" << endl;
