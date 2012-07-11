@@ -101,7 +101,7 @@ void TapManager::showStatistics()
 		}
 	}
 
-	show_statistic(offline, stats.connecting, stats.online);
+	show_statistic(offline, connecting, online);
 	stats_time = chrono::high_resolution_clock::now() + stats_interval;
 }
 

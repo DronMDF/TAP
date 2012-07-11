@@ -26,4 +26,6 @@ private:
 	unsigned rx_bytes;
 	
 	int fd;
+	
+	bool is_online;
 };

@@ -11,7 +11,9 @@ all: tap-http
 clean:
 	rm -f tap-http
 	rm -rf ${OBJDIR}
-	
+
+tap-http: ../../libtap.a
+
 tap-http: ${OBJECTS}
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex
 	

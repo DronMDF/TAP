@@ -41,6 +41,15 @@ string timestamp()
 	return out.str();
 }
 
+void showStatistic(int offline, int connecting, int online)
+{
+	cout << timestamp() 
+		<< "offline: " << offline
+		<< " connecting: " << connecting
+		<< " online: " << online
+		<< endl;
+}
+
 void init(unsigned n)
 {
 	signal(SIGPIPE, SIG_IGN);
@@ -137,6 +146,7 @@ int main(int argc, char **argv)
 			[server, request](){ return make_shared<ClientHttp>(server, 80, request); });
 	
 	tapm.setTracer(0, &tracer);
+	tapm.setShowStatistic(showStatistic, chrono::seconds(10));
 	
 	tapm.pressure();
 	return 0;

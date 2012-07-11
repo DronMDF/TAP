@@ -14,7 +14,8 @@
 using namespace std;
 
 ClientHttp::ClientHttp(const in_addr &server, int port, const string &request)
-	: addr(server), port(port), request(request), rx_start(time(0)), rx_bytes(0), fd(-1)
+	: addr(server), port(port), request(request), rx_start(time(0)), rx_bytes(0), fd(-1), 
+	  is_online(false)
 {
 }
 
@@ -67,14 +68,16 @@ void ClientHttp::readFromMain(ClientControl *control)
 		control->trace("Closing connection by terminate");
 		close(fd);
 		fd = -1;
+		is_online = false;
 		control->setMainDescriptor(fd);
-		setState(OFFLINE);
+		control->setStateOffline();
 		return;
 	}
 
-	if (getState() != ONLINE) {
+	if (!is_online) {
+		is_online = true;
 		control->trace("Client online");
-		setState(ONLINE);
+		control->setStateOnline();
 	}
 	
 	rx_bytes += rv;
@@ -95,8 +98,9 @@ void ClientHttp::timeout(ClientControl *control)
 		control->trace("Closing connection by timeout");
 		close(fd);
 		fd = -1;
+		is_online = false;
 		control->setMainDescriptor(fd);
-		setState(OFFLINE);
+		control->setStateOffline();
 	}
 }
 
@@ -104,6 +108,7 @@ void ClientHttp::action(ClientControl *control)
 {
 	if (fd == -1) {
 		control->trace("Create connection");
+		control->setStateConnecting();
 		fd = createMainDescriptor();
 		rx_start = time(0);
 		rx_bytes = 0;
