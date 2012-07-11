@@ -27,9 +27,9 @@ void ClientControl::setWakeupTime(const time_point &wakeup_time) const
 	tapm->setTimeout(n, wakeup_time);
 }
 
-void ClientControl::setState(int state) const
+void ClientControl::setStateOnline() const
 {
-	tapm->setState(n, state);
+	tapm->setStateOnline(n);
 }
 
 void ClientControl::trace(const string &message) const

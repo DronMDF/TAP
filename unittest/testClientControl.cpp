@@ -47,26 +47,25 @@ BOOST_AUTO_TEST_CASE(ShouldPassKeyValueToTracer)
 	BOOST_REQUIRE_EQUAL(tracer.value, value);
 }
 
-BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClient)
+BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClientToOnline)
 {
+	// Given
 	struct testTapManager : public TapManager {
 		unsigned n;
-		int state;
 		testTapManager() 
 			: TapManager(0, [](int){ return shared_ptr<Selector>(); }, 
 				[](){ return shared_ptr<Client>(); }), 
-			  n(0), state(-1) 
+			  n(0)
 		{};
-		virtual void setState(unsigned n, int state) {
+		virtual void setStateOnline(unsigned n) {
 			this->n = n;
-			this->state = state;
 		}
 	} tapm;
 	ClientControl cc(&tapm, 42, 0);
-	
-	cc.setState(8);
+	// When
+	cc.setStateOnline();
+	// Then
 	BOOST_REQUIRE_EQUAL(tapm.n, 42);
-	BOOST_REQUIRE_EQUAL(tapm.state, 8);
 }
 	
 BOOST_AUTO_TEST_SUITE_END();
