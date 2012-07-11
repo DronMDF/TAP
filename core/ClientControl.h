@@ -16,6 +16,8 @@ public:
 	void writeToMain(const std::vector<uint8_t> &data) const;
 	void setWakeupTime(const time_point &wakeup_time) const;
 	
+	void setStateOffline() const;
+	void setStateConnecting() const;
 	void setStateOnline() const;
 	
 	void trace(const std::string &message) const;

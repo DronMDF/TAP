@@ -50,9 +50,22 @@ void TapManager::setMainDescriptor(unsigned n, int fd)
 	main_ds->setDescriptor(n, fd);
 }
 
-void TapManager::setState(unsigned n, int state)
+void TapManager::setStateOffline(unsigned n)
 {
-	// TODO: implement local list of client state
+	assert(n < clients.size());
+	clients_states[n] = OFFLINE;
+}
+
+void TapManager::setStateConnecting(unsigned n)
+{
+	assert(n < clients.size());
+	clients_states[n] = CONNECTING;
+}
+
+void TapManager::setStateOnline(unsigned n)
+{
+	assert(n < clients.size());
+	clients_states[n] = ONLINE;
 }
 
 void TapManager::writeToMain(unsigned n, const vector<uint8_t> &data)

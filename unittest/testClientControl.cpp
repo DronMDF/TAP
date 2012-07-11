@@ -47,19 +47,48 @@ BOOST_AUTO_TEST_CASE(ShouldPassKeyValueToTracer)
 	BOOST_REQUIRE_EQUAL(tracer.value, value);
 }
 
+struct testStateTapManager : public TapManager {
+	testStateTapManager() : TapManager(0, [](int){ return shared_ptr<Selector>(); }, 
+			[](){ return shared_ptr<Client>(); }) {};
+};
+
+BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClientToOffline)
+{
+	// Given
+	struct testTapManager : public testStateTapManager {
+		unsigned n;
+		testTapManager() : n(0) {};
+		virtual void setStateOffline(unsigned n) { this->n = n; }
+	} tapm;
+	ClientControl cc(&tapm, 42, 0);
+	// When
+	cc.setStateOffline();
+	// Then
+	BOOST_REQUIRE_EQUAL(tapm.n, 42);
+}
+	
+BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClientToConnected)
+{
+	// Given
+	struct testTapManager : public testStateTapManager {
+		unsigned n;
+		testTapManager() : n(0) {};
+		virtual void setStateConnecting(unsigned n) { this->n = n; }
+	} tapm;
+	ClientControl cc(&tapm, 42, 0);
+	// When
+	cc.setStateConnecting();
+	// Then
+	BOOST_REQUIRE_EQUAL(tapm.n, 42);
+}
+	
 BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClientToOnline)
 {
 	// Given
-	struct testTapManager : public TapManager {
+	struct testTapManager : public testStateTapManager {
 		unsigned n;
-		testTapManager() 
-			: TapManager(0, [](int){ return shared_ptr<Selector>(); }, 
-				[](){ return shared_ptr<Client>(); }), 
-			  n(0)
-		{};
-		virtual void setStateOnline(unsigned n) {
-			this->n = n;
-		}
+		testTapManager() : n(0) {};
+		virtual void setStateOnline(unsigned n) { this->n = n; }
 	} tapm;
 	ClientControl cc(&tapm, 42, 0);
 	// When

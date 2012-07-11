@@ -27,6 +27,16 @@ void ClientControl::setWakeupTime(const time_point &wakeup_time) const
 	tapm->setTimeout(n, wakeup_time);
 }
 
+void ClientControl::setStateOffline() const
+{
+	tapm->setStateOffline(n);
+}
+
+void ClientControl::setStateConnecting() const
+{
+	tapm->setStateConnecting(n);
+}
+
 void ClientControl::setStateOnline() const
 {
 	tapm->setStateOnline(n);
