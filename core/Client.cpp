@@ -5,13 +5,11 @@
 using namespace std;
 
 Client::Client()
-	: state_changer([](int, int) {}), state(OFFLINE)
 {
 }
 
 Client::~Client()
 {
-	setState(OFFLINE);
 }
 
 bool Client::writeToMain(ClientControl *, const vector<uint8_t> &data)
@@ -23,21 +21,5 @@ bool Client::writeToMain(ClientControl *, const vector<uint8_t> &data)
 
 void Client::action(ClientControl *)
 {
-}
-
-void Client::setStatsChanger(function<void (int, int)> state_changer)
-{
-	this->state_changer = state_changer;
-}
-
-void Client::setState(int new_state)
-{
-	state_changer(state, new_state);
-	state = new_state;
-}
-
-int Client::getState() const
-{
-	return state;
 }
 

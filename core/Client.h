@@ -6,11 +6,9 @@
 class Tracer;
 class ClientControl;
 
-// Абстрактный клиент нагрузки
+// Parent of load clients
 class Client {
 public:
-	enum { OFFLINE, CONNECTING, ONLINE };
-	
 	Client();
 	virtual ~Client();
 
@@ -21,19 +19,9 @@ public:
 	/// TapManager calls this method when the Сlient has no other events
 	virtual void action(ClientControl *control);
 		
-	void setStatsChanger(std::function<void (int, int)> state_changer);
-	
-	int getState() const;
-	
-protected:
-	void setState(int new_state);
-
 private:
 	Client(const Client&) = delete;
 	Client &operator=(const Client&) = delete;
 	
 	virtual int getMain() const = 0;
-	
-	std::function<void (int, int)> state_changer;
-	int state;
 };
