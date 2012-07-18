@@ -3,6 +3,7 @@
 #include <string>
 #include <arpa/inet.h>
 #include <core/Client.h>
+#include <core/TimePoint.h>
 
 class ClientHttp: public Client {
 public:
@@ -18,14 +19,18 @@ private:
 	int createMainDescriptor() const;
 	void setTimeout(ClientControl *control, unsigned sec) const;
 	
+	virtual bool writeToMain(ClientControl *control, const std::vector<uint8_t> &data);
+	void fixTimestamp(const std::string &what, ClientControl *control);
+	
+	
 	const in_addr addr;
 	int port;
 	const std::string request;
 
-	time_t rx_start;
-	unsigned rx_bytes;
-	
 	int fd;
 	
 	bool is_online;
+	
+	time_point start_time;
+	unsigned rx_bytes;
 };

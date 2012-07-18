@@ -55,4 +55,8 @@ BOOST_AUTO_TEST_CASE(ShouldInitAllClientAsOffline)
 	BOOST_REQUIRE_EXCEPTION(tam.pressure(), int, [](int n){ return n == 10; });
 }
 
+BOOST_AUTO_TEST_CASE(ShouldAskTheClientAboutTheAvailabilityOfDataToBeSent)
+{
+}
+
 BOOST_AUTO_TEST_SUITE_END();

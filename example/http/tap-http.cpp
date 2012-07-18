@@ -145,7 +145,10 @@ int main(int argc, char **argv)
 			[](int n){ return make_shared<SelectorPoll>(n); }, 
 			[server, request](){ return make_shared<ClientHttp>(server, 80, request); });
 	
-	tapm.setTracer(0, &tracer);
+	for (unsigned i = 0; i < count; i++) {
+		tapm.setTracer(i, &tracer);
+	}
+	
 	tapm.setShowStatistic(showStatistic, chrono::seconds(10));
 	
 	tapm.pressure();
