@@ -33,4 +33,6 @@ private:
 	
 	time_point start_time;
 	unsigned rx_bytes;
+	
+	unsigned status;
 };

@@ -16,6 +16,7 @@
 #include "ClientHttp.h"
 
 using namespace std;
+using namespace std::placeholders;
 
 string timestamp()
 {
@@ -41,7 +42,16 @@ string timestamp()
 	return out.str();
 }
 
-void showStatistic(int offline, int connecting, int online)
+string timestamp_millis()
+{
+	using namespace chrono;
+	const auto time = high_resolution_clock::now();
+	ostringstream out;
+	out << duration_cast<milliseconds>(time.time_since_epoch()).count() << " ";
+	return out.str();
+}
+
+void showStatistic(int offline, int connecting, int online, function<string ()> timestamp)
 {
 	cout << timestamp() 
 		<< "offline: " << offline
@@ -138,7 +148,7 @@ int main(int argc, char **argv)
 
 	cout << "Fetched url: http://" << inet_ntoa(server) << file << endl;
 	
-	TracerStream tracer(&cout, timestamp);
+	TracerStream tracer(&cout, timestamp_millis);
 	
 	const string request = "GET " + file + " HTTP/1.0\n\r\n\r";
 	TapManager tapm(count,
@@ -149,7 +159,7 @@ int main(int argc, char **argv)
 		tapm.setTracer(i, &tracer);
 	}
 	
-	tapm.setShowStatistic(showStatistic, chrono::seconds(10));
+	tapm.setShowStatistic(bind(showStatistic, _1, _2, _3, timestamp_millis), chrono::seconds(10));
 	
 	tapm.pressure();
 	return 0;

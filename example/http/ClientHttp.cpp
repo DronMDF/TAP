@@ -7,7 +7,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
 #include <core/Tracer.h>
 #include <core/ClientControl.h>
 
@@ -15,7 +15,7 @@ using namespace std;
 
 ClientHttp::ClientHttp(const in_addr &server, int port, const string &request)
 	: addr(server), port(port), request(request), fd(-1), is_online(false), 
-	  start_time(time_point::max()), rx_bytes(0)
+	  start_time(time_point::max()), rx_bytes(0), status(0)
 {
 }
 
@@ -83,7 +83,9 @@ void ClientHttp::readFromMain(ClientControl *control)
 	
 	if (rv <= 0) {
 		control->trace("bytes", rx_bytes);
-		fixTimestamp("recv", control);
+		if (status == 200) {
+			fixTimestamp("recv", control);
+		}
 		
 		control->trace("Closing connection by terminate");
 		close(fd);
@@ -101,6 +103,15 @@ void ClientHttp::readFromMain(ClientControl *control)
 		is_online = true;
 		control->trace("Client online");
 		control->setStateOnline();
+	}
+	
+	
+	if (status == 0 and rv >= 12) {
+		const string status_text(reinterpret_cast<char *>(&buf[0]), 9, 3);
+		status = boost::lexical_cast<unsigned>(status_text);
+		if (status != 200) {
+			control->trace("error code", status);
+		}
 	}
 	
 	rx_bytes += rv;
@@ -127,6 +138,7 @@ void ClientHttp::action(ClientControl *control)
 		fd = createMainDescriptor();
 		control->setMainDescriptor(fd);
 		start_time = chrono::high_resolution_clock::now();
+		status = 0;
 		
 		control->trace("Send HTTP request");
 		control->writeToMain(vector<uint8_t>(request.begin(), request.end()));
