@@ -16,7 +16,6 @@
 using namespace std;
 using namespace std::placeholders;
 
-
 Tracer TapManager::nulltracer;
 
 TapManager::TapManager(unsigned nth, 
@@ -145,6 +144,7 @@ bool TapManager::selectAllToMain(const time_point &endtime)
 {
 	set<unsigned> intrest;
 	for (unsigned i = 0; i < queues.size(); i++) {
+		// TODO: Keep queue in Client
 		if (!queues[i].empty()) {
 			intrest.insert(i);
 		}
@@ -167,6 +167,7 @@ bool TapManager::selectAllToMain(const time_point &endtime)
 		// Indexes is not need in the future
 		intrest.clear();
 	
+		// TODO: Write packet in Client
 		ClientControl control(this, rv, tracers[rv]);
 		if (clients[rv]->writeToMain(&control, queues[rv].front())) {
 			// Remove if success

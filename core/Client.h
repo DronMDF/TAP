@@ -12,7 +12,9 @@ public:
 	Client();
 	virtual ~Client();
 
+	// TODO: remove FromMain/ToMain
 	virtual void readFromMain(ClientControl *control) = 0;
+	// TODO: keep queue in private, change this in two methods isWantWrite and write
 	virtual bool writeToMain(ClientControl *control, const std::vector<uint8_t> &data);
 	virtual void timeout(ClientControl *control) = 0;
 	

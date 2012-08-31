@@ -4,3 +4,6 @@ libtap.a
 test
 tap-http
 
+.settings
+.project
+.cproject
