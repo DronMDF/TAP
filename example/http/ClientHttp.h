@@ -10,7 +10,7 @@ public:
 	ClientHttp(const in_addr &server, int port, const std::string &request);
 	virtual ~ClientHttp();
 
-	virtual void readFromMain(ClientControl *control);
+	virtual void read(ClientControl *control);
 	virtual void timeout(ClientControl *control);
 	virtual void action(ClientControl *control);
 

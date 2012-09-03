@@ -113,7 +113,7 @@ bool TapManager::selectAllFromMain(const time_point &endtime)
 		}
 		
 		ClientControl control(this, rc, tracers[rc]);
-		clients[rc]->readFromMain(&control);
+		clients[rc]->read(&control);
 		
 		if (chrono::high_resolution_clock::now() > endtime) {
 			return false;
@@ -169,7 +169,7 @@ bool TapManager::selectAllToMain(const time_point &endtime)
 	
 		// TODO: Write packet in Client
 		ClientControl control(this, rv, tracers[rv]);
-		if (clients[rv]->writeToMain(&control, queues[rv].front())) {
+		if (clients[rv]->write(&control, queues[rv].front())) {
 			// Remove if success
 			queues[rv].pop();
 		}

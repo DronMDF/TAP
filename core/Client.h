@@ -13,9 +13,9 @@ public:
 	virtual ~Client();
 
 	// TODO: remove FromMain/ToMain
-	virtual void readFromMain(ClientControl *control) = 0;
+	virtual void read(ClientControl *control) = 0;
 	// TODO: keep queue in private, change this in two methods isWantWrite and write
-	virtual bool writeToMain(ClientControl *control, const std::vector<uint8_t> &data);
+	virtual bool write(ClientControl *control, const std::vector<uint8_t> &data);
 	virtual void timeout(ClientControl *control) = 0;
 	
 	/// TapManager calls this method when the Сlient has no other events

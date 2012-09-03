@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_SUITE(suiteTapManager);
 
 struct ClientStub : public Client {
 	virtual int getMain() const { return -1; };
-	virtual void readFromMain(ClientControl *) {};
+	virtual void read(ClientControl *) {};
 	virtual void timeout(ClientControl *) {};
 };
 

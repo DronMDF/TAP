@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(ShouldWriteDataToMain)
 		int fd;
 		TestClient() : fd(-1) {};
 		virtual int getMain() const { return fd; };
-		virtual void readFromMain(ClientControl *) {};
+		virtual void read(ClientControl *) {};
 		virtual void timeout(ClientControl *) {};
 	} client;
 	ClientControl cc(0, 0, 0);
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(ShouldWriteDataToMain)
 	piper p;
 	// When
 	client.fd = p.out;
-	BOOST_REQUIRE(client.writeToMain(&cc, expected));
+	BOOST_REQUIRE(client.write(&cc, expected));
 	// Then
 	array<uint8_t, 3> buf;
 	BOOST_REQUIRE_EQUAL(read(p.in, &buf, buf.size()), buf.size());

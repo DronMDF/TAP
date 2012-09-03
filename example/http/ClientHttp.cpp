@@ -76,7 +76,7 @@ int ClientHttp::getMain() const
 	return fd;
 }
 
-void ClientHttp::readFromMain(ClientControl *control)
+void ClientHttp::read(ClientControl *control)
 {
 	vector<uint8_t> buf(4096);
 	int rv = read(fd, &buf[0], buf.size());
