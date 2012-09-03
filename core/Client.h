@@ -1,11 +1,11 @@
 
 #pragma once
 #include <functional>
-#include <list>
+#include <queue>
 #include <vector>
 
-class Tracer;
 class ClientControl;
+class Socket;
 
 // Parent of load clients
 class Client {
@@ -13,9 +13,7 @@ public:
 	Client();
 	virtual ~Client();
 
-	// TODO: remove FromMain/ToMain
 	virtual void read(ClientControl *control) = 0;
-	// TODO: keep queue in private, change this in two methods isWantWrite and write
 	virtual bool write(ClientControl *control, const std::vector<uint8_t> &data);
 	virtual void timeout(ClientControl *control) = 0;
 	
@@ -26,6 +24,7 @@ public:
 
 protected:
 	void writeToQueue(const std::vector<uint8_t> &data);
+	void sendFromQueue(Socket *socket);
 
 private:
 	Client(const Client&) = delete;
@@ -33,5 +32,5 @@ private:
 	
 	virtual int getMain() const = 0;
 
-	std::list<std::vector<uint8_t>> queue;
+	std::queue<std::vector<uint8_t>> queue;
 };

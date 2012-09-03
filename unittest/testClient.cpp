@@ -1,8 +1,10 @@
 
+
 #include <array>
 #include <boost/test/unit_test.hpp>
 #include <core/Client.h>
 #include <core/ClientControl.h>
+#include <core/Socket.h>
 
 using namespace std;
 
@@ -56,6 +58,30 @@ BOOST_AUTO_TEST_CASE(ShouldWantsToWriteIfQueued)
 	client.writeToQueue({});
 	// Then
 	BOOST_REQUIRE(client.wantsToWrite());
+}
+
+BOOST_AUTO_TEST_CASE(ShouldSendFromQueueToSocket)
+{
+	// Given
+	struct TestClient : public Client {
+		using Client::writeToQueue;
+		using Client::sendFromQueue;
+		// stubs
+		virtual int getMain() const { return 0; };
+		virtual void read(ClientControl *) {};
+		virtual void timeout(ClientControl *) {};
+	} client;
+	struct TestSocket : public Socket {
+		vector<uint8_t> sended;
+		TestSocket() : sended() {}
+		virtual bool send(const vector<uint8_t> &data) { sended = data; return true; };
+	} socket;
+	const vector<uint8_t> packet = {1, 2, 3};
+	// When
+	client.writeToQueue(packet);
+	client.sendFromQueue(&socket);
+	// Then
+	BOOST_REQUIRE(socket.sended == packet);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

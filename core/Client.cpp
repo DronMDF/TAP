@@ -1,6 +1,7 @@
 
 #include <boost/format.hpp>
 #include "Client.h"
+#include "Socket.h"
 
 using namespace std;
 
@@ -31,5 +32,12 @@ bool Client::wantsToWrite() const
 
 void Client::writeToQueue(const vector<uint8_t> &data)
 {
-	queue.push_back(data);
+	queue.push(data);
+}
+
+void Client::sendFromQueue(Socket *socket)
+{
+	if (socket->send(queue.front())) {
+		queue.pop();
+	}
 }
