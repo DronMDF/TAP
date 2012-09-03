@@ -4,7 +4,6 @@
 #include <memory>
 #include <queue>
 #include <vector>
-#include "Statistic.h"
 #include "TimePoint.h"
 
 class Client;
@@ -43,8 +42,6 @@ private:
 	
 	static Tracer nulltracer;
 	std::vector<Tracer *> tracers;
-	
-	Statistic stats;
 	
 	enum { OFFLINE, CONNECTING, ONLINE };
 	std::vector<int> clients_states;

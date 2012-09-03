@@ -22,7 +22,7 @@ TapManager::TapManager(unsigned nth,
 		       function<shared_ptr<Selector> (int)> create_selector,
 		       function<shared_ptr<Client> ()> create_client)
 	: main_ds(create_selector(nth)), clients(nth), queues(nth), 
-	  timeouts(nth, time_point::max()), tracers(nth, &nulltracer), stats(),
+	  timeouts(nth, time_point::max()), tracers(nth, &nulltracer),
 	  clients_states(nth, OFFLINE), show_statistic([](int, int, int){}), 
 	  stats_time(time_point::max()), stats_interval(std::chrono::seconds::max())
 {

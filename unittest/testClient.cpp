@@ -42,5 +42,21 @@ BOOST_AUTO_TEST_CASE(ShouldWriteDataToMain)
 	BOOST_REQUIRE_EQUAL_COLLECTIONS(buf.begin(), buf.end(), expected.begin(), expected.end());
 }
 	
+BOOST_AUTO_TEST_CASE(ShouldWantsToWriteIfQueued)
+{
+	// Given
+	struct TestClient : public Client {
+		using Client::writeToQueue;
+		// stubs
+		virtual int getMain() const { return 0; };
+		virtual void read(ClientControl *) {};
+		virtual void timeout(ClientControl *) {};
+	} client;
+	// When
+	client.writeToQueue({});
+	// Then
+	BOOST_REQUIRE(client.wantsToWrite());
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 

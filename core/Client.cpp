@@ -5,6 +5,7 @@
 using namespace std;
 
 Client::Client()
+	: queue()
 {
 }
 
@@ -23,3 +24,12 @@ void Client::action(ClientControl *)
 {
 }
 
+bool Client::wantsToWrite() const
+{
+	return !queue.empty();
+}
+
+void Client::writeToQueue(const vector<uint8_t> &data)
+{
+	queue.push_back(data);
+}
