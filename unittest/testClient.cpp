@@ -74,7 +74,10 @@ BOOST_AUTO_TEST_CASE(ShouldSendFromQueueToSocket)
 	struct TestSocket : public Socket {
 		vector<uint8_t> sended;
 		TestSocket() : sended() {}
-		virtual bool send(const vector<uint8_t> &data) { sended = data; return true; };
+		virtual vector<uint8_t> recv() { return {}; };
+		virtual size_t send(const vector<uint8_t> &data) {
+			sended = data; return data.size();
+		}
 	} socket;
 	const vector<uint8_t> packet = {1, 2, 3};
 	// When
