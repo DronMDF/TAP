@@ -28,12 +28,14 @@ test: ${TEST_OBJECTS}
 
 
 ${OBJDIR}/%.o : core/%.cpp ${OBJDIR}/.keep
-	${CXX} ${CXXFLAGS} -c -o $@ $<
+	${CXX} -MMD ${CXXFLAGS} -c -o $@ $<
 
 ${OBJDIR}/%.o : unittest/%.cpp ${OBJDIR}/.keep
-	${CXX} ${CXXFLAGS} -c -o $@ $<
+	${CXX} -MMD ${CXXFLAGS} -c -o $@ $<
 
 ${OBJDIR}/.keep:
 	test -d ${OBJDIR} || mkdir ${OBJDIR}
 	touch $@
 
+-include ${patsubst %.o,%.d,${OBJECTS}}
+-include ${patsubst %.o,%.d,${TEST_OBJECTS}}
