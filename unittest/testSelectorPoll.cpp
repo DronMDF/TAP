@@ -2,6 +2,7 @@
 #include <memory.h>
 #include <boost/test/unit_test.hpp>
 #include <core/SelectorPoll.h>
+#include <core/Socket.h>
 
 using namespace std;
 
@@ -21,6 +22,14 @@ struct piper {
 		close(in);
 		close(out);
 	}
+};
+
+struct TestSocket : public Socket {
+	int fd;
+	TestSocket(int fd) : fd(fd) {};
+	virtual int getDescriptor() const { return fd; };
+	virtual vector<uint8_t> recv() { return {}; };
+	virtual size_t send(const vector<uint8_t> &) { return 0; };
 };
 
 BOOST_AUTO_TEST_CASE(ShouldReturnNegativeUninitialized)
@@ -47,9 +56,21 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEvent)
 {
 	// Given
 	SelectorPoll selector(10);
-	vector<piper> pipers(10);
 	for (int i = 0; i < 10; i++) {
 		selector.setDescriptor(i, 1);
+	}
+	// When
+	int rv = selector.selectRead();
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, -1);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEventBySocket)
+{
+	// Given
+	SelectorPoll selector(10);
+	for (int i = 0; i < 10; i++) {
+		selector.setSocket(i, make_shared<TestSocket>(1));
 	}
 	// When
 	int rv = selector.selectRead();

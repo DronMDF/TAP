@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <boost/foreach.hpp>
 #include "SelectorPoll.h"
+#include "Socket.h"
 
 using namespace std;
 
@@ -25,6 +26,12 @@ void SelectorPoll::setDescriptor(unsigned idx, int fd)
 {
 	assert(idx < rfds.size());
 	rfds[idx].fd = fd;
+}
+
+void SelectorPoll::setSocket(unsigned idx, const shared_ptr<const Socket> &socket)
+{
+	assert(idx < rfds.size());
+	rfds[idx].fd = socket->getDescriptor();
 }
 
 int SelectorPoll::getDescriptor(unsigned idx) const

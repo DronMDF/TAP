@@ -8,4 +8,5 @@ public:
 	virtual int getDescriptor(unsigned) const { return -1; };
 	virtual int selectRead() { return -1; };
 	virtual int selectWrite(const std::set<unsigned> &) { return -1; };
+	virtual void setSocket(unsigned, const std::shared_ptr<const Socket> &) {};
 };
