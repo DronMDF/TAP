@@ -7,3 +7,5 @@ tap-http
 .settings
 .project
 .cproject
+syntax: regexp
+^example/tcp/tap-tcp$
