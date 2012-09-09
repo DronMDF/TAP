@@ -19,10 +19,8 @@ public:
 
 private:
 	int getMain() const;
-	int createMainDescriptor() const;
 	void setTimeout(ClientControl *control, unsigned sec) const;
-
-	void fixTimestamp(const std::string &what, ClientControl *control);
+	void terminate(ClientControl* control);
 
 	const in_addr addr;
 	const int port;

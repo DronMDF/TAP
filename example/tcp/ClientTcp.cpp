@@ -34,13 +34,22 @@ void ClientTcp::setTimeout(ClientControl *control, unsigned sec) const
 	control->setWakeupTime(wakeup_time);
 }
 
+void ClientTcp::terminate(ClientControl* control)
+{
+	socket.reset();
+	is_online = false;
+	control->setSocket(socket);
+	control->setStateOffline();
+}
+
 void ClientTcp::read(ClientControl *control)
 {
 	try {
 		const auto buf = socket->recv();
 		if (buf.empty()) {
-			// TODO: logic over exception
-			throw runtime_error("eof");
+			control->trace("Closing connection by reset");
+			terminate(control);
+			return;
 		}
 
 		if (!is_online) {
@@ -51,22 +60,16 @@ void ClientTcp::read(ClientControl *control)
 		
 		setTimeout(control, 60);
 	} catch(const std::exception &) {
-		socket.reset();
-		is_online = false;
-		control->trace("Closing connection by terminate");
-		control->setSocket(socket);
-		control->setStateOffline();
+		control->trace("Closing connection by error");
+		terminate(control);
 	}
 }
 
 void ClientTcp::timeout(ClientControl *control)
 {
 	if (socket) {
-		socket.reset();
-		is_online = false;
 		control->trace("Closing connection by timeout");
-		control->setSocket(socket);
-		control->setStateOffline();
+		terminate(control);
 	}
 }
 
