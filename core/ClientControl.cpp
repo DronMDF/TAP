@@ -12,6 +12,11 @@ ClientControl::ClientControl(TapManager *tapm, unsigned n, Tracer *tracer)
 {
 }
 
+void ClientControl::setSocket(const std::shared_ptr<const Socket> &socket) const
+{
+	tapm->setSocket(n, socket);
+}
+
 void ClientControl::setMainDescriptor(int fd) const
 {
 	tapm->setMainDescriptor(n, fd);

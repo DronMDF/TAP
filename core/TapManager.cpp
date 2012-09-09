@@ -43,6 +43,12 @@ void TapManager::setTimeout(unsigned n, const time_point &wakeup_time)
 	timeouts[n] = wakeup_time;
 }
 
+void TapManager::setSocket(unsigned n, const std::shared_ptr<const Socket> &socket)
+{
+	assert(n < clients.size());
+	main_ds->setSocket(n, socket);
+}
+
 void TapManager::setMainDescriptor(unsigned n, int fd)
 {
 	assert(n < clients.size());

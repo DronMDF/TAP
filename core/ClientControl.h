@@ -3,14 +3,18 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <memory>
 #include "TimePoint.h"
 
+class Socket;
 class TapManager;
 class Tracer;
 
 class ClientControl {
 public:
 	ClientControl(TapManager *tapm, unsigned n, Tracer *tracer);
+
+	void setSocket(const std::shared_ptr<const Socket> &socket) const;
 
 	void setMainDescriptor(int fd) const;
 	void writeToMain(const std::vector<uint8_t> &data) const;

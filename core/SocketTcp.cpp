@@ -31,6 +31,11 @@ SocketTcp::SocketTcp(const in_addr &addr, unsigned port)
 	}
 }
 
+int SocketTcp::getDescriptor() const
+{
+	return sock;
+}
+
 vector<uint8_t> SocketTcp::recv()
 {
 	vector<uint8_t> data(4096);

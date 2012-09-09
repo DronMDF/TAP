@@ -1,9 +1,12 @@
 
 #pragma once
 #include <string>
+#include <memory>
 #include <arpa/inet.h>
 #include <core/Client.h>
 #include <core/TimePoint.h>
+
+class Socket;
 
 class ClientTcp: public Client {
 public:
@@ -24,12 +27,7 @@ private:
 	const in_addr addr;
 	const int port;
 
-	int fd;
+	std::shared_ptr<Socket> socket;
 	
 	bool is_online;
-	
-	time_point start_time;
-	unsigned rx_bytes;
-	
-	unsigned status;
 };
