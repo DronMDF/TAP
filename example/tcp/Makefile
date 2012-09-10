@@ -3,9 +3,9 @@ CXX ?= g++
 CXXFLAGS ?= -std=c++0x -Wall -Wextra -Weffc++ -I../../
 
 OBJDIR ?= .obj
-OBJECTS = ${patsubst %.cpp,${OBJDIR}/%.o,${wildcard *.cpp}}
+OBJECTS = ${patsubst %.cpp,${OBJDIR}/%.o,${filter-out tap-tcp-server.cpp,${wildcard *.cpp}}}
 
-all: tap-tcp
+all: tap-tcp tap-tcp-server
 
 .PHONY: clean
 clean:
@@ -15,7 +15,11 @@ clean:
 tap-tcp: ../../libtap.a
 
 tap-tcp: ${OBJECTS}
+	echo $^
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex
+
+tap-tcp-server: tap-tcp-server.o
+	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap
 
 ${OBJDIR}/%.o : %.cpp ${OBJDIR}/.keep
 	${CXX} -MMD ${CXXFLAGS} -c -o $@ $<
