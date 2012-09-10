@@ -7,5 +7,7 @@ tap-http
 .settings
 .project
 .cproject
+
 syntax: regexp
 ^example/tcp/tap-tcp$
+^example/tcp/tap-tcp-server$

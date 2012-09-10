@@ -18,7 +18,7 @@ tap-tcp: ${OBJECTS}
 	echo $^
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex
 
-tap-tcp-server: tap-tcp-server.o
+tap-tcp-server: ${OBJDIR}/tap-tcp-server.o
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap
 
 ${OBJDIR}/%.o : %.cpp ${OBJDIR}/.keep

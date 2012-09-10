@@ -1,5 +1,7 @@
 
 #include <algorithm>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -8,8 +10,6 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <poll.h>
-#include <stdlib.h>
-#include <string.h>
 #include <core/Tap.h>
 
 using namespace std;

@@ -1,5 +1,6 @@
 
 #include <chrono>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -9,9 +10,9 @@
 #include <getopt.h>
 #include <netdb.h>
 #include <signal.h>
-#include <string.h>
 #include <sys/resource.h>
 #include <core/SelectorPoll.h>
+#include <core/Tap.h>
 #include <core/TapManager.h>
 #include <core/TracerStream.h>
 #include "ClientTcp.h"
@@ -61,31 +62,6 @@ void showStatistic(int offline, int connecting, int online, function<string ()> 
 		<< endl;
 }
 
-void init(unsigned n)
-{
-	signal(SIGPIPE, SIG_IGN);
-	
-	const unsigned need_fdcount = n * 3;
-	
-	rlimit nofile;
-	if (getrlimit(RLIMIT_NOFILE, &nofile) == 0 and 
-		(nofile.rlim_cur < need_fdcount or nofile.rlim_max < need_fdcount))
-	{
-		nofile.rlim_cur = need_fdcount;
-		nofile.rlim_max = need_fdcount;
-	
-		if (getuid() != 0) {
-			cerr << "root need for change RLIMIT_NOFILE" << endl;
-			exit(-1);
-		}
-		
-		if (setrlimit(RLIMIT_NOFILE, &nofile) == -1) {
-			cerr << "Error change RLIMIT_NOFILE: " << strerror(errno) << endl;
-			exit(-1);
-		}
-	}
-}
-
 void usage()
 {
 	cout << "TCP load utility" << endl;
@@ -129,7 +105,7 @@ int main(int argc, char **argv)
 	}
 	
 	cout << "Clients count: " << count << endl;
-	init(count);	
+	tap_init(count);
 	
 	const string fetch_point = argv[optind++];
 	in_addr server = { inet_addr("127.0.0.1") };
