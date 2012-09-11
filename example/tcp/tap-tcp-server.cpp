@@ -37,7 +37,7 @@ void Server::setNonblock(int fd) const
 
 bool Server::insertDescriptor(int fd)
 {
-	BOOST_FOREACH(pollfd &p, pfd) {
+	for(auto &p, pfd) {
 		if (p.fd == -1) {
 			p.fd = fd;
 			return true;
@@ -50,7 +50,7 @@ Server::Server(unsigned port, unsigned count)
 	: lsock(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)), pfd(count + 1), idata(4096),
 	  odata(4096)
 {
-	BOOST_FOREACH(pollfd &p, pfd) {
+	for(auto &p, pfd) {
 		p.fd = -1;
 		p.events = POLLIN | POLLOUT;
 		p.revents = 0;
@@ -95,7 +95,7 @@ void Server::listenning()
 			continue;
 		}
 
-		BOOST_FOREACH(pollfd &p, pfd) {
+		for(auto &p: pfd) {
 			if (p.revents == 0) {
 				continue;
 			}
