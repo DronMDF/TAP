@@ -15,7 +15,6 @@ clean:
 tap-tcp: ../../libtap.a
 
 tap-tcp: ${OBJECTS}
-	echo $^
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex
 
 tap-tcp-server: ${OBJDIR}/tap-tcp-server.o

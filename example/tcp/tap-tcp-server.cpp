@@ -14,19 +14,53 @@
 
 using namespace std;
 
-void usage()
+class Server {
+public:
+	Server(unsigned port, unsigned count);
+
+	void listenning();
+private:
+	void setNonblock(int fd) const;
+	bool insertDescriptor(int fd);
+
+	int lsock;
+	vector<pollfd> pfd;
+	vector<uint8_t> idata;
+	vector<uint8_t> odata;
+};
+
+void Server::setNonblock(int fd) const
 {
-	cout << "TAP TCP server" << endl;
-	cout << "$ tap-tcp-server [OPTIONS]" << endl;
-	cout << "Options:" << endl;
-	cout << "  -n, --count NUM\t\tquantity of clients" << endl;
-	cout << "  -p, --port NUM\t\tlisten port" << endl;
-	cout << "  -h, -?, --help\t\tthis help" << endl;
+	const int flags = fcntl(fd, F_GETFL, 0);
+	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-void server(unsigned port, unsigned count)
+bool Server::insertDescriptor(int fd)
 {
-	int lsock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	BOOST_FOREACH(pollfd &p, pfd) {
+		if (p.fd == -1) {
+			p.fd = fd;
+			return true;
+		}
+	}
+	return false;
+}
+
+Server::Server(unsigned port, unsigned count)
+	: lsock(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)), pfd(count + 1), idata(4096),
+	  odata(4096)
+{
+	BOOST_FOREACH(pollfd &p, pfd) {
+		p.fd = -1;
+		p.events = POLLIN | POLLOUT;
+		p.revents = 0;
+	}
+
+	pfd[0].fd = lsock;
+	pfd[0].events = POLLIN | POLLPRI;
+
+	generate(odata.begin(), odata.end(), rand);
+
 	if (lsock == -1) {
 		throw runtime_error(string("Cannot create socket") + strerror(errno));
 	}
@@ -34,15 +68,13 @@ void server(unsigned port, unsigned count)
 	const int reuse = 1;
 	setsockopt(lsock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
-	const int flags = fcntl(lsock, F_GETFL, 0);
-	fcntl(lsock, F_SETFL, flags | O_NONBLOCK);
+	setNonblock(lsock);
 
 	struct sockaddr_in addr;
-	memset(&addr , 0, sizeof(addr));
+	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = INADDR_ANY;
-
 	if (::bind(lsock, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) == -1) {
 		close(lsock);
 		throw runtime_error(string("Cannot bind socket") + strerror(errno));
@@ -52,24 +84,12 @@ void server(unsigned port, unsigned count)
 		close(lsock);
 		throw runtime_error(string("Cannot listen socket") + strerror(errno));
 	}
+}
 
-	vector<pollfd> pfd(count + 1);
-	BOOST_FOREACH(pollfd &p, pfd) {
-		p.fd = -1;
-		// POLLIN temporary is not supported
-		p.events = POLLOUT;
-		p.revents = 0;
-	}
-
-	pfd[0].fd = lsock;
-	pfd[0].events = POLLIN | POLLPRI;
-
-	vector<uint8_t> buf(4096);
-	srand(time(0));
-	generate(buf.begin(), buf.end(), rand);
-
+void Server::listenning()
+{
 	while (true) {
-		int rv = poll(&pfd[0], pfd.size(), 0);
+		int rv = ::poll(&pfd[0], pfd.size(), 0);
 		if (rv < 1) {
 			sched_yield();
 			continue;
@@ -84,29 +104,46 @@ void server(unsigned port, unsigned count)
 				// ListenSocket
 				const int nfd = accept(lsock, 0, 0);
 				if (nfd != -1) {
-					const int nflags = fcntl(nfd, F_GETFL, 0);
-					fcntl(nfd, F_SETFL, nflags | O_NONBLOCK);
-
-					BOOST_FOREACH(pollfd &p, pfd) {
-						if (p.fd == -1) {
-							p.fd = nfd;
-							break;
-						}
+					cout << "opening socket " << nfd << endl;
+					setNonblock(nfd);
+					if (!insertDescriptor(nfd)) {
+						close(nfd);
 					}
 				}
-
 				continue;
 			}
 
+			if ((p.revents & POLLIN) != 0) {
+				read(p.fd, &idata[0], idata.size());
+			}
+
 			if ((p.revents & POLLOUT) != 0) {
-				write(p.fd, &buf[0], buf.size());
+				write(p.fd, &odata[0], odata.size());
+			}
+
+			if ((p.revents & (POLLRDHUP | POLLERR | POLLHUP |  POLLNVAL)) != 0) {
+				cout << "closing socket " << p.fd << endl;
+				close(p.fd);
+				p.fd = -1;
 			}
 		}
 	}
 }
 
+void usage()
+{
+	cout << "TAP TCP server" << endl;
+	cout << "$ tap-tcp-server [OPTIONS]" << endl;
+	cout << "Options:" << endl;
+	cout << "  -n, --count NUM\t\tquantity of clients" << endl;
+	cout << "  -p, --port NUM\t\tlisten port" << endl;
+	cout << "  -h, -?, --help\t\tthis help" << endl;
+}
+
 int main(int argc, char **argv)
 {
+	srand(time(0));
+
 	unsigned count = 1000;
 	unsigned port = 6666;
 
@@ -141,6 +178,8 @@ int main(int argc, char **argv)
 	cout << "Clients count: " << count << endl;
 	tap_init(count);
 
-	server(port, count);
+	Server server(port, count);
+	server.listenning();
+
 	return 0;
 }
