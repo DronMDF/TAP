@@ -1,5 +1,6 @@
 
 #include <algorithm>
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -13,6 +14,7 @@
 #include <core/Tap.h>
 
 using namespace std;
+using namespace std::chrono;
 
 class Server {
 public:
@@ -23,34 +25,25 @@ private:
 	void setNonblock(int fd) const;
 	bool insertDescriptor(int fd);
 
+	void pollIn(int fd);
+	void pollOut(int fd);
+
 	int lsock;
 	vector<pollfd> pfd;
 	vector<uint8_t> idata;
 	vector<uint8_t> odata;
+
+	unsigned readed;
+	unsigned writed;
+
+	time_point<high_resolution_clock> outtime;
 };
-
-void Server::setNonblock(int fd) const
-{
-	const int flags = fcntl(fd, F_GETFL, 0);
-	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-}
-
-bool Server::insertDescriptor(int fd)
-{
-	for(auto &p, pfd) {
-		if (p.fd == -1) {
-			p.fd = fd;
-			return true;
-		}
-	}
-	return false;
-}
 
 Server::Server(unsigned port, unsigned count)
 	: lsock(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)), pfd(count + 1), idata(4096),
-	  odata(4096)
+	  odata(4096), readed(0), writed(0), outtime(high_resolution_clock::now())
 {
-	for(auto &p, pfd) {
+	for(auto &p: pfd) {
 		p.fd = -1;
 		p.events = POLLIN | POLLOUT;
 		p.revents = 0;
@@ -89,6 +82,16 @@ Server::Server(unsigned port, unsigned count)
 void Server::listenning()
 {
 	while (true) {
+		const auto interval = high_resolution_clock::now() - outtime;
+		if (interval > seconds(5)) {
+			const auto ms = duration_cast<milliseconds>(interval).count();
+			cout << "Read: " << (readed * 1000 / ms) << " bit/s; ";
+			cout << "Write: " << (writed * 1000 / ms) << " bit/s" << endl;
+
+			readed = writed = 0;
+			outtime = high_resolution_clock::now();
+		}
+
 		int rv = ::poll(&pfd[0], pfd.size(), 0);
 		if (rv < 1) {
 			sched_yield();
@@ -96,29 +99,12 @@ void Server::listenning()
 		}
 
 		for(auto &p: pfd) {
-			if (p.revents == 0) {
-				continue;
-			}
-
-			if (p.fd == lsock and (p.revents & POLLIN) != 0) {
-				// ListenSocket
-				const int nfd = accept(lsock, 0, 0);
-				if (nfd != -1) {
-					cout << "opening socket " << nfd << endl;
-					setNonblock(nfd);
-					if (!insertDescriptor(nfd)) {
-						close(nfd);
-					}
-				}
-				continue;
-			}
-
 			if ((p.revents & POLLIN) != 0) {
-				read(p.fd, &idata[0], idata.size());
+				pollIn(p.fd);
 			}
 
 			if ((p.revents & POLLOUT) != 0) {
-				write(p.fd, &odata[0], odata.size());
+				pollOut(p.fd);
 			}
 
 			if ((p.revents & (POLLRDHUP | POLLERR | POLLHUP |  POLLNVAL)) != 0) {
@@ -127,6 +113,52 @@ void Server::listenning()
 				p.fd = -1;
 			}
 		}
+	}
+}
+
+void Server::setNonblock(int fd) const
+{
+	const int flags = fcntl(fd, F_GETFL, 0);
+	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+}
+
+bool Server::insertDescriptor(int fd)
+{
+	for(auto &p: pfd) {
+		if (p.fd == -1) {
+			p.fd = fd;
+			return true;
+		}
+	}
+	return false;
+}
+
+void Server::pollIn(int fd)
+{
+	if (fd == lsock) {
+		// ListenSocket
+		const int nfd = accept(lsock, 0, 0);
+		if (nfd != -1) {
+			cout << "opening socket " << nfd << endl;
+			setNonblock(nfd);
+			if (!insertDescriptor(nfd)) {
+				close(nfd);
+			}
+		}
+		return;
+	}
+
+	const int rv = read(fd, &idata[0], idata.size());
+	if (rv > 0) {
+		readed += rv;
+	}
+}
+
+void Server::pollOut(int fd)
+{
+	const int rv = write(fd, &odata[0], odata.size());
+	if (rv > 0) {
+		writed += rv;
 	}
 }
 
