@@ -93,7 +93,7 @@ void ClientTcp::action(ClientControl *control)
 			socket = make_shared<SocketTcp>(addr, port);
 			control->setSocket(socket);
 			control->setStateConnecting();
-			setTimeout(control, 60);
+			setTimeout(control, 10);
 		} catch (const exception &e) {
 			control->trace(e.what());
 		}

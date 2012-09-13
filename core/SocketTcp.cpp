@@ -31,6 +31,11 @@ SocketTcp::SocketTcp(const in_addr &addr, unsigned port)
 	}
 }
 
+SocketTcp::~SocketTcp()
+{
+	close(sock);
+}
+
 int SocketTcp::getDescriptor() const
 {
 	return sock;

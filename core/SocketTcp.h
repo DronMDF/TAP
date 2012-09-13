@@ -7,6 +7,7 @@ struct in_addr;
 class SocketTcp : public Socket {
 public:
 	SocketTcp(const in_addr &addr, unsigned port);
+	virtual ~SocketTcp();
 
 	virtual int getDescriptor() const;
 

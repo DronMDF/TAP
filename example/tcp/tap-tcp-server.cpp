@@ -103,7 +103,9 @@ void Server::listenning()
 			if ((p.revents & POLLIN) != 0) {
 				pollIn(p.fd);
 			}
+		}
 
+		for(auto &p: pfd) {
 			if ((p.revents & POLLOUT) != 0) {
 				pollOut(p.fd);
 			}
