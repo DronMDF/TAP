@@ -13,9 +13,11 @@
 #include <core/SocketTcp.h>
 
 using namespace std;
+using namespace std::chrono;
 
 ClientTcp::ClientTcp(const in_addr &server, int port)
-	: addr(server), port(port), socket(), is_online(false)
+	: addr(server), port(port), socket(), is_online(false),
+	  stamp(high_resolution_clock::now()), readed(0)
 {
 }
 
@@ -30,7 +32,7 @@ int ClientTcp::getMain() const
 
 void ClientTcp::setTimeout(ClientControl *control, unsigned sec) const
 {
-	const auto wakeup_time = chrono::high_resolution_clock::now() + chrono::seconds(sec);
+	const auto wakeup_time = high_resolution_clock::now() + seconds(sec);
 	control->setWakeupTime(wakeup_time);
 }
 
@@ -58,6 +60,16 @@ void ClientTcp::read(ClientControl *control)
 			control->setStateOnline();
 		}
 		
+		readed += buf.size();
+		const auto interval = high_resolution_clock::now() - stamp;
+		if (interval > seconds(10)) {
+			const auto ms = duration_cast<milliseconds>(interval).count();
+			const auto rate = readed * 8000 / ms;
+			control->trace("read rate (bit/sec)", rate);
+			stamp = high_resolution_clock::now();
+			readed = 0;
+		}
+
 		setTimeout(control, 60);
 	} catch(const std::exception &) {
 		control->trace("Closing connection by error");
@@ -77,9 +89,13 @@ void ClientTcp::action(ClientControl *control)
 {
 	if (!socket) {
 		control->trace("Create connection");
-		control->setStateConnecting();
-		socket = make_shared<SocketTcp>(addr, port);
-		control->setSocket(socket);
-		setTimeout(control, 60);
+		try {
+			socket = make_shared<SocketTcp>(addr, port);
+			control->setSocket(socket);
+			control->setStateConnecting();
+			setTimeout(control, 60);
+		} catch (const exception &e) {
+			control->trace(e.what());
+		}
 	}
 }

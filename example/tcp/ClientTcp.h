@@ -28,4 +28,7 @@ private:
 	std::shared_ptr<Socket> socket;
 	
 	bool is_online;
+
+	time_point stamp;
+	uint64_t readed;
 };

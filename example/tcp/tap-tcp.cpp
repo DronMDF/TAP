@@ -126,17 +126,15 @@ int main(int argc, char **argv)
 
 	cout << "Server: " << inet_ntoa(server) << ':' << port << endl;
 	
-	TracerStream tracer(&cout, timestamp_millis);
+	TracerStream tracer(&cout, timestamp);
 	
 	TapManager tapm(count,
 			[](int n){ return make_shared<SelectorPoll>(n); }, 
 			[server, port](){ return make_shared<ClientTcp>(server, port); });
 	
-	for (unsigned i = 0; i < count; i++) {
-		tapm.setTracer(i, &tracer);
-	}
+	tapm.setTracer(0, &tracer);
 	
-	tapm.setShowStatistic(bind(showStatistic, _1, _2, _3, timestamp_millis), chrono::seconds(10));
+	tapm.setShowStatistic(bind(showStatistic, _1, _2, _3, timestamp), chrono::seconds(10));
 	tapm.pressure();
 	
 	return 0;

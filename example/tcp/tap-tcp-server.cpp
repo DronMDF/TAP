@@ -33,8 +33,8 @@ private:
 	vector<uint8_t> idata;
 	vector<uint8_t> odata;
 
-	unsigned readed;
-	unsigned writed;
+	uint64_t readed;
+	uint64_t writed;
 
 	time_point<high_resolution_clock> outtime;
 };
@@ -83,10 +83,11 @@ void Server::listenning()
 {
 	while (true) {
 		const auto interval = high_resolution_clock::now() - outtime;
-		if (interval > seconds(5)) {
+		if (interval > seconds(10)) {
 			const auto ms = duration_cast<milliseconds>(interval).count();
-			cout << "Read: " << (readed * 1000 / ms) << " bit/s; ";
-			cout << "Write: " << (writed * 1000 / ms) << " bit/s" << endl;
+			cout << "Interval:" << ms << " ";
+			cout << "Read: " << (readed * 8000 / ms) << " bit/s; ";
+			cout << "Write: " << (writed * 8000 / ms) << " bit/s" << endl;
 
 			readed = writed = 0;
 			outtime = high_resolution_clock::now();
@@ -108,7 +109,7 @@ void Server::listenning()
 			}
 
 			if ((p.revents & (POLLRDHUP | POLLERR | POLLHUP |  POLLNVAL)) != 0) {
-				cout << "closing socket " << p.fd << endl;
+				//cout << "closing socket " << p.fd << endl;
 				close(p.fd);
 				p.fd = -1;
 			}
@@ -139,7 +140,7 @@ void Server::pollIn(int fd)
 		// ListenSocket
 		const int nfd = accept(lsock, 0, 0);
 		if (nfd != -1) {
-			cout << "opening socket " << nfd << endl;
+			//cout << "opening socket " << nfd << endl;
 			setNonblock(nfd);
 			if (!insertDescriptor(nfd)) {
 				close(nfd);

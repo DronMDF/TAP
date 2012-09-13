@@ -31,7 +31,7 @@ void SelectorPoll::setDescriptor(unsigned idx, int fd)
 void SelectorPoll::setSocket(unsigned idx, const shared_ptr<const Socket> &socket)
 {
 	assert(idx < rfds.size());
-	rfds[idx].fd = socket->getDescriptor();
+	rfds[idx].fd = socket ? socket->getDescriptor() : -1;
 }
 
 int SelectorPoll::getDescriptor(unsigned idx) const
