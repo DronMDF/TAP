@@ -71,8 +71,8 @@ void ClientTcp::read(ClientControl *control)
 		}
 
 		setTimeout(control, 60);
-	} catch(const std::exception &) {
-		control->trace("Closing connection by error");
+	} catch(const std::exception &e) {
+		control->trace(string("Closing connection by error: ") + e.what());
 		terminate(control);
 	}
 }

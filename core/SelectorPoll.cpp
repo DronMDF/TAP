@@ -44,7 +44,7 @@ int SelectorPoll::selectRead()
 {
 	while (rcursor < rfds.size()) {
 		const int i = rcursor++;
-		if (rfds[i].revents != 0) {
+		if (rfds[i].fd != -1 && rfds[i].revents != 0) {
 			rfds[i].revents = 0;
 			return i;
 		}
