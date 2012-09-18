@@ -1,6 +1,6 @@
 
 CXX ?= g++
-CXXFLAGS ?= -std=c++0x -Wall -Wextra -Weffc++ -I../../
+CXXFLAGS ?= -O2 -g0 -std=c++0x -Wall -Wextra -Weffc++ -I../../
 
 OBJDIR ?= .obj
 OBJECTS = ${patsubst %.cpp,${OBJDIR}/%.o,${filter-out tap-tcp-server.cpp,${wildcard *.cpp}}}

@@ -42,45 +42,41 @@ void ClientTcp::terminate(ClientControl* control)
 	is_online = false;
 	control->setSocket(socket);
 	control->setStateOffline();
+	readed = 0;
 }
 
 void ClientTcp::read(ClientControl *control)
 {
-	try {
-		const auto buf = socket->recv();
-		if (buf.empty()) {
-			control->trace("Closing connection by reset");
-			terminate(control);
-			return;
-		}
-
-		if (!is_online) {
-			is_online = true;
-			control->trace("Client online");
-			control->setStateOnline();
-		}
-		
-		readed += buf.size();
-		const auto interval = high_resolution_clock::now() - stamp;
-		if (interval > seconds(10)) {
-			const auto ms = duration_cast<milliseconds>(interval).count();
-			const auto rate = readed * 8000 / ms;
-			control->trace("read rate (bit/sec)", rate);
-			stamp = high_resolution_clock::now();
-			readed = 0;
-		}
-
-		setTimeout(control, 60);
-	} catch(const std::exception &e) {
-		control->trace(string("Closing connection by error: ") + e.what());
+	const auto buf = socket->recv();
+	if (buf.empty()) {
+		control->trace("Closing connection (error or reset)");
 		terminate(control);
+		return;
 	}
+
+	if (!is_online) {
+		is_online = true;
+		//control->trace("Client online");
+		control->setStateOnline();
+	}
+
+	readed += buf.size();
+	const auto interval = high_resolution_clock::now() - stamp;
+	if (interval > seconds(10)) {
+		const auto ms = duration_cast<milliseconds>(interval).count();
+		const auto rate = readed * 8000 / ms;
+		control->trace("read rate (bit/sec)", rate);
+		stamp = high_resolution_clock::now();
+		readed = 0;
+	}
+
+	setTimeout(control, 60);
 }
 
 void ClientTcp::timeout(ClientControl *control)
 {
 	if (socket) {
-		control->trace("Closing connection by timeout");
+		control->trace("Closing connection by timeout", readed);
 		terminate(control);
 	}
 }
@@ -88,12 +84,12 @@ void ClientTcp::timeout(ClientControl *control)
 void ClientTcp::action(ClientControl *control)
 {
 	if (!socket) {
-		control->trace("Create connection");
 		try {
 			socket = make_shared<SocketTcp>(addr, port);
 			control->setSocket(socket);
 			control->setStateConnecting();
-			setTimeout(control, 10);
+			setTimeout(control, 60);
+			//control->trace("Goes connecting");
 		} catch (const exception &e) {
 			control->trace(e.what());
 		}

@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 			[](int n){ return make_shared<SelectorPoll>(n); }, 
 			[server, port](){ return make_shared<ClientTcp>(server, port); });
 	
-	tapm.setTracer(0, &tracer);
+	tapm.setTracer(count - 1, &tracer);
 	
 	tapm.setShowStatistic(bind(showStatistic, _1, _2, _3, timestamp), chrono::seconds(10));
 	tapm.pressure();

@@ -13,7 +13,7 @@ SelectorPoll::SelectorPoll(int n)
 {
 	for (int i = 0; i < n; i++) {
 		rfds[i].fd = -1;
-		rfds[i].events = POLLIN;
+		rfds[i].events = POLLIN | POLLPRI;
 		rfds[i].revents = 0;
 		
 		wfds[i].fd = -1;
@@ -26,12 +26,14 @@ void SelectorPoll::setDescriptor(unsigned idx, int fd)
 {
 	assert(idx < rfds.size());
 	rfds[idx].fd = fd;
+	rfds[idx].revents = 0;
 }
 
 void SelectorPoll::setSocket(unsigned idx, const shared_ptr<const Socket> &socket)
 {
 	assert(idx < rfds.size());
 	rfds[idx].fd = socket ? socket->getDescriptor() : -1;
+	rfds[idx].revents = 0;
 }
 
 int SelectorPoll::getDescriptor(unsigned idx) const
@@ -44,7 +46,7 @@ int SelectorPoll::selectRead()
 {
 	while (rcursor < rfds.size()) {
 		const int i = rcursor++;
-		if (rfds[i].fd != -1 && rfds[i].revents != 0) {
+		if (rfds[i].revents != 0) {
 			rfds[i].revents = 0;
 			return i;
 		}
@@ -68,18 +70,18 @@ int SelectorPoll::selectRead()
 int SelectorPoll::selectWrite(const set<unsigned> &intrest)
 {
 	if (!intrest.empty()) {
-		BOOST_FOREACH(auto &p, wfds) {
+		for(auto &p: wfds) {
 			p.fd = -1;
 		}
-		BOOST_FOREACH(auto &i, intrest) {
+		for(const auto &i: intrest) {
 			wfds[i].fd = rfds[i].fd;
 		}
 
 		int rv = poll(&wfds[0], wfds.size(), 0);
 		if (rv < 0) {
 			cerr << "poll failed: " << strerror(errno) << endl;
-			for (unsigned i = 0; i < wfds.size(); i++) {
-				wfds[i].revents = 0;
+			for (auto &p: wfds) {
+				p.revents = 0;
 			}
 			
 			return -1;
@@ -100,4 +102,3 @@ int SelectorPoll::selectWrite(const set<unsigned> &intrest)
 	
 	return -1;
 }
-

@@ -29,6 +29,8 @@ private:
 	void pollOut(int fd);
 
 	int lsock;
+	pollfd cfd;
+
 	vector<pollfd> pfd;
 	vector<uint8_t> idata;
 	vector<uint8_t> odata;
@@ -40,17 +42,18 @@ private:
 };
 
 Server::Server(unsigned port, unsigned count)
-	: lsock(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)), pfd(count + 1), idata(4096),
-	  odata(4096), readed(0), writed(0), outtime(high_resolution_clock::now())
+	: lsock(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)), cfd({0, 0, 0}), pfd(count),
+	  idata(4096), odata(4096), readed(0), writed(0), outtime(high_resolution_clock::now())
 {
+	cfd.fd = lsock;
+	cfd.events = POLLIN | POLLPRI;
+	cfd.revents = 0;
+
 	for(auto &p: pfd) {
 		p.fd = -1;
 		p.events = POLLIN | POLLOUT;
 		p.revents = 0;
 	}
-
-	pfd[0].fd = lsock;
-	pfd[0].events = POLLIN | POLLPRI;
 
 	generate(odata.begin(), odata.end(), rand);
 
@@ -84,8 +87,15 @@ void Server::listenning()
 	while (true) {
 		const auto interval = high_resolution_clock::now() - outtime;
 		if (interval > seconds(10)) {
+			int count = 0;
+			for (const auto p: pfd) {
+				if (p.fd != -1) {
+					count++;
+				}
+			}
+
 			const auto ms = duration_cast<milliseconds>(interval).count();
-			cout << "Interval:" << ms << " ";
+			cout << "Clients:" << count << " ";
 			cout << "Read: " << (readed * 8000 / ms) << " bit/s; ";
 			cout << "Write: " << (writed * 8000 / ms) << " bit/s" << endl;
 
@@ -93,19 +103,32 @@ void Server::listenning()
 			outtime = high_resolution_clock::now();
 		}
 
-		int rv = ::poll(&pfd[0], pfd.size(), 0);
-		if (rv < 1) {
+		if (poll(&pfd[0], pfd.size(), 0) <= 0 and poll(&cfd, 1, 0) <= 0) {
 			sched_yield();
 			continue;
 		}
 
 		for(auto &p: pfd) {
+			if (poll(&cfd, 1, 0) > 0) {
+				// ListenSocket
+				const int nfd = accept(lsock, 0, 0);
+				if (nfd != -1) {
+					// cout << "opening socket " << nfd << endl;
+					setNonblock(nfd);
+					if (!insertDescriptor(nfd)) {
+						close(nfd);
+					}
+				}
+			}
+
+			if ((p.revents & POLLPRI) != 0) {
+				pollIn(p.fd);
+			}
+
 			if ((p.revents & POLLIN) != 0) {
 				pollIn(p.fd);
 			}
-		}
 
-		for(auto &p: pfd) {
 			if ((p.revents & POLLOUT) != 0) {
 				pollOut(p.fd);
 			}
@@ -138,19 +161,6 @@ bool Server::insertDescriptor(int fd)
 
 void Server::pollIn(int fd)
 {
-	if (fd == lsock) {
-		// ListenSocket
-		const int nfd = accept(lsock, 0, 0);
-		if (nfd != -1) {
-			//cout << "opening socket " << nfd << endl;
-			setNonblock(nfd);
-			if (!insertDescriptor(nfd)) {
-				close(nfd);
-			}
-		}
-		return;
-	}
-
 	const int rv = read(fd, &idata[0], idata.size());
 	if (rv > 0) {
 		readed += rv;
