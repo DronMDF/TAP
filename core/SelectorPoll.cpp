@@ -41,10 +41,11 @@ void SelectorPoll::select()
 // TODO: Push clients over callback
 int SelectorPoll::selectRead()
 {
+	const int flags = POLLPRI | POLLIN | POLLERR | POLLHUP | POLLNVAL;
 	while (rcursor < fds.size()) {
 		const int i = rcursor++;
-		if ((fds[i].revents & (POLLPRI | POLLIN)) != 0) {
-			fds[i].revents &= ~(POLLPRI | POLLIN);
+		if ((fds[i].revents & flags) != 0) {
+			fds[i].revents &= ~flags;
 			return i;
 		}
 	}
@@ -55,18 +56,19 @@ int SelectorPoll::selectRead()
 // TODO: Push clients over callback
 int SelectorPoll::selectWrite(const set<unsigned> &intrest)
 {
+	const int flags = POLLOUT | POLLERR | POLLHUP | POLLNVAL;
 	if (!intrest.empty()) {
 		for (unsigned i = 0; i < fds.size(); i++) {
 			if (intrest.count(i) == 0) {
-				fds[i].revents &= POLLOUT;
+				fds[i].revents &= ~POLLOUT;
 			}
 		}
 	}
 	
 	while (wcursor < fds.size()) {
 		const int i = wcursor++;
-		if ((fds[i].revents & POLLOUT) != 0) {
-			fds[i].revents &= POLLOUT;
+		if ((fds[i].revents & flags) != 0) {
+			fds[i].revents &= ~flags;
 			return i;
 		}
 	}
