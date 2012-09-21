@@ -112,21 +112,12 @@ void TapManager::showStatistics()
 
 bool TapManager::selectAllFromMain(const time_point &endtime)
 {
-	while (true) {
-		const int rc = main_ds->selectRead();
-		if (rc == -1) {
-			break;
-		}
-		
-		ClientControl control(this, rc, tracers[rc]);
-		clients[rc]->read(&control);
-		
-		if (chrono::high_resolution_clock::now() > endtime) {
-			return false;
-		}
-	}
-	
-	return true;
+	main_ds->selectRead([&](int n){
+		ClientControl control(this, n, tracers[n]);
+		clients[n]->read(&control);
+	});
+
+	return chrono::high_resolution_clock::now() <= endtime;
 }
 
 bool TapManager::checkTimeouts(const time_point &endtime)

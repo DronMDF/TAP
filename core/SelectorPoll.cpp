@@ -38,6 +38,16 @@ void SelectorPoll::select()
 	wcursor = 0;
 }
 
+void SelectorPoll::selectRead(const std::function<void (int)> &callback)
+{
+	const int flags = POLLPRI | POLLIN | POLLERR | POLLHUP | POLLNVAL;
+	for (unsigned i = 0; i < fds.size(); i++) {
+		if ((fds[i].revents & flags) != 0) {
+			callback(i);
+		}
+	}
+}
+
 // TODO: Push clients over callback
 int SelectorPoll::selectRead()
 {

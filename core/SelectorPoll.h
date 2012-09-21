@@ -10,6 +10,8 @@ public:
 	
 	virtual void setSocket(unsigned idx, const std::shared_ptr<const Socket> &socket);
 	virtual void select();
+	virtual void selectRead(const std::function<void (int)> &callback);
+
 	virtual int selectRead();
 	virtual int selectWrite(const std::set<unsigned> &intrest);
 	
