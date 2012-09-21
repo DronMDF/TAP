@@ -8,16 +8,16 @@ class SelectorPoll : public Selector {
 public:
 	SelectorPoll(int n);
 	
-	virtual void setDescriptor(unsigned idx, int fd);
-	virtual int getDescriptor(unsigned idx) const;
+	virtual void setSocket(unsigned idx, const std::shared_ptr<const Socket> &socket);
+	virtual void select();
 	virtual int selectRead();
 	virtual int selectWrite(const std::set<unsigned> &intrest);
 	
-	virtual void setSocket(unsigned idx, const std::shared_ptr<const Socket> &socket);
+	virtual void setDescriptor(unsigned idx, int fd);
+	virtual int getDescriptor(unsigned idx) const;
 
 private:
-	std::vector<pollfd> rfds;
+	std::vector<pollfd> fds;
 	unsigned rcursor;
-	std::vector<pollfd> wfds;
 	unsigned wcursor;
 };

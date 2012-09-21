@@ -208,6 +208,8 @@ void TapManager::pressure()
 		
 		showStatistics();
 		
+		main_ds->select();
+
 		if (!selectAllFromMain(endtime)) {
 			cout << "break on read" << endl;
 			continue;

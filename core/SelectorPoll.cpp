@@ -9,96 +9,80 @@
 using namespace std;
 
 SelectorPoll::SelectorPoll(int n)
-	: rfds(n), rcursor(n), wfds(n), wcursor(n)
+	: fds(n), rcursor(0), wcursor(0)
 {
-	for (int i = 0; i < n; i++) {
-		rfds[i].fd = -1;
-		rfds[i].events = POLLIN | POLLPRI;
-		rfds[i].revents = 0;
-		
-		wfds[i].fd = -1;
-		wfds[i].events = POLLOUT;
-		wfds[i].revents = 0;
+	for (auto &p: fds) {
+		p.fd = -1;
+		p.events = POLLIN | POLLPRI | POLLOUT;
+		p.revents = 0;
 	}
-}
-
-void SelectorPoll::setDescriptor(unsigned idx, int fd)
-{
-	assert(idx < rfds.size());
-	rfds[idx].fd = fd;
-	rfds[idx].revents = 0;
 }
 
 void SelectorPoll::setSocket(unsigned idx, const shared_ptr<const Socket> &socket)
 {
-	assert(idx < rfds.size());
-	rfds[idx].fd = socket ? socket->getDescriptor() : -1;
-	rfds[idx].revents = 0;
+	assert(idx < fds.size());
+	fds[idx].fd = socket ? socket->getDescriptor() : -1;
+	fds[idx].revents = 0;
+}
+
+void SelectorPoll::select()
+{
+	if (poll(&fds[0], fds.size(), 0) < 0) {
+		cerr << "poll failed: " << strerror(errno) << endl;
+		for (auto &p: fds) {
+			p.revents = 0;
+		}
+	}
+
+	rcursor = 0;
+	wcursor = 0;
+}
+
+// TODO: Push clients over callback
+int SelectorPoll::selectRead()
+{
+	while (rcursor < fds.size()) {
+		const int i = rcursor++;
+		if ((fds[i].revents & (POLLPRI | POLLIN)) != 0) {
+			fds[i].revents &= ~(POLLPRI | POLLIN);
+			return i;
+		}
+	}
+	
+	return -1;
+}
+
+// TODO: Push clients over callback
+int SelectorPoll::selectWrite(const set<unsigned> &intrest)
+{
+	if (!intrest.empty()) {
+		for (unsigned i = 0; i < fds.size(); i++) {
+			if (intrest.count(i) == 0) {
+				fds[i].revents &= POLLOUT;
+			}
+		}
+	}
+	
+	while (wcursor < fds.size()) {
+		const int i = wcursor++;
+		if ((fds[i].revents & POLLOUT) != 0) {
+			fds[i].revents &= POLLOUT;
+			return i;
+		}
+	}
+	
+	return -1;
+}
+
+void SelectorPoll::setDescriptor(unsigned idx, int fd)
+{
+	assert(idx < fds.size());
+	fds[idx].fd = fd;
+	fds[idx].revents = 0;
 }
 
 int SelectorPoll::getDescriptor(unsigned idx) const
 {
-	assert(idx < rfds.size());
-	return rfds[idx].fd;
-}
-
-int SelectorPoll::selectRead()
-{
-	while (rcursor < rfds.size()) {
-		const int i = rcursor++;
-		if (rfds[i].revents != 0) {
-			rfds[i].revents = 0;
-			return i;
-		}
-	}
-	
-	int rv = poll(&rfds[0], rfds.size(), 0);
-	if (rv < 0) {
-		cerr << "poll failed: " << strerror(errno) << endl;
-		for (unsigned i = 0; i < rfds.size(); i++) {
-			rfds[i].revents = 0;
-		}
-	}
-	
-	if (rv > 0) {
-		rcursor = 0;
-	}
-
-	return -1;
-}
-
-int SelectorPoll::selectWrite(const set<unsigned> &intrest)
-{
-	if (!intrest.empty()) {
-		for(auto &p: wfds) {
-			p.fd = -1;
-		}
-		for(const auto &i: intrest) {
-			wfds[i].fd = rfds[i].fd;
-		}
-
-		int rv = poll(&wfds[0], wfds.size(), 0);
-		if (rv < 0) {
-			cerr << "poll failed: " << strerror(errno) << endl;
-			for (auto &p: wfds) {
-				p.revents = 0;
-			}
-			
-			return -1;
-		}
-		
-		if (rv > 0) {
-			wcursor = 0;
-		}
-	}
-	
-	while (wcursor < wfds.size()) {
-		const int i = wcursor++;
-		if (wfds[i].revents != 0) {
-			wfds[i].revents = 0;
-			return i;
-		}
-	}
-	
-	return -1;
+	assert(idx < fds.size());
+	return fds[idx].fd;
 }

@@ -59,6 +59,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEvent)
 	for (int i = 0; i < 10; i++) {
 		selector.setDescriptor(i, 1);
 	}
+	selector.select();
 	// When
 	int rv = selector.selectRead();
 	// Then
@@ -72,6 +73,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEventBySocket)
 	for (int i = 0; i < 10; i++) {
 		selector.setSocket(i, make_shared<TestSocket>(1));
 	}
+	selector.select();
 	// When
 	int rv = selector.selectRead();
 	// Then
@@ -88,8 +90,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
 	piper p;
 	selector.setDescriptor(5, p.in);
 	write(p.out, "X", 1);
-	// After poll return -1 always
-	BOOST_REQUIRE_EQUAL(selector.selectRead(), -1);
+	selector.select();
 	// When
 	int rv = selector.selectRead();
 	// Then
@@ -106,8 +107,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptorBySocket)
 	piper p;
 	selector.setSocket(5, make_shared<TestSocket>(p.in));
 	write(p.out, "X", 1);
-	// After poll return -1 always
-	BOOST_REQUIRE_EQUAL(selector.selectRead(), -1);
+	selector.select();
 	// When
 	int rv = selector.selectRead();
 	// Then
@@ -122,6 +122,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoWrite)
 	for (int i = 0; i < 10; i++) {
 		selector.setDescriptor(i, p.in);
 	}
+	selector.select();
 	// When
 	int rv = selector.selectWrite({3, 5, 7});
 	// Then
@@ -136,6 +137,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoWriteBySocket)
 	for (int i = 0; i < 10; i++) {
 		selector.setSocket(i, make_shared<TestSocket>(p.in));
 	}
+	selector.select();
 	// When
 	int rv = selector.selectWrite({3, 5, 7});
 	// Then
@@ -151,6 +153,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfWritableDescriptor)
 		selector.setDescriptor(i, p.in);
 	}
 	selector.setDescriptor(5, p.out);
+	selector.select();
 	// When
 	int rv = selector.selectWrite({3, 5, 7});
 	// Then
@@ -166,6 +169,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfWritableDescriptorBySocket)
 		selector.setSocket(i, make_shared<TestSocket>(p.in));
 	}
 	selector.setSocket(5, make_shared<TestSocket>(p.out));
+	selector.select();
 	// When
 	int rv = selector.selectWrite({3, 5, 7});
 	// Then
@@ -181,6 +185,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeAfterLast)
 		selector.setDescriptor(i, p.in);
 	}
 	selector.setDescriptor(9, p.out);
+	selector.select();
 	BOOST_REQUIRE_EQUAL(selector.selectWrite({3, 5, 7, 9}), 9);
 	// When
 	int rv = selector.selectWrite({});
@@ -197,6 +202,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeAfterLastBySocket)
 		selector.setSocket(i, make_shared<TestSocket>(p.in));
 	}
 	selector.setSocket(9, make_shared<TestSocket>(p.out));
+	selector.select();
 	BOOST_REQUIRE_EQUAL(selector.selectWrite({3, 5, 7, 9}), 9);
 	// When
 	int rv = selector.selectWrite({});

@@ -11,6 +11,7 @@ public:
 
 	// New API for Socket
 	virtual void setSocket(unsigned idx, const std::shared_ptr<const Socket> &socket) = 0;
+	virtual void select() = 0;
 	virtual int selectRead() = 0;
 	virtual int selectWrite(const std::set<unsigned> &intrest) = 0;
 
