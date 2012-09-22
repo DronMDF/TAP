@@ -61,6 +61,15 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoIntrest)
 	BOOST_REQUIRE_EQUAL(rv, -1);
 }
 
+BOOST_AUTO_TEST_CASE(ShouldNotCallbackOnWriteIfUninitialized)
+{
+	// Given
+	SelectorPoll selector(10);
+	selector.select();
+	// When/Then
+	selector.selectWriteCallback([](int){ BOOST_FAIL("Invalid call"); });
+}
+
 BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEvent)
 {
 	// Given
@@ -183,6 +192,19 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoWriteBySocket)
 	BOOST_REQUIRE_EQUAL(rv, -1);
 }
 
+BOOST_AUTO_TEST_CASE(ShouldNotCallIfNoOneReadyForWrite)
+{
+	// Given
+	SelectorPoll selector(10);
+	piper p;
+	for (int i = 0; i < 10; i++) {
+		selector.setDescriptor(i, p.in);
+	}
+	selector.select();
+	// When/Then
+	selector.selectWriteCallback([](int){ BOOST_FAIL("Invalid call"); });
+}
+
 BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfWritableDescriptor)
 {
 	// Given
@@ -211,6 +233,26 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfWritableDescriptorBySocket)
 	selector.select();
 	// When
 	int rv = selector.selectWrite({3, 5, 7});
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, 5);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldCallIndexOfWritableDescriptor)
+{
+	// Given
+	SelectorPoll selector(10);
+	piper p;
+	for (int i = 0; i < 10; i++) {
+		selector.setSocket(i, make_shared<TestSocket>(p.in));
+	}
+	selector.setSocket(5, make_shared<TestSocket>(p.out));
+	selector.select();
+	// When
+	int rv = -1;
+	selector.selectWriteCallback([&rv](int n){
+		BOOST_REQUIRE_EQUAL(n, 5);
+		rv = n;
+	});
 	// Then
 	BOOST_REQUIRE_EQUAL(rv, 5);
 }

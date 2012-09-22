@@ -7,6 +7,7 @@ public:
 	virtual void setSocket(unsigned, const std::shared_ptr<const Socket> &) {};
 	virtual void select() {};
 	virtual void selectRead(const std::function<void (int)> &) {};
+	virtual void selectWriteCallback(const std::function<void (int)> &) {};
 
 	virtual void setDescriptor(unsigned, int) {};
 	virtual int getDescriptor(unsigned) const { return -1; };

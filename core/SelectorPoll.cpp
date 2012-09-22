@@ -38,7 +38,7 @@ void SelectorPoll::select()
 	wcursor = 0;
 }
 
-void SelectorPoll::selectRead(const std::function<void (int)> &callback)
+void SelectorPoll::selectRead(const function<void (int)> &callback)
 {
 	const int flags = POLLPRI | POLLIN | POLLERR | POLLHUP | POLLNVAL;
 	for (unsigned i = 0; i < fds.size(); i++) {
@@ -48,7 +48,16 @@ void SelectorPoll::selectRead(const std::function<void (int)> &callback)
 	}
 }
 
-// TODO: Push clients over callback
+void SelectorPoll::selectWriteCallback(const function<void (int)> &callback)
+{
+	const int flags = POLLOUT | POLLERR | POLLHUP | POLLNVAL;
+	for (unsigned i = 0; i < fds.size(); i++) {
+		if ((fds[i].revents & flags) != 0) {
+			callback(i);
+		}
+	}
+}
+
 int SelectorPoll::selectRead()
 {
 	const int flags = POLLPRI | POLLIN | POLLERR | POLLHUP | POLLNVAL;
@@ -63,7 +72,6 @@ int SelectorPoll::selectRead()
 	return -1;
 }
 
-// TODO: Push clients over callback
 int SelectorPoll::selectWrite(const set<unsigned> &intrest)
 {
 	const int flags = POLLOUT | POLLERR | POLLHUP | POLLNVAL;
