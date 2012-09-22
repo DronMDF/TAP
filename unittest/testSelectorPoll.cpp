@@ -42,6 +42,15 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeUninitialized)
 	BOOST_REQUIRE_EQUAL(rv, -1);
 }
 
+BOOST_AUTO_TEST_CASE(ShouldNotCallbackUninitialized)
+{
+	// Given
+	SelectorPoll selector(10);
+	selector.select();
+	// When/Then
+	selector.selectRead([](int){ BOOST_FAIL("Invalid Call"); });
+}
+
 BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoIntrest)
 {
 	// Given
@@ -80,6 +89,18 @@ BOOST_AUTO_TEST_CASE(ShouldReturnNegativeIfNoEventBySocket)
 	BOOST_REQUIRE_EQUAL(rv, -1);
 }
 
+BOOST_AUTO_TEST_CASE(ShouldNotCallbackIfNoEvent)
+{
+	// Given
+	SelectorPoll selector(10);
+	for (int i = 0; i < 10; i++) {
+		selector.setSocket(i, make_shared<TestSocket>(1));
+	}
+	selector.select();
+	// When/Then
+	selector.selectRead([](int){ BOOST_FAIL("Invalid Call"); });
+}
+
 BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
 {
 	// Given
@@ -89,7 +110,7 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptor)
 	}
 	piper p;
 	selector.setDescriptor(5, p.in);
-	write(p.out, "X", 1);
+	BOOST_REQUIRE_EQUAL(write(p.out, "X", 1), 1);
 	selector.select();
 	// When
 	int rv = selector.selectRead();
@@ -106,10 +127,28 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptorBySocket)
 	}
 	piper p;
 	selector.setSocket(5, make_shared<TestSocket>(p.in));
-	write(p.out, "X", 1);
+	BOOST_REQUIRE_EQUAL(write(p.out, "X", 1), 1);
 	selector.select();
 	// When
-	int rv = selector.selectRead();
+	int rv =  selector.selectRead();
+	// Then
+	BOOST_REQUIRE_EQUAL(rv, 5);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptorByCallback)
+{
+	// Given
+	SelectorPoll selector(10);
+	for (int i = 0; i < 10; i++) {
+		selector.setSocket(i, make_shared<TestSocket>(1));
+	}
+	piper p;
+	selector.setSocket(5, make_shared<TestSocket>(p.in));
+	BOOST_REQUIRE_EQUAL(write(p.out, "X", 1), 1);
+	selector.select();
+	// When
+	int rv;
+	selector.selectRead([&rv](int n){ rv = n; });
 	// Then
 	BOOST_REQUIRE_EQUAL(rv, 5);
 }
