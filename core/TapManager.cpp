@@ -139,40 +139,17 @@ bool TapManager::checkTimeouts(const time_point &endtime)
 
 bool TapManager::selectAllToMain(const time_point &endtime)
 {
-	set<unsigned> intrest;
-	for (unsigned i = 0; i < queues.size(); i++) {
-		// TODO: Keep queue in Client
-		if (!queues[i].empty()) {
-			intrest.insert(i);
+	main_ds->selectRead([&](int n){
+		if (!queues[n].empty()) {
+			ClientControl control(this, n, tracers[n]);
+			if (clients[n]->write(&control, queues[n].front())) {
+				// Remove if success
+				queues[n].pop();
+			}
 		}
-	}
-	
-	if (intrest.empty()) {
-		return true;
-	}
-	
-	while (true) {
-		if (chrono::high_resolution_clock::now() > endtime) {
-			return false;
-		}
-		
-		int rv = main_ds->selectWrite(intrest);
-		if (rv == -1) {
-			return true;
-		}
-		
-		// Indexes is not need in the future
-		intrest.clear();
-	
-		// TODO: Write packet in Client
-		ClientControl control(this, rv, tracers[rv]);
-		if (clients[rv]->write(&control, queues[rv].front())) {
-			// Remove if success
-			queues[rv].pop();
-		}
-	}
+	});
 
-	return true;
+	return chrono::high_resolution_clock::now() <= endtime;
 }
 
 bool TapManager::needToAction(const time_point &endtime)
