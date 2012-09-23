@@ -14,7 +14,7 @@ struct piper {
 	int in;
 	int out;
 	piper() : in(-1), out(-1) {
-		pipe(reinterpret_cast<int *>(this));
+		assert(pipe(reinterpret_cast<int *>(this)) == 0);
 	}
 	~piper() {
 		close(in);

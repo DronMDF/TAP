@@ -16,10 +16,6 @@ public:
 	// Callback is a temporary name postfix
 	virtual void selectWriteCallback(const std::function<void (int)> &callback) = 0;
 
-	virtual int selectRead() = 0;
-	virtual int selectWrite(const std::set<unsigned> &intrest) = 0;
-
 	// Deprecated API
 	virtual void setDescriptor(unsigned idx, int fd) = 0;
-	virtual int getDescriptor(unsigned idx) const = 0;
 };

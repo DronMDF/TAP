@@ -10,7 +10,4 @@ public:
 	virtual void selectWriteCallback(const std::function<void (int)> &) {};
 
 	virtual void setDescriptor(unsigned, int) {};
-	virtual int getDescriptor(unsigned) const { return -1; };
-	virtual int selectRead() { return -1; };
-	virtual int selectWrite(const std::set<unsigned> &) { return -1; };
 };

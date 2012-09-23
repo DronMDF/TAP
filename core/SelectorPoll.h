@@ -13,11 +13,7 @@ public:
 	virtual void selectRead(const std::function<void (int)> &callback);
 	virtual void selectWriteCallback(const std::function<void (int)> &callback);
 
-	virtual int selectRead();
-	virtual int selectWrite(const std::set<unsigned> &intrest);
-	
 	virtual void setDescriptor(unsigned idx, int fd);
-	virtual int getDescriptor(unsigned idx) const;
 
 private:
 	std::vector<pollfd> fds;

@@ -58,51 +58,9 @@ void SelectorPoll::selectWriteCallback(const function<void (int)> &callback)
 	}
 }
 
-int SelectorPoll::selectRead()
-{
-	const int flags = POLLPRI | POLLIN | POLLERR | POLLHUP | POLLNVAL;
-	while (rcursor < fds.size()) {
-		const int i = rcursor++;
-		if ((fds[i].revents & flags) != 0) {
-			fds[i].revents &= ~flags;
-			return i;
-		}
-	}
-	
-	return -1;
-}
-
-int SelectorPoll::selectWrite(const set<unsigned> &intrest)
-{
-	const int flags = POLLOUT | POLLERR | POLLHUP | POLLNVAL;
-	if (!intrest.empty()) {
-		for (unsigned i = 0; i < fds.size(); i++) {
-			if (intrest.count(i) == 0) {
-				fds[i].revents &= ~POLLOUT;
-			}
-		}
-	}
-	
-	while (wcursor < fds.size()) {
-		const int i = wcursor++;
-		if ((fds[i].revents & flags) != 0) {
-			fds[i].revents &= ~flags;
-			return i;
-		}
-	}
-	
-	return -1;
-}
-
 void SelectorPoll::setDescriptor(unsigned idx, int fd)
 {
 	assert(idx < fds.size());
 	fds[idx].fd = fd;
 	fds[idx].revents = 0;
-}
-
-int SelectorPoll::getDescriptor(unsigned idx) const
-{
-	assert(idx < fds.size());
-	return fds[idx].fd;
 }
