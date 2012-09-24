@@ -24,7 +24,8 @@ TapManager::TapManager(unsigned nth,
 	: main_ds(create_selector(nth)), clients(nth), queues(nth), 
 	  timeouts(nth, time_point::max()), tracers(nth, &nulltracer),
 	  clients_states(nth, OFFLINE), show_statistic([](int, int, int){}), 
-	  stats_time(time_point::max()), stats_interval(std::chrono::seconds::max())
+	  stats_time(time_point::max()), stats_interval(std::chrono::seconds::max()),
+	  action_idx(0)
 {
 	for (auto &client: clients) {
 		client = create_client();
@@ -110,34 +111,25 @@ void TapManager::showStatistics()
 	stats_time = chrono::high_resolution_clock::now() + stats_interval;
 }
 
-bool TapManager::selectAllFromMain(const time_point &endtime)
+void TapManager::selectAllFromMain()
 {
 	main_ds->selectRead([&](int n){
 		ClientControl control(this, n, tracers[n]);
 		clients[n]->read(&control);
 	});
-
-	return chrono::high_resolution_clock::now() <= endtime;
 }
 
-bool TapManager::checkTimeouts(const time_point &endtime)
+void TapManager::checkTimeouts(const time_point &now)
 {
 	for (unsigned i = 0; i < clients.size(); i++) {
-		const auto now = chrono::high_resolution_clock::now();
-		if (now > endtime) {
-			return false;
-		}
-		
 		if (timeouts[i] < now) {
 			ClientControl control(this, i, tracers[i]);
 			clients[i]->timeout(&control);
 		}
 	}
-	
-	return true;
 }
 
-bool TapManager::selectAllToMain(const time_point &endtime)
+void TapManager::selectAllToMain()
 {
 	main_ds->selectRead([&](int n){
 		if (!queues[n].empty()) {
@@ -148,28 +140,25 @@ bool TapManager::selectAllToMain(const time_point &endtime)
 			}
 		}
 	});
-
-	return chrono::high_resolution_clock::now() <= endtime;
 }
 
 bool TapManager::needToAction(const time_point &endtime)
 {
-	for (unsigned i = 0; i < clients.size(); i++) {
-		ClientControl control(this, i, tracers[i]);
-		clients[i]->action(&control);
+	for (; action_idx < clients.size(); action_idx++) {
+		ClientControl control(this, action_idx, tracers[action_idx]);
+		clients[action_idx]->action(&control);
 		
 		if (chrono::high_resolution_clock::now() > endtime) {
 			return false;
 		}
 	}
 	
+	action_idx = 0;
 	return true;
 }
 
 void TapManager::pressure()
 {
-	time_point status;
-	
 	while (true) {
 		const auto now = chrono::high_resolution_clock::now();
 		const auto endtime = now + chrono::seconds(1);
@@ -178,20 +167,15 @@ void TapManager::pressure()
 		
 		main_ds->select();
 
-		if (!selectAllFromMain(endtime)) {
-			cout << "break on read" << endl;
+		selectAllFromMain();
+		checkTimeouts(chrono::high_resolution_clock::now());
+
+		if (chrono::high_resolution_clock::now() > endtime) {
+			cout << "break on phase 1" << endl;
 			continue;
 		}
 		
-		if (!checkTimeouts(endtime)) {
-			cout << "break on check timeout" << endl;
-			continue;
-		}
-		
-		if (!selectAllToMain(endtime)) {
-			cout << "break on write" << endl;
-			continue;
-		}
+		selectAllToMain();
 		
 		if (!needToAction(endtime)) {
 			cout << "break on action" << endl;

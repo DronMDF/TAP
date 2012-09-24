@@ -51,10 +51,12 @@ private:
 	time_point stats_time;
 	std::chrono::seconds stats_interval;
 	
+	unsigned action_idx;
+
 	void showStatistics();
-	bool selectAllFromMain(const time_point &endtime);
-	bool checkTimeouts(const time_point &endtime);
-	bool selectAllToMain(const time_point &endtime);
+	void selectAllFromMain();
+	void checkTimeouts(const time_point &now);
+	void selectAllToMain();
 	bool needToAction(const time_point &endtime);
 };
 

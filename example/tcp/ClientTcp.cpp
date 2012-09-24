@@ -60,6 +60,8 @@ void ClientTcp::read(ClientControl *control)
 		control->setStateOnline();
 	}
 
+	//control->trace("read", buf.size());
+
 	readed += buf.size();
 	const auto interval = high_resolution_clock::now() - stamp;
 	if (interval > seconds(10)) {
