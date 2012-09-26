@@ -11,7 +11,7 @@ public:
 
 	virtual int getDescriptor() const;
 
-	virtual std::vector<uint8_t> recv();
+	virtual std::vector<uint8_t> recv(size_t size);
 	virtual size_t send(const std::vector<uint8_t> &data);
 
 private:

@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(ShouldSendFromQueueToSocket)
 		vector<uint8_t> sended;
 		TestSocket() : sended() {}
 		virtual int getDescriptor() const { return 0; };
-		virtual vector<uint8_t> recv() { return {}; };
+		virtual vector<uint8_t> recv(size_t) { return {}; };
 		virtual size_t send(const vector<uint8_t> &data) {
 			sended = data; return data.size();
 		}

@@ -41,9 +41,9 @@ int SocketTcp::getDescriptor() const
 	return sock;
 }
 
-vector<uint8_t> SocketTcp::recv()
+vector<uint8_t> SocketTcp::recv(size_t size)
 {
-	vector<uint8_t> data(64);
+	vector<uint8_t> data(size);
 	const int rv = read(sock, &data[0], data.size());
 	if (rv < 0) {
 		return {};

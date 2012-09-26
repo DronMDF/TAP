@@ -47,7 +47,7 @@ void ClientTcp::terminate(ClientControl* control)
 
 void ClientTcp::read(ClientControl *control)
 {
-	const auto buf = socket->recv();
+	const auto buf = socket->recv(1);
 	if (buf.empty()) {
 		control->trace("Closing connection (error or reset)");
 		terminate(control);

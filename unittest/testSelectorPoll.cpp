@@ -28,7 +28,7 @@ struct TestSocket : public Socket {
 	int fd;
 	TestSocket(int fd) : fd(fd) {};
 	virtual int getDescriptor() const { return fd; };
-	virtual vector<uint8_t> recv() { return {}; };
+	virtual vector<uint8_t> recv(size_t) { return {}; };
 	virtual size_t send(const vector<uint8_t> &) { return 0; };
 };
 
