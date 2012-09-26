@@ -14,7 +14,7 @@ public:
 	virtual void select() = 0;
 	virtual void selectRead(const std::function<void (int)> &callback) = 0;
 	// Callback is a temporary name postfix
-	virtual void selectWriteCallback(const std::function<void (int)> &callback) = 0;
+	virtual void selectWrite(const std::function<void (int)> &callback) = 0;
 
 	// Deprecated API
 	virtual void setDescriptor(unsigned idx, int fd) = 0;

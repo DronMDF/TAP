@@ -1,13 +1,13 @@
 
 #include <memory.h>
 #include <boost/test/unit_test.hpp>
-#include <core/SelectorPoll.h>
+#include <core/SelectorEpoll.h>
 #include <core/Socket.h>
 #include "SocketTest.h"
 
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(suiteSelectorPoll);
+BOOST_AUTO_TEST_SUITE(suiteSelectorEpoll);
 
 struct piper {
 	int in;
@@ -28,7 +28,7 @@ struct piper {
 BOOST_AUTO_TEST_CASE(ShouldNotCallbackUninitialized)
 {
 	// Given
-	SelectorPoll selector(10);
+	SelectorEpoll selector(10);
 	selector.select();
 	// When/Then
 	selector.selectRead([](int){ BOOST_FAIL("Invalid Call"); });
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(ShouldNotCallbackUninitialized)
 BOOST_AUTO_TEST_CASE(ShouldNotCallbackOnWriteIfUninitialized)
 {
 	// Given
-	SelectorPoll selector(10);
+	SelectorEpoll selector(10);
 	selector.select();
 	// When/Then
 	selector.selectWrite([](int){ BOOST_FAIL("Invalid call"); });
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(ShouldNotCallbackOnWriteIfUninitialized)
 BOOST_AUTO_TEST_CASE(ShouldNotCallbackIfNoEvent)
 {
 	// Given
-	SelectorPoll selector(10);
+	SelectorEpoll selector(10);
 	for (int i = 0; i < 10; i++) {
 		selector.setSocket(i, make_shared<SocketTest>(1));
 	}
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(ShouldNotCallbackIfNoEvent)
 BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptorByCallback)
 {
 	// Given
-	SelectorPoll selector(10);
+	SelectorEpoll selector(10);
 	for (int i = 0; i < 10; i++) {
 		selector.setSocket(i, make_shared<SocketTest>(1));
 	}
@@ -73,23 +73,10 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptorByCallback)
 	BOOST_REQUIRE_EQUAL(rv, 5);
 }
 
-BOOST_AUTO_TEST_CASE(ShouldNotCallIfNoOneReadyForWrite)
-{
-	// Given
-	SelectorPoll selector(10);
-	piper p;
-	for (int i = 0; i < 10; i++) {
-		selector.setDescriptor(i, p.in);
-	}
-	selector.select();
-	// When/Then
-	selector.selectWrite([](int){ BOOST_FAIL("Invalid call"); });
-}
-
 BOOST_AUTO_TEST_CASE(ShouldCallIndexOfWritableDescriptor)
 {
 	// Given
-	SelectorPoll selector(10);
+	SelectorEpoll selector(10);
 	piper p;
 	for (int i = 0; i < 10; i++) {
 		selector.setSocket(i, make_shared<SocketTest>(p.in));

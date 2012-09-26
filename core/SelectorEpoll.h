@@ -4,9 +4,9 @@
 #include <vector>
 #include "Selector.h"
 
-class SelectorPoll : public Selector {
+class SelectorEpoll : public Selector {
 public:
-	SelectorPoll(int n);
+	SelectorEpoll(int n);
 	
 	virtual void setSocket(unsigned idx, const std::shared_ptr<const Socket> &socket);
 	virtual void select();

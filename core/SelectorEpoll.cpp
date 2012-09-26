@@ -3,12 +3,12 @@
 #include <iostream>
 #include <stdexcept>
 #include <boost/foreach.hpp>
-#include "SelectorPoll.h"
+#include "SelectorEpoll.h"
 #include "Socket.h"
 
 using namespace std;
 
-SelectorPoll::SelectorPoll(int n)
+SelectorEpoll::SelectorEpoll(int n)
 	: fds(n), rcursor(0), wcursor(0)
 {
 	for (auto &p: fds) {
@@ -18,14 +18,14 @@ SelectorPoll::SelectorPoll(int n)
 	}
 }
 
-void SelectorPoll::setSocket(unsigned idx, const shared_ptr<const Socket> &socket)
+void SelectorEpoll::setSocket(unsigned idx, const shared_ptr<const Socket> &socket)
 {
 	assert(idx < fds.size());
 	fds[idx].fd = socket ? socket->getDescriptor() : -1;
 	fds[idx].revents = 0;
 }
 
-void SelectorPoll::select()
+void SelectorEpoll::select()
 {
 	if (poll(&fds[0], fds.size(), 0) < 0) {
 		cerr << "poll failed: " << strerror(errno) << endl;
@@ -38,7 +38,7 @@ void SelectorPoll::select()
 	wcursor = 0;
 }
 
-void SelectorPoll::selectRead(const function<void (int)> &callback)
+void SelectorEpoll::selectRead(const function<void (int)> &callback)
 {
 	const int flags = POLLPRI | POLLIN | POLLERR | POLLHUP | POLLNVAL;
 	for (unsigned i = 0; i < fds.size(); i++) {
@@ -48,7 +48,7 @@ void SelectorPoll::selectRead(const function<void (int)> &callback)
 	}
 }
 
-void SelectorPoll::selectWrite(const function<void (int)> &callback)
+void SelectorEpoll::selectWrite(const function<void (int)> &callback)
 {
 	const int flags = POLLOUT | POLLERR | POLLHUP | POLLNVAL;
 	for (unsigned i = 0; i < fds.size(); i++) {
@@ -58,9 +58,6 @@ void SelectorPoll::selectWrite(const function<void (int)> &callback)
 	}
 }
 
-void SelectorPoll::setDescriptor(unsigned idx, int fd)
+void SelectorEpoll::setDescriptor(unsigned, int)
 {
-	assert(idx < fds.size());
-	fds[idx].fd = fd;
-	fds[idx].revents = 0;
 }
