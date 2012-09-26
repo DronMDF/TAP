@@ -5,6 +5,7 @@
 #include <core/Client.h>
 #include <core/ClientControl.h>
 #include <core/Socket.h>
+#include "SocketTest.h"
 
 using namespace std;
 
@@ -71,11 +72,9 @@ BOOST_AUTO_TEST_CASE(ShouldSendFromQueueToSocket)
 		virtual void read(ClientControl *) {};
 		virtual void timeout(ClientControl *) {};
 	} client;
-	struct TestSocket : public Socket {
+	struct TestSocket : public SocketTest {
 		vector<uint8_t> sended;
-		TestSocket() : sended() {}
-		virtual int getDescriptor() const { return 0; };
-		virtual vector<uint8_t> recv(size_t) { return {}; };
+		TestSocket() : SocketTest(0), sended() {}
 		virtual size_t send(const vector<uint8_t> &data) {
 			sended = data; return data.size();
 		}

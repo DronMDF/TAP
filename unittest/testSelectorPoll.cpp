@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 #include <core/SelectorPoll.h>
 #include <core/Socket.h>
+#include "SocketTest.h"
 
 using namespace std;
 
@@ -22,14 +23,6 @@ struct piper {
 		close(in);
 		close(out);
 	}
-};
-
-struct TestSocket : public Socket {
-	int fd;
-	TestSocket(int fd) : fd(fd) {};
-	virtual int getDescriptor() const { return fd; };
-	virtual vector<uint8_t> recv(size_t) { return {}; };
-	virtual size_t send(const vector<uint8_t> &) { return 0; };
 };
 
 BOOST_AUTO_TEST_CASE(ShouldNotCallbackUninitialized)
@@ -55,7 +48,7 @@ BOOST_AUTO_TEST_CASE(ShouldNotCallbackIfNoEvent)
 	// Given
 	SelectorPoll selector(10);
 	for (int i = 0; i < 10; i++) {
-		selector.setSocket(i, make_shared<TestSocket>(1));
+		selector.setSocket(i, make_shared<SocketTest>(1));
 	}
 	selector.select();
 	// When/Then
@@ -67,10 +60,10 @@ BOOST_AUTO_TEST_CASE(ShouldReturnIndexOfReadableDescriptorByCallback)
 	// Given
 	SelectorPoll selector(10);
 	for (int i = 0; i < 10; i++) {
-		selector.setSocket(i, make_shared<TestSocket>(1));
+		selector.setSocket(i, make_shared<SocketTest>(1));
 	}
 	piper p;
-	selector.setSocket(5, make_shared<TestSocket>(p.in));
+	selector.setSocket(5, make_shared<SocketTest>(p.in));
 	BOOST_REQUIRE_EQUAL(write(p.out, "X", 1), 1);
 	selector.select();
 	// When
@@ -99,9 +92,9 @@ BOOST_AUTO_TEST_CASE(ShouldCallIndexOfWritableDescriptor)
 	SelectorPoll selector(10);
 	piper p;
 	for (int i = 0; i < 10; i++) {
-		selector.setSocket(i, make_shared<TestSocket>(p.in));
+		selector.setSocket(i, make_shared<SocketTest>(p.in));
 	}
-	selector.setSocket(5, make_shared<TestSocket>(p.out));
+	selector.setSocket(5, make_shared<SocketTest>(p.out));
 	selector.select();
 	// When
 	int rv = -1;
