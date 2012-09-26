@@ -9,7 +9,7 @@
 using namespace std;
 
 SelectorEpoll::SelectorEpoll(int n)
-	: fds(n), rcursor(0), wcursor(0)
+	: fds(n)
 {
 	for (auto &p: fds) {
 		p.fd = -1;
@@ -33,9 +33,6 @@ void SelectorEpoll::select()
 			p.revents = 0;
 		}
 	}
-
-	rcursor = 0;
-	wcursor = 0;
 }
 
 void SelectorEpoll::selectRead(const function<void (int)> &callback)

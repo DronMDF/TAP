@@ -17,6 +17,4 @@ public:
 
 private:
 	std::vector<pollfd> fds;
-	unsigned rcursor;
-	unsigned wcursor;
 };
