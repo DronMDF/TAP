@@ -129,11 +129,12 @@ int main(int argc, char **argv)
 	TracerStream tracer(&cout, timestamp);
 	
 	TapManager tapm(count,
-			[](int n){ return make_shared<SelectorPoll>(n); }, 
+			[](int n){ return make_shared<SelectorPoll>(n); },
 			[server, port](){ return make_shared<ClientTcp>(server, port); });
 	
-	// tapm.setTracer(count - 1, &tracer);
-	tapm.setTracer(0, &tracer);
+	for (unsigned i = 0; i < count; i++) {
+		tapm.setTracer(i, &tracer);
+	}
 	
 	tapm.setShowStatistic(bind(showStatistic, _1, _2, _3, timestamp), chrono::seconds(10));
 	tapm.pressure();

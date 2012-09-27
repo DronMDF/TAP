@@ -16,9 +16,6 @@ SocketTcp::SocketTcp(const in_addr &addr, unsigned port)
 		return;
 	}
 
-	const int flags = fcntl(sock, F_GETFL, 0);
-	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
-
 	sockaddr_in sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sin_family = AF_INET;
@@ -27,8 +24,13 @@ SocketTcp::SocketTcp(const in_addr &addr, unsigned port)
 	if (connect(sock, (sockaddr *)&sa, sizeof(sa)) == -1) {
 		if (errno != EINPROGRESS) {
 			close(sock);
+			sock = -1;
+			return;
 		}
 	}
+
+	const int flags = fcntl(sock, F_GETFL, 0);
+	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 }
 
 SocketTcp::~SocketTcp()

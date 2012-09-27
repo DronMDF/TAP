@@ -56,23 +56,28 @@ void ClientTcp::read(ClientControl *control)
 
 	if (!is_online) {
 		is_online = true;
-		//control->trace("Client online");
+		control->trace("Client online");
 		control->setStateOnline();
 	}
 
 	//control->trace("read", buf.size());
 
 	readed += buf.size();
-	const auto interval = high_resolution_clock::now() - stamp;
-	if (interval > seconds(10)) {
-		const auto ms = duration_cast<milliseconds>(interval).count();
-		const auto rate = readed * 8000 / ms;
-		control->trace("read rate (bit/sec)", rate);
-		stamp = high_resolution_clock::now();
-		readed = 0;
-	}
+//	const auto interval = high_resolution_clock::now() - stamp;
+//	if (interval > seconds(10)) {
+//		const auto ms = duration_cast<milliseconds>(interval).count();
+//		const auto rate = readed * 8000 / ms;
+//		control->trace("read rate (bit/sec)", rate);
+//		stamp = high_resolution_clock::now();
+//		readed = 0;
+//	}
 
 	setTimeout(control, 60);
+}
+
+bool ClientTcp::write(ClientControl *control, const vector<uint8_t> &data)
+{
+	return true;
 }
 
 void ClientTcp::timeout(ClientControl *control)

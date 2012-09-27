@@ -23,7 +23,7 @@ libtap.a: ${OBJECTS}
 	${AR} -r $@ $^
 	${AR} -s $@
 
-test: ${TEST_OBJECTS}
+test: ${TEST_OBJECTS} libtap.a
 	${CXX} -o $@ $^ -L. -ltap -lboost_unit_test_framework
 
 

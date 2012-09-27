@@ -14,6 +14,7 @@ public:
 	virtual ~ClientTcp();
 
 	virtual void read(ClientControl *control);
+	virtual bool write(ClientControl *control, const std::vector<uint8_t> &data);
 	virtual void timeout(ClientControl *control);
 	virtual void action(ClientControl *control);
 

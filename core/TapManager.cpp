@@ -161,7 +161,7 @@ void TapManager::pressure()
 {
 	while (true) {
 		const auto now = chrono::high_resolution_clock::now();
-		const auto endtime = now + chrono::seconds(1);
+		const auto endtime = now + chrono::seconds(10);
 		
 		showStatistics();
 		
@@ -182,6 +182,11 @@ void TapManager::pressure()
 			continue;
 		}
 		
+		const auto interval = chrono::high_resolution_clock::now() - now;
+		if (interval > chrono::seconds(1)) {
+			cout << "Long cycle time: " << chrono::duration_cast<chrono::milliseconds>(interval).count() << endl;
+		}
+
 		sched_yield();
 	}
 }
