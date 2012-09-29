@@ -39,7 +39,7 @@ string timestamp()
 
 	auto millis = duration_cast<milliseconds>(time.time_since_epoch()).count() % 1000;
 	out << "." << setw(3) << setfill('0') << millis;
-	out << "] ";
+	out << "]";
 	
 	return out.str();
 }
@@ -48,9 +48,7 @@ string timestamp_millis()
 {
 	using namespace chrono;
 	const auto time = high_resolution_clock::now();
-	ostringstream out;
-	out << duration_cast<milliseconds>(time.time_since_epoch()).count() << " ";
-	return out.str();
+	return boost::lexical_cast<string>(duration_cast<milliseconds>(time.time_since_epoch()).count());
 }
 
 void showStatistic(int offline, int connecting, int online, function<string ()> timestamp)
@@ -126,7 +124,7 @@ int main(int argc, char **argv)
 
 	cout << "Server: " << inet_ntoa(server) << ':' << port << endl;
 	
-	TracerStream tracer(&cout, timestamp);
+	TracerStream tracer(&cout, timestamp_millis);
 	
 	TapManager tapm(count,
 			[](int n){ return make_shared<SelectorPoll>(n); },

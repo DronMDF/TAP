@@ -49,11 +49,11 @@ void ClientControl::setStateOnline() const
 
 void ClientControl::trace(const string &message) const
 {
-	tracer->trace(message);
+	tracer->trace(n, message);
 }
 
 void ClientControl::trace(const string &key, unsigned value) const
 {
-	tracer->trace(key, value);
+	tracer->trace(n, key, value);
 }
 

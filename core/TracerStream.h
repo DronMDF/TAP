@@ -10,8 +10,8 @@ public:
 	TracerStream(std::ostream *out, 
 		std::function<std::string()> timestamp = [](){ return ""; });
 	
-	virtual void trace(const std::string &msg) const;
-	virtual void trace(const std::string &key, unsigned value) const;
+	virtual void trace(unsigned id, const std::string &msg) const;
+	virtual void trace(unsigned id, const std::string &key, unsigned value) const;
 
 private:
 	TracerStream(const TracerStream&) = delete;

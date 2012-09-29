@@ -12,20 +12,20 @@ BOOST_AUTO_TEST_CASE(ShouldOutString)
 	ostringstream out;
 	TracerStream tracer(&out);
 	// When
-	tracer.trace("hello");
+	tracer.trace(42, "hello");
 	// Then
-	BOOST_REQUIRE_EQUAL(out.str(), "hello\n");
+	BOOST_REQUIRE_EQUAL(out.str(), "42 hello\n");
 }
 
 BOOST_AUTO_TEST_CASE(ShouldPrintTimestampBeforeString)
 {
 	// Given
 	ostringstream out;
-	TracerStream tracer(&out, [](){ return "[timestamp] "; });
+	TracerStream tracer(&out, [](){ return "[timestamp]"; });
 	// When
-	tracer.trace("hello");
+	tracer.trace(66, "hello");
 	// Then
-	BOOST_REQUIRE_EQUAL(out.str(), "[timestamp] hello\n");
+	BOOST_REQUIRE_EQUAL(out.str(), "[timestamp] 66 hello\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END();

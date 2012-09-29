@@ -60,7 +60,7 @@ void ClientTcp::read(ClientControl *control)
 		control->setStateOnline();
 	}
 
-	//control->trace("read", buf.size());
+	control->trace("read", buf.size());
 
 	readed += buf.size();
 //	const auto interval = high_resolution_clock::now() - stamp;
@@ -96,7 +96,7 @@ void ClientTcp::action(ClientControl *control)
 			control->setSocket(socket);
 			control->setStateConnecting();
 			setTimeout(control, 60);
-			//control->trace("Goes connecting");
+			control->trace("Goes connecting");
 		} catch (const exception &e) {
 			control->trace(e.what());
 		}

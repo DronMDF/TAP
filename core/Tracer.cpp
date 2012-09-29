@@ -7,11 +7,11 @@ Tracer::~Tracer()
 {
 }
 
-void Tracer::trace(const string &) const
+void Tracer::trace(unsigned, const string &) const
 {
 }
 
-void Tracer::trace(const string &, unsigned) const
+void Tracer::trace(unsigned, const string &, unsigned) const
 {
 }
 

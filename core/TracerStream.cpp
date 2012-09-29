@@ -9,13 +9,15 @@ TracerStream::TracerStream(ostream *out, std::function<std::string()> timestamp)
 {
 }
 
-void TracerStream::trace(const string &msg) const
+void TracerStream::trace(unsigned id, const string &msg) const
 {
-	(*out) << timestamp() << msg << endl;
+	const string ts = timestamp();
+	(*out) << ts << (ts.empty() ? "" : " ") << id << ' ' << msg << endl;
 }
 
-void TracerStream::trace(const std::string &key, unsigned value) const
+void TracerStream::trace(unsigned id, const std::string &key, unsigned value) const
 {
-	(*out) << timestamp() << key << ": " << value << endl;
+	const string ts = timestamp();
+	(*out) << ts << (ts.empty() ? "" : " ") << id << ' ' << key << ": " << value << endl;
 }
 
