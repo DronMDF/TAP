@@ -15,7 +15,7 @@ clean:
 tap-tcp: ../../libtap.a
 
 tap-tcp: ${OBJECTS}
-	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex
+	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex -lmongoclient -lboost_thread -lboost_filesystem -lboost_system 
 
 tap-tcp-server: ${OBJDIR}/tap-tcp-server.o
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap

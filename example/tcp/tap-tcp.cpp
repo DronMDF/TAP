@@ -15,10 +15,10 @@
 #include <core/Tap.h>
 #include <core/TapManager.h>
 #include <core/TracerStream.h>
+#include <core/TracerMongo.h>
 #include "ClientTcp.h"
 
 using namespace std;
-using namespace std::placeholders;
 
 string timestamp()
 {
@@ -124,7 +124,8 @@ int main(int argc, char **argv)
 
 	cout << "Server: " << inet_ntoa(server) << ':' << port << endl;
 	
-	TracerStream tracer(&cout, timestamp_millis);
+	//TracerStream tracer(&cout, timestamp_millis);
+	TracerMongo tracer("localhost");
 	
 	TapManager tapm(count,
 			[](int n){ return make_shared<SelectorPoll>(n); },

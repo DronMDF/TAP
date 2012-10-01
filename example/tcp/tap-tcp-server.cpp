@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <poll.h>
+#include <sched.h>
 #include <core/Tap.h>
 
 using namespace std;
@@ -139,6 +140,8 @@ void Server::listenning()
 				p.fd = -1;
 			}
 		}
+
+		sched_yield();
 	}
 }
 
