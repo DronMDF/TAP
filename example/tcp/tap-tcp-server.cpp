@@ -104,22 +104,31 @@ void Server::listenning()
 			outtime = high_resolution_clock::now();
 		}
 
-		if (poll(&pfd[0], pfd.size(), 0) <= 0 and poll(&cfd, 1, 0) <= 0) {
-			sched_yield();
+		while (poll(&cfd, 1, 0) > 0) {
+			const int nfd = accept(lsock, 0, 0);
+			if (nfd != -1) {
+				// cout << "opening socket " << nfd << endl;
+				setNonblock(nfd);
+				if (!insertDescriptor(nfd)) {
+					close(nfd);
+				}
+			}
+		}
+
+		int pc = poll(&pfd[0], pfd.size(), 0);
+		if (pc <= 0) {
+			sleep(1);
 			continue;
 		}
 
+		int pa = 0;
 		for(auto &p: pfd) {
-			if (poll(&cfd, 1, 0) > 0) {
-				// ListenSocket
-				const int nfd = accept(lsock, 0, 0);
-				if (nfd != -1) {
-					// cout << "opening socket " << nfd << endl;
-					setNonblock(nfd);
-					if (!insertDescriptor(nfd)) {
-						close(nfd);
-					}
-				}
+			if (pa > pc) {
+				break;
+			}
+
+			if (p.revents != 0) {
+				pa++;
 			}
 
 			if ((p.revents & POLLPRI) != 0) {
@@ -140,8 +149,6 @@ void Server::listenning()
 				p.fd = -1;
 			}
 		}
-
-		sched_yield();
 	}
 }
 

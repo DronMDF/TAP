@@ -19,6 +19,7 @@
 #include "ClientTcp.h"
 
 using namespace std;
+using namespace std::placeholders;
 
 string timestamp()
 {

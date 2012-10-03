@@ -1,7 +1,9 @@
 
 #pragma once
-#include <mongo/client/dbclient.h>
+#include <memory>
 #include "Tracer.h"
+
+namespace mongo { class DBClientConnection; };
 
 class TracerMongo : public Tracer {
 public:
@@ -15,5 +17,5 @@ private:
 	TracerMongo(const TracerMongo&) = delete;
 	TracerMongo &operator=(const TracerMongo&) = delete;
 	
-	mutable mongo::DBClientConnection client;
+	std::unique_ptr<mongo::DBClientConnection> client;
 };
