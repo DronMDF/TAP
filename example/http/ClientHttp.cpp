@@ -58,13 +58,6 @@ void ClientHttp::fixTimestamp(const string &what, ClientControl *control)
 	start_time = chrono::high_resolution_clock::now();
 }
 
-bool ClientHttp::writeToMain(ClientControl *control, const std::vector<uint8_t> &data)
-{
-	const bool rv = Client::writeToMain(control, data);
-	fixTimestamp("handshake", control);
-	return rv;
-}
-
 void ClientHttp::setTimeout(ClientControl *control, unsigned sec) const
 {
 	const auto wakeup_time = chrono::high_resolution_clock::now() + chrono::seconds(sec);
@@ -79,7 +72,7 @@ int ClientHttp::getMain() const
 void ClientHttp::read(ClientControl *control)
 {
 	vector<uint8_t> buf(4096);
-	int rv = read(fd, &buf[0], buf.size());
+	int rv = ::read(fd, &buf[0], buf.size());
 	
 	if (rv <= 0) {
 		control->trace("bytes", rx_bytes);

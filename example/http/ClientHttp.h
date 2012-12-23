@@ -19,7 +19,6 @@ private:
 	int createMainDescriptor() const;
 	void setTimeout(ClientControl *control, unsigned sec) const;
 	
-	virtual bool writeToMain(ClientControl *control, const std::vector<uint8_t> &data);
 	void fixTimestamp(const std::string &what, ClientControl *control);
 	
 	

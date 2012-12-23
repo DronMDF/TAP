@@ -131,7 +131,7 @@ void TapManager::checkTimeouts(const time_point &now)
 
 void TapManager::selectAllToMain()
 {
-	main_ds->selectRead([&](int n){
+	main_ds->selectWrite([&](int n){
 		if (!queues[n].empty()) {
 			ClientControl control(this, n, tracers[n]);
 			if (clients[n]->write(&control, queues[n].front())) {

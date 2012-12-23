@@ -150,14 +150,12 @@ int main(int argc, char **argv)
 	
 	TracerStream tracer(&cout, timestamp_millis);
 	
-	const string request = "GET " + file + " HTTP/1.0\n\r\n\r";
+	const string request = "GET " + file + " HTTP/1.0\r\n\r\n";
 	TapManager tapm(count,
 			[](int n){ return make_shared<SelectorPoll>(n); }, 
-			[server, request](){ return make_shared<ClientHttp>(server, 80, request); });
+			[server, request](){ return make_shared<ClientHttp>(server, 7777, request); });
 	
-	for (unsigned i = 0; i < count; i++) {
-		tapm.setTracer(i, &tracer);
-	}
+	tapm.setTracer(0, &tracer);
 	
 	tapm.setShowStatistic(bind(showStatistic, _1, _2, _3, timestamp_millis), chrono::seconds(10));
 	
