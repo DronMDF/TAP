@@ -4,7 +4,8 @@ Network load testing framework. Provides loads of up to tens of thousands of par
 Prerequesties:
 
 	gcc-4.5 or above
-	
+	Boost test library (libboost-test-dev on Ubuntu)
+
 Building:
 
 	make
