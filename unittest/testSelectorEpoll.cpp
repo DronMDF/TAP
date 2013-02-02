@@ -88,4 +88,32 @@ BOOST_AUTO_TEST_CASE(ShouldCallIndexOfWritableDescriptor)
 	BOOST_REQUIRE_EQUAL(rv, 1);
 }
 
+BOOST_AUTO_TEST_CASE(ShouldPollSockets)
+{
+	// Given
+	struct SocketFlagged : public SocketTest {
+		bool received, sended;
+		SocketFlagged(int fd) : SocketTest(fd), received(false), sended(false) {};
+		virtual std::vector<uint8_t> recv(size_t) { received = true; return {}; };
+		virtual size_t send(const std::vector<uint8_t> &) { sended = true; return 0; };
+	};
+
+	piper p;
+	auto in = make_shared<SocketFlagged>(p.in);
+	auto out = make_shared<SocketFlagged>(p.out);
+
+	SelectorEpoll selector(2);
+	selector.addSocket(in);
+	selector.addSocket(out);
+
+	BOOST_REQUIRE_EQUAL(write(p.out, "X", 1), 1);
+	// When
+	selector.proceed();
+	// Then
+	BOOST_REQUIRE(in->received);
+	BOOST_REQUIRE(!in->sended);
+	BOOST_REQUIRE(!out->received);
+	BOOST_REQUIRE(out->sended);
+}
+
 BOOST_AUTO_TEST_SUITE_END();

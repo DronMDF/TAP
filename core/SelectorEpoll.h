@@ -1,6 +1,7 @@
 
 #pragma once
 #include <vector>
+#include <map>
 #include <sys/epoll.h>
 #include "Selector.h"
 
@@ -21,4 +22,12 @@ private:
 	std::vector<int> fds;
 	std::vector<epoll_event> events;
 	int event_count;
+
+	// New selector API
+public:
+	virtual void addSocket(const std::shared_ptr<Socket> &socket);
+	virtual void proceed();
+
+private:
+	std::map<int, std::shared_ptr<Socket>> sockets;
 };

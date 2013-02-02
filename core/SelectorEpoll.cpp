@@ -9,10 +9,10 @@
 using namespace std;
 
 SelectorEpoll::SelectorEpoll(int n)
-	: epollfd(epoll_create(n)), fds(n), events(n), event_count(0)
+	: epollfd(epoll_create(n)), fds(n), events(n), event_count(0), sockets()
 {
 	if (epollfd == -1) {
-		throw runtime_error(string("epoll_create failed") + strerror(errno));
+		throw runtime_error(string("epoll_create failed: ") + strerror(errno));
 	}
 
 	for (auto &fd: fds) {
@@ -100,3 +100,51 @@ void SelectorEpoll::selectWrite(const function<void (int)> &callback)
 void SelectorEpoll::setDescriptor(unsigned, int)
 {
 }
+
+void SelectorEpoll::addSocket(const std::shared_ptr<Socket> &socket)
+{
+	const int fd = socket->getDescriptor();
+	if (sockets.count(fd) > 0) {
+		throw runtime_error("Descriptor already in use");
+	}
+	sockets[fd] = socket;
+
+	struct epoll_event ev = { EPOLLIN | EPOLLOUT | EPOLLPRI, {}};
+	ev.data.fd = fd;
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1) {
+		throw runtime_error(string("epoll_ctl(EPOLL_CTL_ADD) failed: ") + strerror(errno));
+	}
+}
+
+void SelectorEpoll::proceed()
+{
+	// TODO: epoll_events should move here.
+	int count = epoll_wait(epollfd, &events[0], events.size(), 0);
+	if (count == -1) {
+		throw runtime_error(string("epoll_wait() failed: ") + strerror(errno));
+	}
+
+	// Read all
+	for (int ec = 0; ec < count; ec++) {
+		if ((events[ec].events & EPOLLIN) != 0) {
+			sockets[events[ec].data.fd]->recv(0);
+			events[ec].events &= ~EPOLLIN;
+		}
+	}
+
+	// Write all
+	for (int ec = 0; ec < count; ec++) {
+		if ((events[ec].events & EPOLLOUT) != 0) {
+			sockets[events[ec].data.fd]->send({});
+			events[ec].events &= ~EPOLLOUT;
+		}
+	}
+
+	// Handle all errors
+	for (int ec = 0; ec < count; ec++) {
+		if (events[ec].events != 0) {
+			sockets[events[ec].data.fd]->recv(0);
+		}
+	}
+}
+
