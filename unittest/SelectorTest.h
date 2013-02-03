@@ -10,4 +10,9 @@ public:
 	virtual void selectWrite(const std::function<void (int)> &) {};
 
 	virtual void setDescriptor(unsigned, int) {};
+
+public:
+	// New selector API
+	virtual void addSocket(const std::shared_ptr<Socket> &) {};
+	virtual void proceed() {};
 };

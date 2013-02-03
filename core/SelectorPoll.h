@@ -17,4 +17,9 @@ public:
 
 private:
 	std::vector<pollfd> fds;
+
+	// New selector API
+public:
+	virtual void addSocket(const std::shared_ptr<Socket> &socket);
+	virtual void proceed();
 };

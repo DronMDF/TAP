@@ -61,3 +61,13 @@ void SelectorPoll::setDescriptor(unsigned idx, int fd)
 	fds[idx].fd = fd;
 	fds[idx].revents = 0;
 }
+
+void SelectorPoll::addSocket(const shared_ptr<Socket> &)
+{
+	// TODO: implement this for new API
+}
+
+void SelectorPoll::proceed()
+{
+	// TODO: implement this for new API
+}
