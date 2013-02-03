@@ -118,32 +118,33 @@ void SelectorEpoll::addSocket(const std::shared_ptr<Socket> &socket)
 
 void SelectorEpoll::proceed()
 {
-	// TODO: epoll_events should move here.
-	int count = epoll_wait(epollfd, &events[0], events.size(), 0);
+	vector<epoll_event> evs(sockets.size());
+	int count = epoll_wait(epollfd, &evs[0], evs.size(), 0);
 	if (count == -1) {
 		throw runtime_error(string("epoll_wait() failed: ") + strerror(errno));
 	}
+	evs.resize(count);
 
 	// Read all
 	for (int ec = 0; ec < count; ec++) {
-		if ((events[ec].events & EPOLLIN) != 0) {
-			sockets[events[ec].data.fd]->recv();
-			events[ec].events &= ~EPOLLIN;
+		if ((evs[ec].events & EPOLLIN) != 0) {
+			sockets[evs[ec].data.fd]->recv();
+			evs[ec].events &= ~EPOLLIN;
 		}
 	}
 
 	// Write all
 	for (int ec = 0; ec < count; ec++) {
-		if ((events[ec].events & EPOLLOUT) != 0) {
-			sockets[events[ec].data.fd]->send();
-			events[ec].events &= ~EPOLLOUT;
+		if ((evs[ec].events & EPOLLOUT) != 0) {
+			sockets[evs[ec].data.fd]->send();
+			evs[ec].events &= ~EPOLLOUT;
 		}
 	}
 
 	// Handle all errors
 	for (int ec = 0; ec < count; ec++) {
-		if (events[ec].events != 0) {
-			sockets[events[ec].data.fd]->recv();
+		if (evs[ec].events != 0) {
+			sockets[evs[ec].data.fd]->recv();
 		}
 	}
 }
