@@ -55,13 +55,6 @@ void SelectorPoll::selectWrite(const function<void (int)> &callback)
 	}
 }
 
-void SelectorPoll::setDescriptor(unsigned idx, int fd)
-{
-	assert(idx < fds.size());
-	fds[idx].fd = fd;
-	fds[idx].revents = 0;
-}
-
 void SelectorPoll::addSocket(const shared_ptr<Socket> &)
 {
 	// TODO: implement this for new API

@@ -97,10 +97,6 @@ void SelectorEpoll::selectWrite(const function<void (int)> &callback)
 	}
 }
 
-void SelectorEpoll::setDescriptor(unsigned, int)
-{
-}
-
 void SelectorEpoll::addSocket(const std::shared_ptr<Socket> &socket)
 {
 	const int fd = socket->getDescriptor();
