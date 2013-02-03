@@ -12,4 +12,8 @@ public:
 
 	virtual std::vector<uint8_t> recv(size_t size) = 0;
 	virtual size_t send(const std::vector<uint8_t> &data) = 0;
+
+	// New API
+	virtual void recv() = 0;
+	virtual void send() = 0;
 };

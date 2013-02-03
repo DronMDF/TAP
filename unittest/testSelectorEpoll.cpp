@@ -94,8 +94,8 @@ BOOST_AUTO_TEST_CASE(ShouldPollSockets)
 	struct SocketFlagged : public SocketTest {
 		bool received, sended;
 		SocketFlagged(int fd) : SocketTest(fd), received(false), sended(false) {};
-		virtual std::vector<uint8_t> recv(size_t) { received = true; return {}; };
-		virtual size_t send(const std::vector<uint8_t> &) { sended = true; return 0; };
+		virtual void recv() { received = true; };
+		virtual void send() { sended = true; };
 	};
 
 	piper p;

@@ -127,7 +127,7 @@ void SelectorEpoll::proceed()
 	// Read all
 	for (int ec = 0; ec < count; ec++) {
 		if ((events[ec].events & EPOLLIN) != 0) {
-			sockets[events[ec].data.fd]->recv(0);
+			sockets[events[ec].data.fd]->recv();
 			events[ec].events &= ~EPOLLIN;
 		}
 	}
@@ -135,7 +135,7 @@ void SelectorEpoll::proceed()
 	// Write all
 	for (int ec = 0; ec < count; ec++) {
 		if ((events[ec].events & EPOLLOUT) != 0) {
-			sockets[events[ec].data.fd]->send({});
+			sockets[events[ec].data.fd]->send();
 			events[ec].events &= ~EPOLLOUT;
 		}
 	}
@@ -143,7 +143,7 @@ void SelectorEpoll::proceed()
 	// Handle all errors
 	for (int ec = 0; ec < count; ec++) {
 		if (events[ec].events != 0) {
-			sockets[events[ec].data.fd]->recv(0);
+			sockets[events[ec].data.fd]->recv();
 		}
 	}
 }
