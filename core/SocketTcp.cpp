@@ -65,3 +65,13 @@ size_t SocketTcp::send(const vector<uint8_t> &data)
 
 	return rv;
 }
+
+void SocketTcp::recv()
+{
+	// TODO: implement new API
+}
+
+void SocketTcp::send()
+{
+	// TODO: implement new API
+}

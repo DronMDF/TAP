@@ -14,6 +14,10 @@ public:
 	virtual std::vector<uint8_t> recv(size_t size);
 	virtual size_t send(const std::vector<uint8_t> &data);
 
+	// New API
+	virtual void recv();
+	virtual void send();
+
 private:
 	int sock;
 };
