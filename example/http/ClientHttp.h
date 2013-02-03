@@ -1,6 +1,7 @@
 
 #pragma once
 #include <string>
+#include <memory>
 #include <arpa/inet.h>
 #include <core/Client.h>
 #include <core/TimePoint.h>
@@ -16,7 +17,6 @@ public:
 
 private:
 	int getMain() const;
-	int createMainDescriptor() const;
 	void setTimeout(ClientControl *control, unsigned sec) const;
 	
 	void fixTimestamp(const std::string &what, ClientControl *control);
@@ -26,7 +26,7 @@ private:
 	int port;
 	const std::string request;
 
-	int fd;
+	std::shared_ptr<Socket> socket;
 	
 	bool is_online;
 	
