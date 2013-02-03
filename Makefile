@@ -17,7 +17,8 @@ install:
 clean:
 	rm -rf ${OBJDIR}
 	rm -f libtap.a test
-
+	make -C example/tcp $@
+	make -C example/http $@
 
 libtap.a: ${OBJECTS}
 	${AR} -r $@ $^
@@ -26,6 +27,9 @@ libtap.a: ${OBJECTS}
 test: ${TEST_OBJECTS} libtap.a
 	${CXX} -o $@ $^ -L. -ltap -lboost_unit_test_framework
 
+examples:
+	make -C example/tcp
+	make -C example/http
 
 ${OBJDIR}/%.o : core/%.cpp ${OBJDIR}/.keep
 	${CXX} -MMD ${CXXFLAGS} -c -o $@ $<
