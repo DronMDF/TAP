@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(ShouldNotCallIfNoOneReadyForWrite)
 	SelectorPoll selector(10);
 	piper p;
 	for (int i = 0; i < 10; i++) {
-		selector.setDescriptor(i, p.in);
+		selector.setSocket(i, make_shared<SocketTest>(p.in));
 	}
 	selector.select();
 	// When/Then
