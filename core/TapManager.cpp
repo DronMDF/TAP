@@ -50,12 +50,6 @@ void TapManager::setSocket(unsigned n, const std::shared_ptr<const Socket> &sock
 	main_ds->setSocket(n, socket);
 }
 
-void TapManager::setMainDescriptor(unsigned n, int fd)
-{
-	assert(n < clients.size());
-	main_ds->setDescriptor(n, fd);
-}
-
 void TapManager::setStateOffline(unsigned n)
 {
 	assert(n < clients.size());

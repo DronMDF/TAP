@@ -16,7 +16,6 @@ public:
 
 	void setSocket(const std::shared_ptr<const Socket> &socket) const;
 
-	void setMainDescriptor(int fd) const;
 	void writeToMain(const std::vector<uint8_t> &data) const;
 	void setWakeupTime(const time_point &wakeup_time) const;
 	

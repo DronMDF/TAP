@@ -17,11 +17,6 @@ void ClientControl::setSocket(const std::shared_ptr<const Socket> &socket) const
 	tapm->setSocket(n, socket);
 }
 
-void ClientControl::setMainDescriptor(int fd) const
-{
-	tapm->setMainDescriptor(n, fd);
-}
-
 void ClientControl::writeToMain(const vector<uint8_t> &data) const
 {
 	tapm->writeToMain(n, data);

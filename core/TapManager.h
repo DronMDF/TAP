@@ -27,7 +27,6 @@ public:
 	virtual void setStateOnline(unsigned n);
 
 	void setSocket(unsigned n, const std::shared_ptr<const Socket> &socket);
-	void setMainDescriptor(unsigned n, int fd);
 	
 	void writeToMain(unsigned n, const std::vector<uint8_t> &data);
 	
