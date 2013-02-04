@@ -53,9 +53,7 @@ private:
 	unsigned action_idx;
 
 	void showStatistics();
-	void selectAllFromMain();
 	void checkTimeouts(const time_point &now);
-	void selectAllToMain();
 	bool needToAction(const time_point &endtime);
 };
 

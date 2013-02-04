@@ -105,14 +105,6 @@ void TapManager::showStatistics()
 	stats_time = chrono::high_resolution_clock::now() + stats_interval;
 }
 
-void TapManager::selectAllFromMain()
-{
-	main_ds->selectRead([&](int n){
-		ClientControl control(this, n, tracers[n]);
-		clients[n]->read(&control);
-	});
-}
-
 void TapManager::checkTimeouts(const time_point &now)
 {
 	for (unsigned i = 0; i < clients.size(); i++) {
@@ -121,19 +113,6 @@ void TapManager::checkTimeouts(const time_point &now)
 			clients[i]->timeout(&control);
 		}
 	}
-}
-
-void TapManager::selectAllToMain()
-{
-	main_ds->selectWrite([&](int n){
-		if (!queues[n].empty()) {
-			ClientControl control(this, n, tracers[n]);
-			if (clients[n]->write(&control, queues[n].front())) {
-				// Remove if success
-				queues[n].pop();
-			}
-		}
-	});
 }
 
 bool TapManager::needToAction(const time_point &endtime)
@@ -159,17 +138,14 @@ void TapManager::pressure()
 		
 		showStatistics();
 		
-		main_ds->select();
+		main_ds->proceed();
 
-		selectAllFromMain();
 		checkTimeouts(chrono::high_resolution_clock::now());
 
 		if (chrono::high_resolution_clock::now() > endtime) {
 			cout << "break on phase 1" << endl;
 			continue;
 		}
-		
-		selectAllToMain();
 		
 		if (!needToAction(endtime)) {
 			cout << "break on action" << endl;
