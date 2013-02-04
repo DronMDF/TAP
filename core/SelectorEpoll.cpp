@@ -54,15 +54,6 @@ void SelectorEpoll::setSocket(unsigned n, const shared_ptr<const Socket> &socket
 	}
 }
 
-void SelectorEpoll::select()
-{
-	event_count = epoll_wait(epollfd, &events[0], events.size(), 0);
-	if (event_count == -1) {
-		cerr << "epoll_wait failed. " << strerror(errno) << endl;
-		event_count = 0;
-	}
-}
-
 void SelectorEpoll::selectRead(const function<void (int)> &callback)
 {
 	const int flags = EPOLLPRI | EPOLLIN | EPOLLERR | EPOLLHUP;

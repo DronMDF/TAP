@@ -25,16 +25,6 @@ void SelectorPoll::setSocket(unsigned idx, const shared_ptr<const Socket> &socke
 	fds[idx].revents = 0;
 }
 
-void SelectorPoll::select()
-{
-	if (poll(&fds[0], fds.size(), 0) < 0) {
-		cerr << "poll failed: " << strerror(errno) << endl;
-		for (auto &p: fds) {
-			p.revents = 0;
-		}
-	}
-}
-
 void SelectorPoll::selectRead(const function<void (int)> &callback)
 {
 	const int flags = POLLPRI | POLLIN | POLLERR | POLLHUP | POLLNVAL;
