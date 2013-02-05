@@ -18,7 +18,7 @@ tap-http: ${OBJECTS}
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex
 	
 ${OBJDIR}/%.o : %.cpp ${OBJDIR}/.keep
-	${CXX} ${CXXFLAGS} -c -o $@ $<
+	${CXX} -MMD ${CXXFLAGS} -c -o $@ $<
 	
 ${OBJDIR}/.keep:
 	test -d ${OBJDIR} || mkdir ${OBJDIR}
