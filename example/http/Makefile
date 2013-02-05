@@ -23,3 +23,6 @@ ${OBJDIR}/%.o : %.cpp ${OBJDIR}/.keep
 ${OBJDIR}/.keep:
 	test -d ${OBJDIR} || mkdir ${OBJDIR}
 	touch $@
+
+-include ${patsubst %.o,%.d,${OBJECTS}}
+	
