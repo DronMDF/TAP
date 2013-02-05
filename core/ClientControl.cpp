@@ -12,9 +12,9 @@ ClientControl::ClientControl(TapManager *tapm, unsigned n, Tracer *tracer)
 {
 }
 
-void ClientControl::setSocket(const std::shared_ptr<const Socket> &socket) const
+void ClientControl::setSocket(const std::shared_ptr<Socket> &socket) const
 {
-	tapm->setSocket(n, socket);
+	tapm->setSocket(socket);
 }
 
 void ClientControl::writeToMain(const vector<uint8_t> &data) const
