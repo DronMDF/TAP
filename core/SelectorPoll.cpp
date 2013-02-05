@@ -18,13 +18,6 @@ SelectorPoll::SelectorPoll(int n)
 	}
 }
 
-void SelectorPoll::setSocket(unsigned idx, const shared_ptr<const Socket> &socket)
-{
-	assert(idx < fds.size());
-	fds[idx].fd = socket ? socket->getDescriptor() : -1;
-	fds[idx].revents = 0;
-}
-
 void SelectorPoll::selectRead(const function<void (int)> &callback)
 {
 	const int flags = POLLPRI | POLLIN | POLLERR | POLLHUP | POLLNVAL;

@@ -25,35 +25,6 @@ SelectorEpoll::~SelectorEpoll()
 	close(epollfd);
 }
 
-void SelectorEpoll::setSocket(unsigned n, const shared_ptr<const Socket> &socket)
-{
-	assert(n < fds.size());
-	const int nfd = socket->getDescriptor();
-	assert(fds[n] != nfd);
-
-	struct epoll_event ev = { EPOLLIN | EPOLLOUT | EPOLLPRI, {}};
-	if (fds[n] != -1) {
-		ev.data.fd = fds[n];
-		if (epoll_ctl(epollfd, EPOLL_CTL_DEL, fds[n], &ev) == -1) {
-			cerr << "epoll_ctl(EPOLL_CTL_DEL, " << fds[n] << ") failed. "
-				<< strerror(errno) << endl;
-			return;
-		}
-
-		fds[n] = -1;
-	}
-
-	if (nfd != -1) {
-		ev.data.fd = nfd;
-		if (epoll_ctl(epollfd, EPOLL_CTL_ADD, nfd, &ev) == -1) {
-			cerr << "epoll_ctl(EPOLL_CTL_ADD, " << nfd << ") failed. "
-				<< strerror(errno) << endl;
-		} else {
-			fds[n] = nfd;
-		}
-	}
-}
-
 void SelectorEpoll::selectRead(const function<void (int)> &callback)
 {
 	const int flags = EPOLLPRI | EPOLLIN | EPOLLERR | EPOLLHUP;
