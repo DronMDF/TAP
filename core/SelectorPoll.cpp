@@ -18,26 +18,6 @@ SelectorPoll::SelectorPoll(int n)
 	}
 }
 
-void SelectorPoll::selectRead(const function<void (int)> &callback)
-{
-	const int flags = POLLPRI | POLLIN | POLLERR | POLLHUP | POLLNVAL;
-	for (unsigned i = 0; i < fds.size(); i++) {
-		if ((fds[i].revents & flags) != 0) {
-			callback(i);
-		}
-	}
-}
-
-void SelectorPoll::selectWrite(const function<void (int)> &callback)
-{
-	const int flags = POLLOUT | POLLERR | POLLHUP | POLLNVAL;
-	for (unsigned i = 0; i < fds.size(); i++) {
-		if ((fds[i].revents & flags) != 0) {
-			callback(i);
-		}
-	}
-}
-
 void SelectorPoll::addSocket(const shared_ptr<Socket> &)
 {
 	// TODO: implement this for new API
@@ -47,3 +27,4 @@ void SelectorPoll::proceed()
 {
 	// TODO: implement this for new API
 }
+

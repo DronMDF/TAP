@@ -10,20 +10,14 @@ public:
 	SelectorEpoll(int n);
 	virtual ~SelectorEpoll();
 	
-	virtual void selectRead(const std::function<void (int)> &callback);
-	virtual void selectWrite(const std::function<void (int)> &callback);
-
 private:
-	int epollfd;
-	std::vector<int> fds;
-	std::vector<epoll_event> events;
-	int event_count;
 
-	// New selector API
 public:
 	virtual void addSocket(const std::shared_ptr<Socket> &socket);
 	virtual void proceed();
 
 private:
+	int epollfd;
 	std::map<int, std::shared_ptr<Socket>> sockets;
 };
+

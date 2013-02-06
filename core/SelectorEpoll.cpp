@@ -9,54 +9,16 @@
 using namespace std;
 
 SelectorEpoll::SelectorEpoll(int n)
-	: epollfd(epoll_create(n)), fds(n), events(n), event_count(0), sockets()
+	: epollfd(epoll_create(n)), sockets()
 {
 	if (epollfd == -1) {
 		throw runtime_error(string("epoll_create failed: ") + strerror(errno));
-	}
-
-	for (auto &fd: fds) {
-		fd = -1;
 	}
 }
 
 SelectorEpoll::~SelectorEpoll()
 {
 	close(epollfd);
-}
-
-void SelectorEpoll::selectRead(const function<void (int)> &callback)
-{
-	const int flags = EPOLLPRI | EPOLLIN | EPOLLERR | EPOLLHUP;
-	for (int ec = 0; ec < event_count; ec++) {
-		if ((events[ec].events & flags) == 0) {
-			continue;
-		}
-
-		// Not optimal way
-		for (unsigned n = 0; n < fds.size(); n++) {
-			if (fds[n] == events[ec].data.fd) {
-				callback(n);
-			}
-		}
-	}
-}
-
-void SelectorEpoll::selectWrite(const function<void (int)> &callback)
-{
-	const int flags = EPOLLOUT | EPOLLERR | EPOLLHUP;
-	for (int ec = 0; ec < event_count; ec++) {
-		if ((events[ec].events & flags) == 0) {
-			continue;
-		}
-
-		// Not optimal way
-		for (unsigned n = 0; n < fds.size(); n++) {
-			if (fds[n] == events[ec].data.fd) {
-				callback(n);
-			}
-		}
-	}
 }
 
 void SelectorEpoll::addSocket(const std::shared_ptr<Socket> &socket)
