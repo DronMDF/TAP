@@ -1,6 +1,6 @@
 
 CXX ?= g++
-CXXFLAGS ?= -O2 -g0 -std=c++0x -Wall -Wextra -Weffc++ -I.
+CXXFLAGS ?= -O2 -g0 -Wall -Wextra -Weffc++
 
 OBJDIR = .obj
 OBJECTS = ${patsubst core/%.cpp,${OBJDIR}/%.o,${wildcard core/*.cpp}}
@@ -32,10 +32,10 @@ examples:
 	make -C example/http
 
 ${OBJDIR}/%.o : core/%.cpp ${OBJDIR}/.keep
-	${CXX} -MMD ${CXXFLAGS} -c -o $@ $<
+	${CXX} -MMD -std=c++0x ${CXXFLAGS} -I. -c -o $@ $<
 
 ${OBJDIR}/%.o : unittest/%.cpp ${OBJDIR}/.keep
-	${CXX} -MMD ${CXXFLAGS} -c -o $@ $<
+	${CXX} -MMD -std=c++0x ${CXXFLAGS} -I. -c -o $@ $<
 
 ${OBJDIR}/.keep:
 	test -d ${OBJDIR} || mkdir ${OBJDIR}
