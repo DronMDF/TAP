@@ -26,5 +26,26 @@ struct piper {
 };
 
 // TODO: Implement add/proceed/remove tests
+BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
+{
+	// Given
+	SelectorPoll selector;
+
+	piper pfd;
+	write(pfd.out, "X", 1);
+
+	struct SocketForRead : public SocketTest {
+		bool received;
+		SocketForRead(int fd) : SocketTest(fd), received(false) {};
+		virtual void recv() { received = true; };
+	};
+	auto socket = make_shared<SocketForRead>(pfd.in);
+	selector.addSocket(socket);
+
+	// When
+	selector.proceed();
+	// Then
+	BOOST_REQUIRE(socket->received);
+}
 
 BOOST_AUTO_TEST_SUITE_END();
