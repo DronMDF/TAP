@@ -23,8 +23,12 @@ void SelectorPoll::addSocket(const shared_ptr<Socket> &)
 	// TODO: implement this for new API
 }
 
-void SelectorPoll::proceed()
+void SelectorPoll::removeSocket(const shared_ptr<Socket> &)
 {
 	// TODO: implement this for new API
 }
 
+void SelectorPoll::proceed()
+{
+	// TODO: implement this for new API
+}

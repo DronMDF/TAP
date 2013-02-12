@@ -9,6 +9,7 @@ public:
 	SelectorPoll(int n);
 	
 	virtual void addSocket(const std::shared_ptr<Socket> &socket);
+	virtual void removeSocket(const std::shared_ptr<Socket> &socket);
 	virtual void proceed();
 
 private:

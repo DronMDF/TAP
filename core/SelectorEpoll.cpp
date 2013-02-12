@@ -1,9 +1,9 @@
 
-#include <assert.h>
-#include <iostream>
-#include <stdexcept>
-#include <boost/foreach.hpp>
 #include "SelectorEpoll.h"
+#include <cstring>
+#include <stdexcept>
+#include <sys/epoll.h>
+#include <unistd.h>
 #include "Socket.h"
 
 using namespace std;
@@ -21,7 +21,7 @@ SelectorEpoll::~SelectorEpoll()
 	close(epollfd);
 }
 
-void SelectorEpoll::addSocket(const std::shared_ptr<Socket> &socket)
+void SelectorEpoll::addSocket(const shared_ptr<Socket> &socket)
 {
 	const int fd = socket->getDescriptor();
 	if (sockets.count(fd) > 0) {
@@ -34,6 +34,15 @@ void SelectorEpoll::addSocket(const std::shared_ptr<Socket> &socket)
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1) {
 		throw runtime_error(string("epoll_ctl(EPOLL_CTL_ADD) failed: ") + strerror(errno));
 	}
+}
+
+void SelectorEpoll::removeSocket(const shared_ptr<Socket> &socket)
+{
+	const int fd = socket->getDescriptor();
+	if (sockets.count(fd) > 0) {
+		throw runtime_error("Descriptor not in use");
+	}
+	sockets.erase(fd);
 }
 
 void SelectorEpoll::proceed()

@@ -1,6 +1,5 @@
 
 #pragma once
-#include <set>
 #include <memory>
 
 class Socket;
@@ -10,6 +9,8 @@ public:
 	virtual ~Selector() {};
 
 	virtual void addSocket(const std::shared_ptr<Socket> &socket) = 0;
+	virtual void removeSocket(const std::shared_ptr<Socket> &socket) = 0;
+
 	virtual void proceed() = 0;
 };
 
