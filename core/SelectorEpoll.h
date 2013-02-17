@@ -5,6 +5,7 @@
 
 class SelectorEpoll : public Selector {
 public:
+	SelectorEpoll();
 	SelectorEpoll(int n);
 	virtual ~SelectorEpoll();
 	

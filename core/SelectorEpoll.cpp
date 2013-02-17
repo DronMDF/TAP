@@ -8,6 +8,14 @@
 
 using namespace std;
 
+SelectorEpoll::SelectorEpoll()
+	: epollfd(epoll_create(1)), sockets()
+{
+	if (epollfd == -1) {
+		throw runtime_error(string("epoll_create failed: ") + strerror(errno));
+	}
+}
+
 SelectorEpoll::SelectorEpoll(int n)
 	: epollfd(epoll_create(n)), sockets()
 {
@@ -24,7 +32,7 @@ SelectorEpoll::~SelectorEpoll()
 void SelectorEpoll::addSocket(const shared_ptr<Socket> &socket)
 {
 	const int fd = socket->getDescriptor();
-	if (sockets.count(fd) > 0) {
+	if (sockets.find(fd) != sockets.end()) {
 		throw runtime_error("Descriptor already in use");
 	}
 	sockets[fd] = socket;
@@ -39,15 +47,24 @@ void SelectorEpoll::addSocket(const shared_ptr<Socket> &socket)
 void SelectorEpoll::removeSocket(const shared_ptr<Socket> &socket)
 {
 	const int fd = socket->getDescriptor();
-	if (sockets.count(fd) > 0) {
+	if (sockets.find(fd) == sockets.end()) {
 		throw runtime_error("Descriptor not in use");
 	}
+
+	if (epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
+		throw runtime_error(string("epoll_ctl(EPOLL_CTL_DEL) failed: ") + strerror(errno));
+	}
+
 	sockets.erase(fd);
 }
 
 void SelectorEpoll::proceed()
 {
 	vector<epoll_event> evs(sockets.size());
+	if (evs.empty()) {
+		return;
+	}
+
 	int count = epoll_wait(epollfd, &evs[0], evs.size(), 0);
 	if (count == -1) {
 		throw runtime_error(string("epoll_wait() failed: ") + strerror(errno));

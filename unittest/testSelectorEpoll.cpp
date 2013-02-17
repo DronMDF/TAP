@@ -66,4 +66,63 @@ BOOST_AUTO_TEST_CASE(ShouldPollSockets)
 	BOOST_REQUIRE(out->sended);
 }
 
+BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
+{
+	// Given
+	piper pfd;
+	BOOST_REQUIRE_EQUAL(write(pfd.out, "X", 1), 1);
+
+	struct SocketForRead : public SocketTest {
+		bool received;
+		SocketForRead(int fd) : SocketTest(fd), received(false) {};
+		virtual void recv() { received = true; };
+	};
+	auto socket = make_shared<SocketForRead>(pfd.in);
+
+	SelectorEpoll selector;
+	selector.addSocket(socket);
+	// When
+	selector.proceed();
+	// Then
+	BOOST_REQUIRE(socket->received);
+}
+
+BOOST_AUTO_TEST_CASE(testShouldUseOutputSocketInProceed)
+{
+	// Given
+	struct SocketForWrite : public SocketTest {
+		bool sended;
+		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
+		virtual void send() { sended = true; };
+	};
+	auto socket = make_shared<SocketForWrite>(1);
+
+	SelectorEpoll selector;
+	selector.addSocket(socket);
+	// When
+	selector.proceed();
+	// Then
+	BOOST_REQUIRE(socket->sended);
+}
+
+BOOST_AUTO_TEST_CASE(testShouldNotUseRemovedSocketInProceed)
+{
+	// Given
+	struct SocketForWrite : public SocketTest {
+		bool sended;
+		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
+		virtual void send() { sended = true; };
+	};
+	auto socket = make_shared<SocketForWrite>(1);
+
+	SelectorEpoll selector;
+	selector.addSocket(socket);
+	selector.addSocket(make_shared<SocketForWrite>(2));
+	selector.removeSocket(socket);
+	// When
+	selector.proceed();
+	// Then
+	BOOST_REQUIRE(!socket->sended);
+}
+
 BOOST_AUTO_TEST_SUITE_END();
