@@ -29,8 +29,6 @@ struct piper {
 BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
 {
 	// Given
-	SelectorPoll selector;
-
 	piper pfd;
 	write(pfd.out, "X", 1);
 
@@ -40,12 +38,50 @@ BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
 		virtual void recv() { received = true; };
 	};
 	auto socket = make_shared<SocketForRead>(pfd.in);
-	selector.addSocket(socket);
 
+	SelectorPoll selector;
+	selector.addSocket(socket);
 	// When
 	selector.proceed();
 	// Then
 	BOOST_REQUIRE(socket->received);
+}
+
+BOOST_AUTO_TEST_CASE(testShouldUseOutputSocketInProceed)
+{
+	// Given
+	struct SocketForWrite : public SocketTest {
+		bool sended;
+		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
+		virtual void send() { sended = true; };
+	};
+	auto socket = make_shared<SocketForWrite>(1);
+
+	SelectorPoll selector;
+	selector.addSocket(socket);
+	// When
+	selector.proceed();
+	// Then
+	BOOST_REQUIRE(socket->sended);
+}
+
+BOOST_AUTO_TEST_CASE(testShouldNotUseRemovedSocketInProceed)
+{
+	// Given
+	struct SocketForWrite : public SocketTest {
+		bool sended;
+		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
+		virtual void send() { sended = true; };
+	};
+	auto socket = make_shared<SocketForWrite>(1);
+
+	SelectorPoll selector;
+	selector.addSocket(socket);
+	selector.removeSocket(socket);
+	// When
+	selector.proceed();
+	// Then
+	BOOST_REQUIRE(!socket->sended);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

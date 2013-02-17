@@ -25,9 +25,13 @@ void SelectorPoll::addSocket(const shared_ptr<Socket> &socket)
 	sockets[fd] = socket;
 }
 
-void SelectorPoll::removeSocket(const shared_ptr<Socket> &)
+void SelectorPoll::removeSocket(const shared_ptr<Socket> &socket)
 {
-	// TODO: implement this for new API
+	const int fd = socket->getDescriptor();
+	if (sockets.find(fd) == sockets.end()) {
+		throw runtime_error("Descriptor not in use");
+	}
+	sockets.erase(fd);
 }
 
 void SelectorPoll::proceed()

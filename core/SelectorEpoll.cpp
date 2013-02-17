@@ -54,6 +54,11 @@ void SelectorEpoll::proceed()
 	}
 	evs.resize(count);
 
+	// This is stupid strategy... for all sockets.
+	// We cannot live socket untouched. All event should be handled
+	// For timeboxing we can reduce evs size (its simple)
+	// Or reduce read/write data size (need pass rate to socket level)
+
 	// Read all
 	for (int ec = 0; ec < count; ec++) {
 		if ((evs[ec].events & EPOLLIN) != 0) {
