@@ -16,14 +16,6 @@ SelectorEpoll::SelectorEpoll()
 	}
 }
 
-SelectorEpoll::SelectorEpoll(int n)
-	: epollfd(epoll_create(n)), sockets()
-{
-	if (epollfd == -1) {
-		throw runtime_error(string("epoll_create failed: ") + strerror(errno));
-	}
-}
-
 SelectorEpoll::~SelectorEpoll()
 {
 	close(epollfd);

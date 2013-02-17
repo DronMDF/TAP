@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(ShouldNotCallbackIfNoEvent)
 	// Given
 	auto stdout = 1;	// Newer readable
 	auto socket = make_shared<SocketFlagged>(stdout);
-	SelectorEpoll selector(1);
+	SelectorEpoll selector;
 	selector.addSocket(socket);
 	// When
 	selector.proceed();
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(ShouldPollSockets)
 	auto in = make_shared<SocketFlagged>(p.in);
 	auto out = make_shared<SocketFlagged>(p.out);
 
-	SelectorEpoll selector(2);
+	SelectorEpoll selector;
 	selector.addSocket(in);
 	selector.addSocket(out);
 
@@ -71,14 +71,7 @@ BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
 	// Given
 	piper pfd;
 	BOOST_REQUIRE_EQUAL(write(pfd.out, "X", 1), 1);
-
-	struct SocketForRead : public SocketTest {
-		bool received;
-		SocketForRead(int fd) : SocketTest(fd), received(false) {};
-		virtual void recv() { received = true; };
-	};
-	auto socket = make_shared<SocketForRead>(pfd.in);
-
+	auto socket = make_shared<SocketFlagged>(pfd.in);
 	SelectorEpoll selector;
 	selector.addSocket(socket);
 	// When
@@ -90,13 +83,7 @@ BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
 BOOST_AUTO_TEST_CASE(testShouldUseOutputSocketInProceed)
 {
 	// Given
-	struct SocketForWrite : public SocketTest {
-		bool sended;
-		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
-		virtual void send() { sended = true; };
-	};
-	auto socket = make_shared<SocketForWrite>(1);
-
+	auto socket = make_shared<SocketFlagged>(1);
 	SelectorEpoll selector;
 	selector.addSocket(socket);
 	// When
@@ -108,16 +95,10 @@ BOOST_AUTO_TEST_CASE(testShouldUseOutputSocketInProceed)
 BOOST_AUTO_TEST_CASE(testShouldNotUseRemovedSocketInProceed)
 {
 	// Given
-	struct SocketForWrite : public SocketTest {
-		bool sended;
-		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
-		virtual void send() { sended = true; };
-	};
-	auto socket = make_shared<SocketForWrite>(1);
-
+	auto socket = make_shared<SocketFlagged>(1);
 	SelectorEpoll selector;
 	selector.addSocket(socket);
-	selector.addSocket(make_shared<SocketForWrite>(2));
+	selector.addSocket(make_shared<SocketTest>(2));
 	selector.removeSocket(socket);
 	// When
 	selector.proceed();
