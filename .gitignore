@@ -1,0 +1,13 @@
+
+.obj
+libtap.a
+test
+
+tap-http
+tap-tcp
+tap-tcp-server
+
+.settings
+.project
+.cproject
+
