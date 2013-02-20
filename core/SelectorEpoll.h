@@ -14,6 +14,5 @@ public:
 
 private:
 	int epollfd;
-	std::map<int, std::shared_ptr<Socket>> sockets;
 };
 
