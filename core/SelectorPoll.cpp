@@ -1,37 +1,19 @@
 
-#include <stdexcept>
-#include <poll.h>
 #include "SelectorPoll.h"
+
+#include <poll.h>
 #include "Socket.h"
 
 using namespace std;
 
 SelectorPoll::SelectorPoll()
-	: sockets()
+	: Selector()
 {
 }
 
 SelectorPoll::SelectorPoll(int)
-	: sockets()
+	: Selector()
 {
-}
-
-void SelectorPoll::addSocket(const shared_ptr<Socket> &socket)
-{
-	const int fd = socket->getDescriptor();
-	if (sockets.find(fd) != sockets.end()) {
-		throw runtime_error("Descriptor already in use");
-	}
-	sockets[fd] = socket;
-}
-
-void SelectorPoll::removeSocket(const shared_ptr<Socket> &socket)
-{
-	const int fd = socket->getDescriptor();
-	if (sockets.find(fd) == sockets.end()) {
-		throw runtime_error("Descriptor not in use");
-	}
-	sockets.erase(fd);
 }
 
 void SelectorPoll::proceed()
