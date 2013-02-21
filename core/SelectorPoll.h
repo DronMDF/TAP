@@ -4,8 +4,5 @@
 
 class SelectorPoll : public Selector {
 public:
-	SelectorPoll();
-	SelectorPoll(int n);
-
 	virtual void proceed();
 };

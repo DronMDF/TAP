@@ -6,16 +6,6 @@
 
 using namespace std;
 
-SelectorPoll::SelectorPoll()
-	: Selector()
-{
-}
-
-SelectorPoll::SelectorPoll(int)
-	: Selector()
-{
-}
-
 void SelectorPoll::proceed()
 {
 	vector<pollfd> fds;
