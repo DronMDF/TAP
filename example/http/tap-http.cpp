@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 	
 	const string request = "GET " + file + " HTTP/1.0\r\n\r\n";
 	TapManager tapm(count,
-			[](int n){ return make_shared<SelectorPoll>(n); }, 
+			[](int){ return make_shared<SelectorPoll>(); },
 			[server, request](){ return make_shared<ClientHttp>(server, 7777, request); });
 	
 	tapm.setTracer(0, &tracer);

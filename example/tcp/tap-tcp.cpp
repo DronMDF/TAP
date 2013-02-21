@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 	TracerStream tracer(&cout, timestamp_millis);
 	
 	TapManager tapm(count,
-			[](int n){ return make_shared<SelectorPoll>(n); },
+			[](int){ return make_shared<SelectorPoll>(); },
 			[server, port](){ return make_shared<ClientTcp>(server, port); });
 	
 	for (unsigned i = 0; i < count; i++) {
