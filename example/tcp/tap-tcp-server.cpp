@@ -13,6 +13,9 @@
 #include <poll.h>
 #include <sched.h>
 #include <core/Tap.h>
+#include <core/SelectorEpoll.h>
+#include <core/SocketHandler.h>
+#include <core/SocketTcp.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -185,6 +188,12 @@ void Server::pollOut(int fd)
 	}
 }
 
+class Listener : public SocketHandler {
+public:
+	Listener(Selector *) {
+	}
+};
+
 void usage()
 {
 	cout << "TAP TCP server" << endl;
@@ -233,8 +242,16 @@ int main(int argc, char **argv)
 	cout << "Clients count: " << count << endl;
 	tap_init(count);
 
-	Server server(port, count);
-	server.listenning();
+	SelectorEpoll selector;
+
+	auto listen_socket = make_shared<SocketTcp>(make_shared<Listener>(&selector));
+	listen_socket->bind(port);
+
+	selector.addSocket(listen_socket);
+
+	while(true) {
+		selector.proceed();
+	}
 
 	return 0;
 }
