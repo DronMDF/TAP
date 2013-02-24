@@ -10,6 +10,18 @@
 
 using namespace std;
 
+SocketTcp::SocketTcp(const shared_ptr<SocketHandler> &)
+	: sock(socket(AF_INET, SOCK_STREAM, 0))
+{
+	if (sock == -1) {
+		return;
+	}
+
+	const int flags = fcntl(sock, F_GETFL, 0);
+	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+}
+
+
 SocketTcp::SocketTcp(const in_addr &addr, unsigned port)
 	: sock(socket(AF_INET, SOCK_STREAM, 0))
 {
@@ -42,6 +54,23 @@ SocketTcp::~SocketTcp()
 int SocketTcp::getDescriptor() const
 {
 	return sock;
+}
+
+void SocketTcp::bind(unsigned port)
+{
+	struct sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	addr.sin_addr.s_addr = INADDR_ANY;
+	if (::bind(sock, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) == -1) {
+		throw runtime_error(string("Cannot bind socket: ") + strerror(errno));
+	}
+
+	// Separate listen
+	if (listen(sock, 100) == -1) {
+		throw runtime_error(string("Cannot listen socket: ") + strerror(errno));
+	}
 }
 
 vector<uint8_t> SocketTcp::recv(size_t size)
