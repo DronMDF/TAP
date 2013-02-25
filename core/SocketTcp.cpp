@@ -67,7 +67,8 @@ void SocketTcp::bind(unsigned port)
 		throw runtime_error(string("Cannot bind socket: ") + strerror(errno));
 	}
 
-	// Separate listen
+	// TODO: at this moment bind needed only for listener, so listen is here
+	//	but in theory we can bind connected socket.
 	if (listen(sock, 100) == -1) {
 		throw runtime_error(string("Cannot listen socket: ") + strerror(errno));
 	}
