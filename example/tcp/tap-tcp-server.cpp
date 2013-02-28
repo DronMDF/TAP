@@ -188,9 +188,28 @@ void Server::pollOut(int fd)
 	}
 }
 
-class Listener : public SocketHandler {
+class SocketTcpListen : public SocketTcp {
+private:
+	Selector *selector;
+	SocketTcpListen(const SocketTcpListen &);
+	SocketTcpListen &operator =(const SocketTcpListen &);
 public:
-	Listener(Selector *) {
+	SocketTcpListen(Selector *selector)
+		: SocketTcp(0), selector(selector)
+	{
+	}
+
+	virtual void recv() {
+		const int nfd = accept(getDescriptor(), 0, 0);
+		if (nfd == -1) {
+			throw runtime_error(string("accept failed: ") + strerror(errno));
+		}
+		auto nsock = make_shared<SocketTcp>(/*nfd, */shared_ptr<SocketHandler>());
+		selector->addSocket(nsock);
+	}
+
+	virtual void send() {
+		throw "Invalid method for listening socket";
 	}
 };
 
@@ -244,7 +263,7 @@ int main(int argc, char **argv)
 
 	SelectorEpoll selector;
 
-	auto listen_socket = make_shared<SocketTcp>(make_shared<Listener>(&selector));
+	auto listen_socket = make_shared<SocketTcpListen>(&selector);
 	listen_socket->bind(port);
 
 	selector.addSocket(listen_socket);
