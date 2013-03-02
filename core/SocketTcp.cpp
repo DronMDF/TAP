@@ -21,6 +21,12 @@ SocketTcp::SocketTcp(const shared_ptr<SocketHandler> &)
 	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 }
 
+SocketTcp::SocketTcp(int s, const std::shared_ptr<SocketHandler> &handler)
+	: sock(s)
+{
+	const int flags = fcntl(sock, F_GETFL, 0);
+	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+}
 
 SocketTcp::SocketTcp(const in_addr &addr, unsigned port)
 	: sock(socket(AF_INET, SOCK_STREAM, 0))

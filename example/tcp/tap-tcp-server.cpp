@@ -218,7 +218,7 @@ public:
 		if (nfd == -1) {
 			throw runtime_error(string("accept failed: ") + strerror(errno));
 		}
-		auto nsock = make_shared<SocketTcp>(/*nfd, */make_shared<WriteHandler>());
+		auto nsock = make_shared<SocketTcp>(nfd, make_shared<WriteHandler>());
 		selector->addSocket(nsock);
 	}
 
