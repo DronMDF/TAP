@@ -188,6 +188,20 @@ void Server::pollOut(int fd)
 	}
 }
 
+class WriteHandler : public SocketHandler {
+	static vector<uint8_t> buffer;
+
+	void recv(const vector<uint8_t> &data) {
+		copy(data.begin(), data.end(), buffer.begin());
+	}
+
+	vector<uint8_t> send() {
+		return buffer;
+	}
+};
+
+vector<uint8_t> WriteHandler::buffer(1024 * 64, 'B');
+
 class SocketTcpListen : public SocketTcp {
 private:
 	Selector *selector;
@@ -204,7 +218,7 @@ public:
 		if (nfd == -1) {
 			throw runtime_error(string("accept failed: ") + strerror(errno));
 		}
-		auto nsock = make_shared<SocketTcp>(/*nfd, */shared_ptr<SocketHandler>());
+		auto nsock = make_shared<SocketTcp>(/*nfd, */make_shared<WriteHandler>());
 		selector->addSocket(nsock);
 	}
 
