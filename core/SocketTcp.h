@@ -26,4 +26,9 @@ public:
 
 private:
 	int sock;
+	std::vector<uint8_t> send_buffer;
+	std::shared_ptr<SocketHandler> handler;
+
+	SocketTcp(const SocketTcp &);
+	SocketTcp &operator =(const SocketTcp &);
 };

@@ -7,11 +7,12 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+#include "SocketHandler.h"
 
 using namespace std;
 
-SocketTcp::SocketTcp(const shared_ptr<SocketHandler> &)
-	: sock(socket(AF_INET, SOCK_STREAM, 0))
+SocketTcp::SocketTcp(const shared_ptr<SocketHandler> &handler)
+	: sock(socket(AF_INET, SOCK_STREAM, 0)), send_buffer(), handler(handler)
 {
 	if (sock == -1) {
 		return;
@@ -21,15 +22,15 @@ SocketTcp::SocketTcp(const shared_ptr<SocketHandler> &)
 	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 }
 
-SocketTcp::SocketTcp(int s, const std::shared_ptr<SocketHandler> &handler)
-	: sock(s)
+SocketTcp::SocketTcp(int s, const shared_ptr<SocketHandler> &handler)
+	: sock(s), send_buffer(), handler(handler)
 {
 	const int flags = fcntl(sock, F_GETFL, 0);
 	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 }
 
 SocketTcp::SocketTcp(const in_addr &addr, unsigned port)
-	: sock(socket(AF_INET, SOCK_STREAM, 0))
+	: sock(socket(AF_INET, SOCK_STREAM, 0)), send_buffer(), handler()
 {
 	if (sock == -1) {
 		return;
@@ -104,10 +105,23 @@ size_t SocketTcp::send(const vector<uint8_t> &data)
 
 void SocketTcp::recv()
 {
-	// TODO: implement new API
+	vector<uint8_t> data(1024);
+	const int rv = read(sock, &data[0], data.size());
+	// TODO: error handling
+	if (rv >= 0) {
+		data.resize(rv);
+		handler->recv(data);
+	}
 }
 
 void SocketTcp::send()
 {
-	// TODO: implement new API
+	if (send_buffer.empty()) {
+		send_buffer = handler->send();
+	}
+	int rv = write(sock, &send_buffer[0], send_buffer.size());
+	// TODO: error handling
+	if (rv >= 0) {
+		send_buffer.erase(send_buffer.begin(), send_buffer.begin() + rv);
+	}
 }
