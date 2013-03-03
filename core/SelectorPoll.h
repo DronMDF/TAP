@@ -4,5 +4,5 @@
 
 class SelectorPoll : public Selector {
 public:
-	virtual void proceed();
+	virtual void proceed() override;
 };

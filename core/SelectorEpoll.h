@@ -7,10 +7,10 @@ class SelectorEpoll : public Selector {
 public:
 	SelectorEpoll();
 	virtual ~SelectorEpoll();
-	
-	virtual void addSocket(const std::shared_ptr<Socket> &socket);
-	virtual void removeSocket(const std::shared_ptr<Socket> &socket);
-	virtual void proceed();
+
+	virtual void addSocket(const std::shared_ptr<Socket> &socket) override;
+	virtual void removeSocket(const std::shared_ptr<Socket> &socket) override;
+	virtual void proceed() override;
 
 private:
 	int epollfd;

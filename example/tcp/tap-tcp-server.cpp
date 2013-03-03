@@ -191,11 +191,11 @@ void Server::pollOut(int fd)
 class WriteHandler : public SocketHandler {
 	static vector<uint8_t> buffer;
 
-	void recv(const vector<uint8_t> &data) {
+	virtual void recv(const vector<uint8_t> &data) override {
 		copy(data.begin(), data.end(), buffer.begin());
 	}
 
-	vector<uint8_t> send() {
+	virtual vector<uint8_t> send() override {
 		return buffer;
 	}
 };
@@ -213,7 +213,7 @@ public:
 	{
 	}
 
-	virtual void recv() {
+	virtual void recv() override {
 		const int nfd = accept(getDescriptor(), 0, 0);
 		if (nfd == -1) {
 			throw runtime_error(string("accept failed: ") + strerror(errno));
@@ -222,7 +222,7 @@ public:
 		selector->addSocket(nsock);
 	}
 
-	virtual void send() {
+	virtual void send() override {
 		throw "Invalid method for listening socket";
 	}
 };

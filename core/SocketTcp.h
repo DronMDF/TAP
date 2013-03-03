@@ -15,14 +15,14 @@ public:
 
 	void bind(unsigned port);
 
-	virtual int getDescriptor() const;
+	virtual int getDescriptor() const override;
 
-	virtual std::vector<uint8_t> recv(size_t size);
-	virtual size_t send(const std::vector<uint8_t> &data);
+	virtual std::vector<uint8_t> recv(size_t size) override;
+	virtual size_t send(const std::vector<uint8_t> &data) override;
 
 	// New API
-	virtual void recv();
-	virtual void send();
+	virtual void recv() override;
+	virtual void send() override;
 
 private:
 	int sock;
