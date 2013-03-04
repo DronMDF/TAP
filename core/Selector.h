@@ -12,6 +12,7 @@ public:
 
 	virtual void addSocket(const std::shared_ptr<Socket> &socket);
 	virtual void removeSocket(const std::shared_ptr<Socket> &socket);
+	size_t getCount() const;
 
 	virtual void proceed() = 0;
 

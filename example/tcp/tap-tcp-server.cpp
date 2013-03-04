@@ -15,14 +15,19 @@
 using namespace std;
 using namespace std::chrono;
 
+static uint64_t received = 0;
+static uint64_t sended = 0;
+
 class WriteHandler : public SocketHandler {
 	static vector<uint8_t> buffer;
 
 	virtual void recv(const vector<uint8_t> &data) override {
 		copy(data.begin(), data.end(), buffer.begin());
+		received += data.size();
 	}
 
 	virtual vector<uint8_t> send() override {
+		sended += buffer.size();
 		return buffer;
 	}
 };
@@ -109,8 +114,23 @@ int main(int argc, char **argv)
 
 	selector.addSocket(listen_socket);
 
+	auto outtime = high_resolution_clock::now();
+
 	while(true) {
 		selector.proceed();
+
+		const auto interval = high_resolution_clock::now() - outtime;
+		if (interval > seconds(10)) {
+			const int count = selector.getCount();
+			const auto ms = duration_cast<milliseconds>(interval).count();
+
+			cout << "Clients:" << count << " ";
+			cout << "Read: " << (received * 8000 / ms) << " bit/s; ";
+			cout << "Write: " << (sended * 8000 / ms) << " bit/s" << endl;
+
+			received = sended = 0;
+			outtime = high_resolution_clock::now();
+		}
 	}
 
 	return 0;

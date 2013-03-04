@@ -32,3 +32,8 @@ void Selector::removeSocket(const std::shared_ptr<Socket> &socket)
 	}
 	sockets.erase(fd);
 }
+
+size_t Selector::getCount() const
+{
+	return sockets.size();
+}
