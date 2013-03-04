@@ -28,8 +28,8 @@ struct piper {
 struct SocketFlagged : public SocketTest {
 	bool received, sended;
 	SocketFlagged(int fd) : SocketTest(fd), received(false), sended(false) {};
-	virtual void recv() { received = true; };
-	virtual void send() { sended = true; };
+	virtual bool recv() override { received = true; return true; };
+	virtual bool send() override { sended = true; return true; };
 };
 
 BOOST_AUTO_TEST_CASE(ShouldNotCallbackIfNoEvent)

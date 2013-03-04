@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
 	struct SocketForRead : public SocketTest {
 		bool received;
 		SocketForRead(int fd) : SocketTest(fd), received(false) {};
-		virtual void recv() { received = true; };
+		virtual bool recv() override { received = true; return true; };
 	};
 	auto socket = make_shared<SocketForRead>(pfd.in);
 
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(testShouldUseOutputSocketInProceed)
 	struct SocketForWrite : public SocketTest {
 		bool sended;
 		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
-		virtual void send() { sended = true; };
+		virtual bool send() override { sended = true; return true; };
 	};
 	auto socket = make_shared<SocketForWrite>(1);
 
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(testShouldNotUseRemovedSocketInProceed)
 	struct SocketForWrite : public SocketTest {
 		bool sended;
 		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
-		virtual void send() { sended = true; };
+		virtual bool send() override { sended = true; return true; };
 	};
 	auto socket = make_shared<SocketForWrite>(1);
 

@@ -9,4 +9,5 @@ public:
 
 	virtual void recv(const std::vector<uint8_t> &data);
 	virtual std::vector<uint8_t> send();
+	virtual void disconnect();
 };

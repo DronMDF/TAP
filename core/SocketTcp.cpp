@@ -103,25 +103,33 @@ size_t SocketTcp::send(const vector<uint8_t> &data)
 	return rv;
 }
 
-void SocketTcp::recv()
+bool SocketTcp::recv()
 {
 	vector<uint8_t> data(1024);
 	const int rv = read(sock, &data[0], data.size());
-	// TODO: error handling
-	if (rv >= 0) {
-		data.resize(rv);
-		handler->recv(data);
+
+	if (rv <= 0) {
+		handler->disconnect();
+		return false;
 	}
+
+	data.resize(rv);
+	handler->recv(data);
+	return true;
 }
 
-void SocketTcp::send()
+bool SocketTcp::send()
 {
 	if (send_buffer.empty()) {
 		send_buffer = handler->send();
 	}
+
 	int rv = write(sock, &send_buffer[0], send_buffer.size());
-	// TODO: error handling
-	if (rv >= 0) {
-		send_buffer.erase(send_buffer.begin(), send_buffer.begin() + rv);
+	if (rv <= 0) {
+		handler->disconnect();
+		return false;
 	}
+
+	send_buffer.erase(send_buffer.begin(), send_buffer.begin() + rv);
+	return true;
 }

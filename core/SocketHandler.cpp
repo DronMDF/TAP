@@ -15,3 +15,7 @@ vector<uint8_t> SocketHandler::send()
 {
 	return {};
 }
+
+void SocketHandler::disconnect()
+{
+}

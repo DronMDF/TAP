@@ -21,8 +21,8 @@ public:
 	virtual size_t send(const std::vector<uint8_t> &data) override;
 
 	// New API
-	virtual void recv() override;
-	virtual void send() override;
+	virtual bool recv() override;
+	virtual bool send() override;
 
 private:
 	int sock;

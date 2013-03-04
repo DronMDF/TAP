@@ -14,6 +14,6 @@ public:
 	virtual size_t send(const std::vector<uint8_t> &data) = 0;
 
 	// New API
-	virtual void recv() = 0;
-	virtual void send() = 0;
+	virtual bool recv() = 0;
+	virtual bool send() = 0;
 };
