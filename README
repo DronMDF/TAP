@@ -4,7 +4,7 @@ Network load testing framework. Provides loads of up to tens of thousands of par
 Prerequesties:
 
 	gcc-4.7 or clang-3.1?
-	Boost test library (libboost-test-dev on Ubuntu)
+	Boost library (lbboost1.48-dev libboost-test1.48-dev libboost-filesystem1.48-dev libboost-regex1.48-dev on Ubuntu 12.04)
 
 Building:
 	make
