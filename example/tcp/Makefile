@@ -12,7 +12,7 @@ clean:
 	rm -f tap-tcp
 	rm -rf ${OBJDIR}
 
-tap-tcp: ../../libtap.a
+tap-tcp tap-tcp-server : ../../libtap.a
 
 tap-tcp: ${OBJECTS}
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex -lboost_filesystem -lboost_system 
