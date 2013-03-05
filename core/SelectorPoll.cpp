@@ -21,24 +21,33 @@ void SelectorPoll::proceed()
 	// Read all
 	for (auto &p: fds) {
 		if ((p.revents & POLLIN) != 0) {
-			sockets[p.fd]->recv();
-			p.revents &= ~POLLIN;
+			if (sockets[p.fd]->recv()) {
+				p.revents &= ~POLLIN;
+			} else {
+				removeSocket(sockets[p.fd]);
+				p.revents = 0;
+			}
 		}
 	}
 
 	// Write all
 	for (auto &p: fds) {
 		if ((p.revents & POLLOUT) != 0) {
-			sockets[p.fd]->send();
-			p.revents &= ~POLLOUT;
+			if (sockets[p.fd]->send()) {
+				p.revents &= ~POLLOUT;
+			} else {
+				removeSocket(sockets[p.fd]);
+				p.revents = 0;
+			}
 		}
 	}
 
 	// Handle all errors
 	for (const auto &p: fds) {
 		if (p.revents != 0) {
-			sockets[p.fd]->recv();
+			if (!sockets[p.fd]->recv()) {
+				removeSocket(sockets[p.fd]);
+			}
 		}
 	}
-
 }

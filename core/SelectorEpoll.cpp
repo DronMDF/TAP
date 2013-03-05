@@ -62,23 +62,36 @@ void SelectorEpoll::proceed()
 	// Read all
 	for (int ec = 0; ec < count; ec++) {
 		if ((evs[ec].events & EPOLLIN) != 0) {
-			sockets[evs[ec].data.fd]->recv();
-			evs[ec].events &= ~EPOLLIN;
+			if (sockets[evs[ec].data.fd]->recv()) {
+				evs[ec].events &= ~EPOLLIN;
+			} else {
+				// recv failed - disconnect
+				removeSocket(sockets[evs[ec].data.fd]);
+				evs[ec].events = 0;
+			}
 		}
 	}
 
 	// Write all
 	for (int ec = 0; ec < count; ec++) {
 		if ((evs[ec].events & EPOLLOUT) != 0) {
-			sockets[evs[ec].data.fd]->send();
-			evs[ec].events &= ~EPOLLOUT;
+			if (sockets[evs[ec].data.fd]->send()) {
+				evs[ec].events &= ~EPOLLOUT;
+			} else {
+				// recv failed - disconnect
+				removeSocket(sockets[evs[ec].data.fd]);
+				evs[ec].events = 0;
+			}
 		}
 	}
 
 	// Handle all errors
 	for (int ec = 0; ec < count; ec++) {
 		if (evs[ec].events != 0) {
-			sockets[evs[ec].data.fd]->recv();
+			if (!sockets[evs[ec].data.fd]->recv()) {
+				// recv failed - disconnect
+				removeSocket(sockets[evs[ec].data.fd]);
+			}
 		}
 	}
 }
