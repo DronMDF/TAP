@@ -36,7 +36,7 @@ public:
 	void pressure();
 	
 private:
-	std::shared_ptr<Selector> main_ds;
+	std::shared_ptr<Selector> selector;
 	std::vector<std::shared_ptr<Client>> clients;
 	std::vector<std::queue<std::vector<uint8_t>>> queues;
 	std::vector<time_point> timeouts;

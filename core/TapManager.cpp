@@ -21,7 +21,7 @@ Tracer TapManager::nulltracer;
 TapManager::TapManager(unsigned nth, 
 		       function<shared_ptr<Selector> (int)> create_selector,
 		       function<shared_ptr<Client> ()> create_client)
-	: main_ds(create_selector(nth)), clients(nth), queues(nth), 
+	: selector(create_selector(nth)), clients(nth), queues(nth), 
 	  timeouts(nth, time_point::max()), tracers(nth, &nulltracer),
 	  clients_states(nth, OFFLINE), show_statistic([](int, int, int){}), 
 	  stats_time(time_point::max()), stats_interval(std::chrono::seconds::max()),
@@ -46,7 +46,7 @@ void TapManager::setTimeout(unsigned n, const time_point &wakeup_time)
 
 void TapManager::setSocket(const std::shared_ptr<Socket> &socket)
 {
-	main_ds->addSocket(socket);
+	selector->addSocket(socket);
 }
 
 void TapManager::setStateOffline(unsigned n)
@@ -137,7 +137,7 @@ void TapManager::pressure()
 		
 		showStatistics();
 		
-		main_ds->proceed();
+		selector->proceed();
 
 		checkTimeouts(chrono::high_resolution_clock::now());
 
