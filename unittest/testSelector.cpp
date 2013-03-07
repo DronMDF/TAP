@@ -1,7 +1,9 @@
 
-#include <boost/test/unit_test.hpp>
 #include <core/Selector.h>
+
+#include <boost/test/unit_test.hpp>
 #include "SocketTest.h"
+#include "TapTestCase.h"
 
 using namespace std;
 
@@ -12,7 +14,7 @@ struct testedSelector : public Selector {
 	using Selector::sockets;
 };
 
-BOOST_AUTO_TEST_CASE(testShouldAddSocket)
+TAP_TEST_CASE(testShouldAddSocket)
 {
 	// Given
 	testedSelector selector;
@@ -23,7 +25,7 @@ BOOST_AUTO_TEST_CASE(testShouldAddSocket)
 	BOOST_REQUIRE_EQUAL(selector.sockets.at(socket->getDescriptor()), socket);
 }
 
-BOOST_AUTO_TEST_CASE(testShouldRemoveSocket)
+TAP_TEST_CASE(testShouldRemoveSocket)
 {
 	// Given
 	testedSelector selector;

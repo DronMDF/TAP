@@ -1,9 +1,11 @@
 
+#include <core/TapManager.h>
+
 #include <memory>
 #include <boost/test/unit_test.hpp>
 #include <core/Client.h>
-#include <core/TapManager.h>
 #include "SelectorTest.h"
+#include "TapTestCase.h"
 
 using namespace std;
 
@@ -15,7 +17,7 @@ struct ClientStub : public Client {
 	virtual void timeout(ClientControl *) {};
 };
 
-BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
+TAP_TEST_CASE(ShouldCallBuilderNth)
 {
 	// Given
 	int actual = 0;
@@ -29,7 +31,7 @@ BOOST_AUTO_TEST_CASE(ShouldCallBuilderNth)
 	BOOST_REQUIRE_EQUAL(actual, nth);
 }
 
-BOOST_AUTO_TEST_CASE(ShouldCallActivate)
+TAP_TEST_CASE(ShouldCallActivate)
 {
 	// Given
 	struct was_action {};
@@ -43,7 +45,7 @@ BOOST_AUTO_TEST_CASE(ShouldCallActivate)
 	BOOST_REQUIRE_THROW(tam.pressure(), was_action);
 }
 
-BOOST_AUTO_TEST_CASE(ShouldInitAllClientAsOffline)
+TAP_TEST_CASE(ShouldInitAllClientAsOffline)
 {
 	// Given
 	TapManager tam(10, 
@@ -55,7 +57,7 @@ BOOST_AUTO_TEST_CASE(ShouldInitAllClientAsOffline)
 	BOOST_REQUIRE_EXCEPTION(tam.pressure(), int, [](int n){ return n == 10; });
 }
 
-BOOST_AUTO_TEST_CASE(ShouldAskTheClientAboutTheAvailabilityOfDataToBeSent)
+TAP_TEST_CASE(ShouldAskTheClientAboutTheAvailabilityOfDataToBeSent)
 {
 }
 

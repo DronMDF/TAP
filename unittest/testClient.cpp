@@ -6,6 +6,7 @@
 #include <core/ClientControl.h>
 #include <core/Socket.h>
 #include "SocketTest.h"
+#include "TapTestCase.h"
 
 using namespace std;
 
@@ -23,7 +24,7 @@ struct piper {
 	}
 };
 
-BOOST_AUTO_TEST_CASE(ShouldWriteDataToMain)
+TAP_TEST_CASE(ShouldWriteDataToMain)
 {
 	// Given
 	struct TestClient : public Client {
@@ -45,7 +46,7 @@ BOOST_AUTO_TEST_CASE(ShouldWriteDataToMain)
 	BOOST_REQUIRE_EQUAL_COLLECTIONS(buf.begin(), buf.end(), expected.begin(), expected.end());
 }
 	
-BOOST_AUTO_TEST_CASE(ShouldWantsToWriteIfQueued)
+TAP_TEST_CASE(ShouldWantsToWriteIfQueued)
 {
 	// Given
 	struct TestClient : public Client {
@@ -61,7 +62,7 @@ BOOST_AUTO_TEST_CASE(ShouldWantsToWriteIfQueued)
 	BOOST_REQUIRE(client.wantsToWrite());
 }
 
-BOOST_AUTO_TEST_CASE(ShouldSendFromQueueToSocket)
+TAP_TEST_CASE(ShouldSendFromQueueToSocket)
 {
 	// Given
 	struct TestClient : public Client {

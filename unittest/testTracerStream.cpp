@@ -1,12 +1,14 @@
 
-#include <boost/test/unit_test.hpp>
 #include <core/TracerStream.h>
+
+#include <boost/test/unit_test.hpp>
+#include "TapTestCase.h"
 
 using namespace std;
 
 BOOST_AUTO_TEST_SUITE(suiteTracerStream);
 
-BOOST_AUTO_TEST_CASE(ShouldOutString)
+TAP_TEST_CASE(ShouldOutString)
 {
 	// Given
 	ostringstream out;
@@ -17,7 +19,7 @@ BOOST_AUTO_TEST_CASE(ShouldOutString)
 	BOOST_REQUIRE_EQUAL(out.str(), "42 hello\n");
 }
 
-BOOST_AUTO_TEST_CASE(ShouldPrintTimestampBeforeString)
+TAP_TEST_CASE(ShouldPrintTimestampBeforeString)
 {
 	// Given
 	ostringstream out;

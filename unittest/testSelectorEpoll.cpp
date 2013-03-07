@@ -1,9 +1,11 @@
 
+#include <core/SelectorEpoll.h>
+
 #include <memory.h>
 #include <boost/test/unit_test.hpp>
-#include <core/SelectorEpoll.h>
 #include <core/Socket.h>
 #include "SocketTest.h"
+#include "TapTestCase.h"
 
 using namespace std;
 
@@ -32,7 +34,7 @@ struct SocketFlagged : public SocketTest {
 	virtual bool send() override { sended = true; return true; };
 };
 
-BOOST_AUTO_TEST_CASE(ShouldNotCallbackIfNoEvent)
+TAP_TEST_CASE(ShouldNotCallbackIfNoEvent)
 {
 	// Given
 	auto stdout = 1;	// Newer readable
@@ -45,7 +47,7 @@ BOOST_AUTO_TEST_CASE(ShouldNotCallbackIfNoEvent)
 	BOOST_REQUIRE(!socket->received);
 }
 
-BOOST_AUTO_TEST_CASE(ShouldPollSockets)
+TAP_TEST_CASE(ShouldPollSockets)
 {
 	// Given
 	piper p;
@@ -66,7 +68,7 @@ BOOST_AUTO_TEST_CASE(ShouldPollSockets)
 	BOOST_REQUIRE(out->sended);
 }
 
-BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
+TAP_TEST_CASE(testShouldUseAddedSocketInProceed)
 {
 	// Given
 	piper pfd;
@@ -80,7 +82,7 @@ BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
 	BOOST_REQUIRE(socket->received);
 }
 
-BOOST_AUTO_TEST_CASE(testShouldUseOutputSocketInProceed)
+TAP_TEST_CASE(testShouldUseOutputSocketInProceed)
 {
 	// Given
 	auto socket = make_shared<SocketFlagged>(1);
@@ -92,7 +94,7 @@ BOOST_AUTO_TEST_CASE(testShouldUseOutputSocketInProceed)
 	BOOST_REQUIRE(socket->sended);
 }
 
-BOOST_AUTO_TEST_CASE(testShouldNotUseRemovedSocketInProceed)
+TAP_TEST_CASE(testShouldNotUseRemovedSocketInProceed)
 {
 	// Given
 	auto socket = make_shared<SocketFlagged>(1);

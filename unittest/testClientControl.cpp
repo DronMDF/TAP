@@ -5,13 +5,14 @@
 #include <core/Client.h>
 #include <core/TapManager.h>
 #include <core/TracerStream.h>
+#include "TapTestCase.h"
 
 using namespace std;
 class Selector;
 
 BOOST_AUTO_TEST_SUITE(suiteClientControl);
 
-BOOST_AUTO_TEST_CASE(ShouldPassMessageToTracer)
+TAP_TEST_CASE(ShouldPassMessageToTracer)
 {
 	// Given
 	struct testTracer : public Tracer {
@@ -27,7 +28,7 @@ BOOST_AUTO_TEST_CASE(ShouldPassMessageToTracer)
 	BOOST_REQUIRE_EQUAL(tracer.out, message);
 }
 
-BOOST_AUTO_TEST_CASE(ShouldPassKeyValueToTracer)
+TAP_TEST_CASE(ShouldPassKeyValueToTracer)
 {
 	// Given
 	struct testTracer : public Tracer {
@@ -52,7 +53,7 @@ struct testStateTapManager : public TapManager {
 			[](){ return shared_ptr<Client>(); }) {};
 };
 
-BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClientToOffline)
+TAP_TEST_CASE(ShouldChangeStateOfClientToOffline)
 {
 	// Given
 	struct testTapManager : public testStateTapManager {
@@ -67,7 +68,7 @@ BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClientToOffline)
 	BOOST_REQUIRE_EQUAL(tapm.n, 42);
 }
 	
-BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClientToConnected)
+TAP_TEST_CASE(ShouldChangeStateOfClientToConnected)
 {
 	// Given
 	struct testTapManager : public testStateTapManager {
@@ -82,7 +83,7 @@ BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClientToConnected)
 	BOOST_REQUIRE_EQUAL(tapm.n, 42);
 }
 	
-BOOST_AUTO_TEST_CASE(ShouldChangeStateOfClientToOnline)
+TAP_TEST_CASE(ShouldChangeStateOfClientToOnline)
 {
 	// Given
 	struct testTapManager : public testStateTapManager {

@@ -1,9 +1,11 @@
 
+#include <core/SelectorPoll.h>
+
 #include <memory.h>
 #include <boost/test/unit_test.hpp>
-#include <core/SelectorPoll.h>
 #include <core/Socket.h>
 #include "SocketTest.h"
+#include "TapTestCase.h"
 
 using namespace std;
 
@@ -25,11 +27,11 @@ struct piper {
 	}
 };
 
-BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
+TAP_TEST_CASE(testShouldUseAddedSocketInProceed)
 {
 	// Given
 	piper pfd;
-	write(pfd.out, "X", 1);
+	BOOST_REQUIRE_EQUAL(write(pfd.out, "X", 1), 1);
 
 	struct SocketForRead : public SocketTest {
 		bool received;
@@ -46,7 +48,7 @@ BOOST_AUTO_TEST_CASE(testShouldUseAddedSocketInProceed)
 	BOOST_REQUIRE(socket->received);
 }
 
-BOOST_AUTO_TEST_CASE(testShouldUseOutputSocketInProceed)
+TAP_TEST_CASE(testShouldUseOutputSocketInProceed)
 {
 	// Given
 	struct SocketForWrite : public SocketTest {
@@ -64,7 +66,7 @@ BOOST_AUTO_TEST_CASE(testShouldUseOutputSocketInProceed)
 	BOOST_REQUIRE(socket->sended);
 }
 
-BOOST_AUTO_TEST_CASE(testShouldNotUseRemovedSocketInProceed)
+TAP_TEST_CASE(testShouldNotUseRemovedSocketInProceed)
 {
 	// Given
 	struct SocketForWrite : public SocketTest {
