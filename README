@@ -2,11 +2,11 @@
 Network load testing framework. Provides loads of up to tens of thousands of parallel connections.
 
 Prerequesties:
-
 	gcc-4.7 or clang-3.1?
-	Boost library (lbboost1.48-dev libboost-test1.48-dev libboost-filesystem1.48-dev libboost-regex1.48-dev on Ubuntu 12.04)
+	Boost library 1.48
 
 Building:
 	make
 	make check
 	make examples
+
