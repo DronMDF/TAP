@@ -10,7 +10,8 @@ class SocketTcp : public Socket {
 public:
 	SocketTcp(const std::shared_ptr<SocketHandler> &handler);
 	SocketTcp(int s, const std::shared_ptr<SocketHandler> &handler);
-	SocketTcp(const in_addr &addr, unsigned port);
+	SocketTcp(const in_addr &addr, unsigned port, const std::shared_ptr<SocketHandler> &handler);
+
 	virtual ~SocketTcp();
 
 	void bind(unsigned port);

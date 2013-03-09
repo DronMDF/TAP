@@ -100,7 +100,7 @@ void ClientHttp::action(ClientControl *control)
 	if (!socket) {
 		control->trace("Create connection");
 		control->setStateConnecting();
-		socket = make_shared<SocketTcp>(addr, port);
+		socket = make_shared<SocketTcp>(addr, port, shared_ptr<SocketHandler>());
 		start_time = chrono::high_resolution_clock::now();
 		status = 0;
 		

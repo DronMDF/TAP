@@ -11,6 +11,7 @@
 #include <core/Tracer.h>
 #include <core/ClientControl.h>
 #include <core/SocketTcp.h>
+#include "SocketHandlerTcp.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -75,7 +76,7 @@ void ClientTcp::read(ClientControl *control)
 	setTimeout(control, 60);
 }
 
-bool ClientTcp::write(ClientControl *control, const vector<uint8_t> &data)
+bool ClientTcp::write(ClientControl *, const vector<uint8_t> &)
 {
 	return true;
 }
@@ -92,7 +93,9 @@ void ClientTcp::action(ClientControl *control)
 {
 	if (!socket) {
 		try {
-			socket = make_shared<SocketTcp>(addr, port);
+			// TODO: separate connect
+			socket = make_shared<SocketTcp>(addr, port,
+				make_shared<SocketHandlerTcp>());
 			control->setSocket(socket);
 			control->setStateConnecting();
 			setTimeout(control, 60);

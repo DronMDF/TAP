@@ -29,8 +29,8 @@ SocketTcp::SocketTcp(int s, const shared_ptr<SocketHandler> &handler)
 	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 }
 
-SocketTcp::SocketTcp(const in_addr &addr, unsigned port)
-	: sock(socket(AF_INET, SOCK_STREAM, 0)), send_buffer(), handler()
+SocketTcp::SocketTcp(const in_addr &addr, unsigned port, const shared_ptr<SocketHandler> &handler)
+	: sock(socket(AF_INET, SOCK_STREAM, 0)), send_buffer(), handler(handler)
 {
 	if (sock == -1) {
 		return;
