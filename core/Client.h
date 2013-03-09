@@ -13,15 +13,15 @@ public:
 	Client();
 	virtual ~Client();
 
+	// TODO: Deprecaded API
 	virtual void read(ClientControl *control) = 0;
 	virtual bool write(ClientControl *control, const std::vector<uint8_t> &data);
+	bool wantsToWrite() const;
+
 	virtual void timeout(ClientControl *control) = 0;
-	
 	/// TapManager calls this method when the Сlient has no other events
 	virtual void action(ClientControl *control);
 		
-	bool wantsToWrite() const;
-
 protected:
 	void writeToQueue(const std::vector<uint8_t> &data);
 	void sendFromQueue(Socket *socket);

@@ -105,7 +105,7 @@ size_t SocketTcp::send(const vector<uint8_t> &data)
 
 bool SocketTcp::recv()
 {
-	vector<uint8_t> data(1024);
+	vector<uint8_t> data(65536);
 	const int rv = read(sock, &data[0], data.size());
 
 	if (rv <= 0) {
