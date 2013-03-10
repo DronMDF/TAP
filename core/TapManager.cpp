@@ -49,6 +49,11 @@ void TapManager::setSocket(const std::shared_ptr<Socket> &socket)
 	selector->addSocket(socket);
 }
 
+void TapManager::removeSocket(const std::shared_ptr<Socket> &socket)
+{
+	selector->removeSocket(socket);
+}
+
 void TapManager::setStateOffline(unsigned n)
 {
 	assert(n < clients.size());

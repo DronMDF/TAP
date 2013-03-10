@@ -17,6 +17,11 @@ void ClientControl::addSocket(const std::shared_ptr<Socket> &socket) const
 	tapm->setSocket(socket);
 }
 
+void ClientControl::removeSocket(const std::shared_ptr<Socket> &socket) const
+{
+	tapm->removeSocket(socket);
+}
+
 void ClientControl::writeToMain(const vector<uint8_t> &data) const
 {
 	tapm->writeToMain(n, data);

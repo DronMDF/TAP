@@ -15,6 +15,8 @@ public:
 	ClientControl(TapManager *tapm, unsigned n, Tracer *tracer);
 
 	void addSocket(const std::shared_ptr<Socket> &socket) const;
+	/// Removing live socket from poll (dead socket removed automatically)
+	void removeSocket(const std::shared_ptr<Socket> &socket) const;
 
 	void writeToMain(const std::vector<uint8_t> &data) const;
 	void setWakeupTime(const time_point &wakeup_time) const;

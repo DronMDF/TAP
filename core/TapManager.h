@@ -27,6 +27,7 @@ public:
 	virtual void setStateOnline(unsigned n);
 
 	void setSocket(const std::shared_ptr<Socket> &socket);
+	void removeSocket(const std::shared_ptr<Socket> &socket);
 	
 	void writeToMain(unsigned n, const std::vector<uint8_t> &data);
 	
