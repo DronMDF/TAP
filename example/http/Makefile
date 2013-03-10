@@ -1,6 +1,6 @@
 
 CXX ?= g++
-CXXFLAGS ?= -std=c++0x -Wall -Wextra -Weffc++ -I../../
+CXXFLAGS ?= -std=c++0x -Wall -Wextra -Weffc++ -Werror -I../../
 
 OBJDIR ?= .obj
 OBJECTS = ${patsubst %.cpp,${OBJDIR}/%.o,${wildcard *.cpp}}
