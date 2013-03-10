@@ -1,6 +1,6 @@
 
 CXX ?= g++
-CXXFLAGS ?= -std=c++0x -Wall -Wextra -Weffc++ -Werror -I../../
+CXXFLAGS ?= -Wall -Wextra -Weffc++ -Werror
 
 OBJDIR ?= .obj
 OBJECTS = ${patsubst %.cpp,${OBJDIR}/%.o,${wildcard *.cpp}}
@@ -15,10 +15,10 @@ clean:
 tap-http: ../../libtap.a
 
 tap-http: ${OBJECTS}
-	${CXX} ${CXXFLAGS} -o $@ $^ -L../../ -ltap -lboost_regex
+	${CXX} ${CXXFLAGS} -o $@ $^ -L../.. -ltap -lboost_regex
 	
 ${OBJDIR}/%.o : %.cpp ${OBJDIR}/.keep
-	${CXX} -MMD ${CXXFLAGS} -c -o $@ $<
+	${CXX} -MMD -std=c++0x ${CXXFLAGS}  -I../.. -c -o $@ $<
 	
 ${OBJDIR}/.keep:
 	test -d ${OBJDIR} || mkdir ${OBJDIR}
