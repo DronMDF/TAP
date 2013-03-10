@@ -95,7 +95,7 @@ void ClientTcp::action(ClientControl *control)
 		try {
 			// TODO: separate connect
 			socket = make_shared<SocketTcp>(addr, port,
-				make_shared<SocketHandlerTcp>());
+				make_shared<SocketHandlerTcp>(this));
 			control->setSocket(socket);
 			control->setStateConnecting();
 			setTimeout(control, 60);
