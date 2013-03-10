@@ -124,6 +124,11 @@ bool SocketTcp::send()
 		send_buffer = handler->send();
 	}
 
+	if (send_buffer.empty()) {
+		// Nothing to send
+		return true;
+	}
+
 	int rv = write(sock, &send_buffer[0], send_buffer.size());
 	if (rv <= 0) {
 		handler->disconnect();

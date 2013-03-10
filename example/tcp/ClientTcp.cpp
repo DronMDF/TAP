@@ -39,9 +39,9 @@ void ClientTcp::setTimeout(ClientControl *control, unsigned sec) const
 
 void ClientTcp::terminate(ClientControl* control)
 {
+	control->removeSocket(socket);
 	socket.reset();
 	is_online = false;
-	control->addSocket(socket);
 	control->setStateOffline();
 	readed = 0;
 }
