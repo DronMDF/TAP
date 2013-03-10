@@ -12,7 +12,7 @@ ClientControl::ClientControl(TapManager *tapm, unsigned n, Tracer *tracer)
 {
 }
 
-void ClientControl::setSocket(const std::shared_ptr<Socket> &socket) const
+void ClientControl::addSocket(const std::shared_ptr<Socket> &socket) const
 {
 	tapm->setSocket(socket);
 }

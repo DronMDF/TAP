@@ -56,7 +56,7 @@ void ClientHttp::read(ClientControl *control)
 		is_online = false;
 
 		socket.reset();
-		control->setSocket(socket);
+		control->addSocket(socket);
 		control->setStateOffline();
 		return;
 	}
@@ -90,7 +90,7 @@ void ClientHttp::timeout(ClientControl *control)
 		is_online = false;
 
 		socket.reset();
-		control->setSocket(socket);
+		control->addSocket(socket);
 		control->setStateOffline();
 	}
 }

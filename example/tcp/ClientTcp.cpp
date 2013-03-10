@@ -41,7 +41,7 @@ void ClientTcp::terminate(ClientControl* control)
 {
 	socket.reset();
 	is_online = false;
-	control->setSocket(socket);
+	control->addSocket(socket);
 	control->setStateOffline();
 	readed = 0;
 }
@@ -96,7 +96,7 @@ void ClientTcp::action(ClientControl *control)
 			// TODO: separate connect
 			socket = make_shared<SocketTcp>(addr, port,
 				make_shared<SocketHandlerTcp>(this));
-			control->setSocket(socket);
+			control->addSocket(socket);
 			control->setStateConnecting();
 			setTimeout(control, 60);
 			control->trace("Goes connecting");
