@@ -12,42 +12,6 @@ class Selector;
 
 BOOST_AUTO_TEST_SUITE(suiteClientControl);
 
-TAP_TEST_CASE(ShouldPassMessageToTracer)
-{
-	// Given
-	struct testTracer : public Tracer {
-		mutable string out;
-		testTracer() : out() {};
-		virtual void trace(unsigned, const std::string &message) const { out = message; };
-	} tracer;
-	ClientControl cc(0, 0, &tracer);
-	const auto message = "hello tracer";
-	// When
-	cc.trace(message);
-	// Then
-	BOOST_REQUIRE_EQUAL(tracer.out, message);
-}
-
-TAP_TEST_CASE(ShouldPassKeyValueToTracer)
-{
-	// Given
-	struct testTracer : public Tracer {
-		mutable string key;
-		mutable unsigned value;
-		testTracer() : key(), value(0) {};
-		virtual void trace(unsigned, const std::string &key, unsigned value) const
-			{ this->key = key; this->value = value; };
-	} tracer;
-	ClientControl cc(0, 0, &tracer);
-	const auto key = "keyname";
-	const auto value = 42U;
-	// When
-	cc.trace(key, value);
-	// Then
-	BOOST_REQUIRE_EQUAL(tracer.key, key);
-	BOOST_REQUIRE_EQUAL(tracer.value, value);
-}
-
 struct testStateTapManager : public TapManager {
 	testStateTapManager() : TapManager(0, [](int){ return shared_ptr<Selector>(); }, 
 			[](){ return shared_ptr<Client>(); }) {};
@@ -61,7 +25,7 @@ TAP_TEST_CASE(ShouldChangeStateOfClientToOffline)
 		testTapManager() : n(0) {};
 		virtual void setStateOffline(unsigned n) { this->n = n; }
 	} tapm;
-	ClientControl cc(&tapm, 42, 0);
+	ClientControl cc(&tapm, 42);
 	// When
 	cc.setStateOffline();
 	// Then
@@ -76,7 +40,7 @@ TAP_TEST_CASE(ShouldChangeStateOfClientToConnected)
 		testTapManager() : n(0) {};
 		virtual void setStateConnecting(unsigned n) { this->n = n; }
 	} tapm;
-	ClientControl cc(&tapm, 42, 0);
+	ClientControl cc(&tapm, 42);
 	// When
 	cc.setStateConnecting();
 	// Then
@@ -91,7 +55,7 @@ TAP_TEST_CASE(ShouldChangeStateOfClientToOnline)
 		testTapManager() : n(0) {};
 		virtual void setStateOnline(unsigned n) { this->n = n; }
 	} tapm;
-	ClientControl cc(&tapm, 42, 0);
+	ClientControl cc(&tapm, 42);
 	// When
 	cc.setStateOnline();
 	// Then

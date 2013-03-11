@@ -26,6 +26,9 @@ public:
 	virtual void setStateConnecting(unsigned n);
 	virtual void setStateOnline(unsigned n);
 
+	void trace(unsigned n, const std::string &message);
+	void trace(unsigned n, const std::string &key, unsigned value);
+
 	void setSocket(const std::shared_ptr<Socket> &socket);
 	void removeSocket(const std::shared_ptr<Socket> &socket);
 	

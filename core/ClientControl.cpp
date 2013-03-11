@@ -7,8 +7,8 @@
 
 using namespace std;
 
-ClientControl::ClientControl(TapManager *tapm, unsigned n, Tracer *tracer)
-	: tapm(tapm), n(n), tracer(tracer)
+ClientControl::ClientControl(TapManager *tapm, unsigned n)
+	: tapm(tapm), n(n)
 {
 }
 
@@ -49,11 +49,11 @@ void ClientControl::setStateOnline() const
 
 void ClientControl::trace(const string &message) const
 {
-	tracer->trace(n, message);
+	tapm->trace(n, message);
 }
 
 void ClientControl::trace(const string &key, unsigned value) const
 {
-	tracer->trace(n, key, value);
+	tapm->trace(n, key, value);
 }
 

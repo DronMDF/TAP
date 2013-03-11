@@ -12,7 +12,7 @@ class Tracer;
 
 class ClientControl {
 public:
-	ClientControl(TapManager *tapm, unsigned n, Tracer *tracer);
+	ClientControl(TapManager *tapm, unsigned n);
 
 	void addSocket(const std::shared_ptr<Socket> &socket) const;
 	/// Removing live socket from poll (dead socket removed automatically)
@@ -31,5 +31,4 @@ public:
 private:
 	TapManager *tapm;
 	unsigned n;
-	Tracer *tracer;
 };

@@ -72,6 +72,18 @@ void TapManager::setStateOnline(unsigned n)
 	clients_states[n] = ONLINE;
 }
 
+void TapManager::trace(unsigned n, const string &message)
+{
+	assert(n < clients.size());
+	tracers[n]->trace(n, message);
+}
+
+void TapManager::trace(unsigned n, const string &key, unsigned value)
+{
+	assert(n < clients.size());
+	tracers[n]->trace(n, key, value);
+}
+
 void TapManager::writeToMain(unsigned n, const vector<uint8_t> &data)
 {
 	assert(n < clients.size());
@@ -113,7 +125,7 @@ void TapManager::checkTimeouts(const time_point &now)
 {
 	for (unsigned i = 0; i < clients.size(); i++) {
 		if (timeouts[i] < now) {
-			ClientControl control(this, i, tracers[i]);
+			ClientControl control(this, i);
 			clients[i]->timeout(&control);
 		}
 	}
@@ -122,7 +134,7 @@ void TapManager::checkTimeouts(const time_point &now)
 bool TapManager::needToAction(const time_point &endtime)
 {
 	for (; action_idx < clients.size(); action_idx++) {
-		ClientControl control(this, action_idx, tracers[action_idx]);
+		ClientControl control(this, action_idx);
 		clients[action_idx]->action(&control);
 		
 		if (chrono::high_resolution_clock::now() > endtime) {
