@@ -18,6 +18,8 @@ public:
 	virtual void timeout(ClientControl *control);
 	virtual void action(ClientControl *control);
 
+	void read_notification(size_t readed);
+
 private:
 	int getMain() const;
 	void setTimeout(ClientControl *control, unsigned sec) const;

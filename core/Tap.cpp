@@ -7,11 +7,11 @@
 
 using namespace std;
 
-void tap_init(unsigned n)
+void tap_init(unsigned)
 {
 	signal(SIGPIPE, SIG_IGN);
 
-	const unsigned need_fdcount = n * 2;
+	const unsigned need_fdcount = 100000;
 
 	rlimit nofile;
 	if (getrlimit(RLIMIT_NOFILE, &nofile) == 0 and
@@ -21,7 +21,8 @@ void tap_init(unsigned n)
 		nofile.rlim_max = need_fdcount;
 
 		if (getuid() != 0) {
-			throw runtime_error("root need for change RLIMIT_NOFILE");
+			//throw runtime_error("root need for change RLIMIT_NOFILE");
+			return;
 		}
 
 		if (setrlimit(RLIMIT_NOFILE, &nofile) == -1) {

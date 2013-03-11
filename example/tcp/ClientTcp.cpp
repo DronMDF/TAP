@@ -31,37 +31,37 @@ int ClientTcp::getMain() const
 	return -1;
 }
 
-void ClientTcp::setTimeout(ClientControl *control, unsigned sec) const
+void ClientTcp::setTimeout(ClientControl *, unsigned sec) const
 {
 	const auto wakeup_time = high_resolution_clock::now() + seconds(sec);
-	control->setWakeupTime(wakeup_time);
+	control.setWakeupTime(wakeup_time);
 }
 
-void ClientTcp::terminate(ClientControl* control)
+void ClientTcp::terminate(ClientControl *)
 {
-	control->removeSocket(socket);
+	control.removeSocket(socket);
 	socket.reset();
 	is_online = false;
-	control->setStateOffline();
+	control.setStateOffline();
 	readed = 0;
 }
 
-void ClientTcp::read(ClientControl *control)
+void ClientTcp::read(ClientControl *)
 {
 	const auto buf = socket->recv(1);
 	if (buf.empty()) {
-		control->trace("Closing connection (error or reset)");
-		terminate(control);
+		control.trace("Closing connection (error or reset)");
+		terminate(0);
 		return;
 	}
 
 	if (!is_online) {
 		is_online = true;
-		control->trace("Client online");
-		control->setStateOnline();
+		control.trace("Client online");
+		control.setStateOnline();
 	}
 
-	control->trace("read", buf.size());
+	control.trace("read", buf.size());
 
 	readed += buf.size();
 //	const auto interval = high_resolution_clock::now() - stamp;
@@ -73,7 +73,13 @@ void ClientTcp::read(ClientControl *control)
 //		readed = 0;
 //	}
 
-	setTimeout(control, 60);
+	setTimeout(0, 60);
+}
+
+void ClientTcp::read_notification(size_t rb)
+{
+	readed += rb;
+	setTimeout(0, 60);
 }
 
 bool ClientTcp::write(ClientControl *, const vector<uint8_t> &)
@@ -81,27 +87,27 @@ bool ClientTcp::write(ClientControl *, const vector<uint8_t> &)
 	return true;
 }
 
-void ClientTcp::timeout(ClientControl *control)
+void ClientTcp::timeout(ClientControl *)
 {
 	if (socket) {
-		control->trace("Closing connection by timeout", readed);
-		terminate(control);
+		control.trace("Closing connection by timeout", readed);
+		terminate(0);
 	}
 }
 
-void ClientTcp::action(ClientControl *control)
+void ClientTcp::action(ClientControl *)
 {
 	if (!socket) {
 		try {
 			// TODO: separate connect
 			socket = make_shared<SocketTcp>(addr, port,
 				make_shared<SocketHandlerTcp>(this));
-			control->addSocket(socket);
-			control->setStateConnecting();
-			setTimeout(control, 60);
-			control->trace("Goes connecting");
+			control.addSocket(socket);
+			control.setStateConnecting();
+			setTimeout(0, 60);
+			control.trace("Goes connecting");
 		} catch (const exception &e) {
-			control->trace(e.what());
+			control.trace(e.what());
 		}
 	}
 }
