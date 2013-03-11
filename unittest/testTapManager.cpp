@@ -50,15 +50,11 @@ TAP_TEST_CASE(ShouldInitAllClientAsOffline)
 	// Given
 	TapManager tam(10, 
 		[](int){ return shared_ptr<Selector>(); }, 
-		[](){ return shared_ptr<Client>(); });
+		[](){ return make_shared<ClientStub>(); });
 	// When
 	tam.setShowStatistic([](int offline, int, int){ throw offline; }, chrono::seconds::min());
 	// Then
 	BOOST_REQUIRE_EXCEPTION(tam.pressure(), int, [](int n){ return n == 10; });
-}
-
-TAP_TEST_CASE(ShouldAskTheClientAboutTheAvailabilityOfDataToBeSent)
-{
 }
 
 BOOST_AUTO_TEST_SUITE_END();

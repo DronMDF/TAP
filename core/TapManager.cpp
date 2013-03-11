@@ -27,8 +27,9 @@ TapManager::TapManager(unsigned nth,
 	  stats_time(time_point::max()), stats_interval(std::chrono::seconds::max()),
 	  action_idx(0)
 {
-	for (auto &client: clients) {
-		client = create_client();
+	for (unsigned i = 0; i < clients.size(); i++) {
+		clients[i] = create_client();
+		clients[i]->setClientControl(ClientControl(this, i));
 	}
 }
 

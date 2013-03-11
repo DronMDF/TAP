@@ -12,6 +12,13 @@ ClientControl::ClientControl(TapManager *tapm, unsigned n)
 {
 }
 
+ClientControl &ClientControl::operator = (const ClientControl &c)
+{
+	tapm = c.tapm;
+	n = c.n;
+	return *this;
+}
+
 void ClientControl::addSocket(const std::shared_ptr<Socket> &socket) const
 {
 	tapm->setSocket(socket);

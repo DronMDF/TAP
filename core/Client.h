@@ -3,8 +3,8 @@
 #include <functional>
 #include <queue>
 #include <vector>
+#include "ClientControl.h"
 
-class ClientControl;
 class Socket;
 
 // Parent of load clients
@@ -21,10 +21,14 @@ public:
 	virtual void timeout(ClientControl *control) = 0;
 	/// TapManager calls this method when the Сlient has no other events
 	virtual void action(ClientControl *control);
+
+	void setClientControl(const ClientControl &control);
 		
 protected:
 	void writeToQueue(const std::vector<uint8_t> &data);
 	void sendFromQueue(Socket *socket);
+
+	ClientControl control;
 
 private:
 	Client(const Client&) = delete;

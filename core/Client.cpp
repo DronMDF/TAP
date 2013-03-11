@@ -6,7 +6,7 @@
 using namespace std;
 
 Client::Client()
-	: queue()
+	: control(0, 0), queue()
 {
 }
 
@@ -40,4 +40,9 @@ void Client::sendFromQueue(Socket *socket)
 	if (socket->send(queue.front())) {
 		queue.pop();
 	}
+}
+
+void Client::setClientControl(const ClientControl &c)
+{
+	control = c;
 }
