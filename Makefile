@@ -5,6 +5,7 @@ CXXFLAGS ?= -O2 -g0 -Wall -Wextra -Weffc++ -Werror
 OBJDIR = .obj
 OBJECTS = ${patsubst core/%.cpp,${OBJDIR}/%.o,${wildcard core/*.cpp}}
 TEST_OBJECTS = ${patsubst unittest/%.cpp,${OBJDIR}/%.o,${wildcard unittest/*.cpp}}
+.PHONY: check install examples
 
 all: libtap.a
 
@@ -28,8 +29,8 @@ test: ${TEST_OBJECTS} libtap.a
 	${CXX} -o $@ $^ -L. -ltap -lboost_unit_test_framework
 
 examples:
-	make -C example/tcp
-	make -C example/http
+	${MAKE} ${MAKEFLAGS} -C example/tcp
+	${MAKE} ${MAKEFLAGS} -C example/http
 
 ${OBJDIR}/%.o : core/%.cpp ${OBJDIR}/.keep
 	${CXX} -MMD -std=c++0x ${CXXFLAGS} -I. -c -o $@ $<
