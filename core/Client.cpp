@@ -6,7 +6,7 @@
 using namespace std;
 
 Client::Client()
-	: control(0, 0), queue()
+	: control(0, 0)
 {
 }
 
@@ -14,32 +14,8 @@ Client::~Client()
 {
 }
 
-bool Client::write(ClientControl *, const vector<uint8_t> &data)
-{
-	// TODO: Interrupt safe
-	int fd = getMain();
-	return ::write(fd, &data[0], data.size()) == int(data.size());
-}
-
 void Client::action(ClientControl *)
 {
-}
-
-bool Client::wantsToWrite() const
-{
-	return !queue.empty();
-}
-
-void Client::writeToQueue(const vector<uint8_t> &data)
-{
-	queue.push(data);
-}
-
-void Client::sendFromQueue(Socket *socket)
-{
-	if (socket->send(queue.front())) {
-		queue.pop();
-	}
 }
 
 void Client::setClientControl(const ClientControl &c)
