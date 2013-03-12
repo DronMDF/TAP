@@ -11,17 +11,13 @@ class Socket;
 class ClientTcp: public Client {
 public:
 	ClientTcp(const in_addr &server, int port);
-	virtual ~ClientTcp();
 
-	virtual void read(ClientControl *control);
-	virtual bool write(ClientControl *control, const std::vector<uint8_t> &data);
 	virtual void timeout(ClientControl *control);
 	virtual void action(ClientControl *control);
 
 	void read_notification(size_t readed);
 
 private:
-	int getMain() const;
 	void setTimeout(ClientControl *control, unsigned sec) const;
 	void terminate(ClientControl* control);
 

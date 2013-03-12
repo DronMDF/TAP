@@ -6,7 +6,7 @@
 class Client {
 public:
 	Client();
-	virtual ~Client();
+	virtual ~Client() = default;
 
 	virtual void timeout(ClientControl *control) = 0;
 	/// TapManager calls this method when the Сlient has no other events

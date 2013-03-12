@@ -10,10 +10,6 @@ Client::Client()
 {
 }
 
-Client::~Client()
-{
-}
-
 void Client::action(ClientControl *)
 {
 }

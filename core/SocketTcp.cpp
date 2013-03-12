@@ -53,7 +53,7 @@ SocketTcp::SocketTcp(const in_addr &addr, unsigned port, const shared_ptr<Socket
 	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 }
 
-SocketTcp::~SocketTcp()
+SocketTcp::~SocketTcp() noexcept
 {
 	close(sock);
 }
@@ -79,28 +79,6 @@ void SocketTcp::bind(unsigned port)
 	if (listen(sock, 100) == -1) {
 		throw runtime_error(string("Cannot listen socket: ") + strerror(errno));
 	}
-}
-
-vector<uint8_t> SocketTcp::recv(size_t size)
-{
-	vector<uint8_t> data(size);
-	const int rv = read(sock, &data[0], data.size());
-	if (rv < 0) {
-		return {};
-	}
-
-	data.resize(rv);
-	return data;
-}
-
-size_t SocketTcp::send(const vector<uint8_t> &data)
-{
-	int rv = write(sock, &data[0], data.size());
-	if (rv < 0) {
-		return 0;
-	}
-
-	return rv;
 }
 
 bool SocketTcp::recv()

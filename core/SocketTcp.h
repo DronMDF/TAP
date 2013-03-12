@@ -12,16 +12,12 @@ public:
 	SocketTcp(int s, const std::shared_ptr<SocketHandler> &handler);
 	SocketTcp(const in_addr &addr, unsigned port, const std::shared_ptr<SocketHandler> &handler);
 
-	virtual ~SocketTcp();
+	virtual ~SocketTcp() noexcept;
 
 	void bind(unsigned port);
 
 	virtual int getDescriptor() const override;
 
-	virtual std::vector<uint8_t> recv(size_t size) override;
-	virtual size_t send(const std::vector<uint8_t> &data) override;
-
-	// New API
 	virtual bool recv() override;
 	virtual bool send() override;
 
@@ -30,6 +26,6 @@ private:
 	std::vector<uint8_t> send_buffer;
 	std::shared_ptr<SocketHandler> handler;
 
-	SocketTcp(const SocketTcp &);
-	SocketTcp &operator =(const SocketTcp &);
+	SocketTcp(const SocketTcp &) = delete;
+	SocketTcp &operator =(const SocketTcp &) = delete;
 };

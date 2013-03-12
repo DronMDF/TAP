@@ -9,7 +9,6 @@
 class ClientHttp: public Client {
 public:
 	ClientHttp(const in_addr &server, int port, const std::string &request);
-	virtual ~ClientHttp();
 
 	virtual void read(ClientControl *control);
 	virtual void timeout(ClientControl *control);

@@ -20,10 +20,6 @@ ClientHttp::ClientHttp(const in_addr &server, int port, const string &request)
 {
 }
 
-ClientHttp::~ClientHttp()
-{
-}
-
 void ClientHttp::fixTimestamp(const string &what, ClientControl *control)
 {
 	const auto interval = chrono::high_resolution_clock::now() - start_time;
@@ -44,7 +40,7 @@ int ClientHttp::getMain() const
 
 void ClientHttp::read(ClientControl *control)
 {
-	vector<uint8_t> buf = socket->recv(4096);
+	vector<uint8_t> buf;// = socket->recv(4096);
 
 	if (buf.empty()) {
 		control->trace("bytes", rx_bytes);
