@@ -20,14 +20,13 @@ public:
 private:
 	void setTimeout(ClientControl *control, unsigned sec) const;
 	void terminate(ClientControl* control);
+	bool isOnline() const;
 
 	const in_addr addr;
 	const int port;
 
 	std::shared_ptr<Socket> socket;
 	
-	bool is_online;
-
 	time_point stamp;
 	uint64_t readed;
 };

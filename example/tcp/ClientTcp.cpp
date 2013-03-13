@@ -17,8 +17,7 @@ using namespace std;
 using namespace std::chrono;
 
 ClientTcp::ClientTcp(const in_addr &server, int port)
-	: addr(server), port(port), socket(), is_online(false),
-	  stamp(high_resolution_clock::now()), readed(0)
+	: addr(server), port(port), socket(), stamp(high_resolution_clock::now()), readed(0)
 {
 }
 
@@ -32,13 +31,22 @@ void ClientTcp::terminate(ClientControl *)
 {
 	control.removeSocket(socket);
 	socket.reset();
-	is_online = false;
 	control.setStateOffline();
 	readed = 0;
 }
 
+bool ClientTcp::isOnline() const
+{
+	return readed > 0;
+}
+
 void ClientTcp::read_notification(size_t rb)
 {
+	if (!isOnline()) {
+		control.setStateOnline();
+		control.trace("Online");
+	}
+
 	readed += rb;
 	setTimeout(0, 60);
 }
