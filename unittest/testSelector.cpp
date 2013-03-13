@@ -10,7 +10,7 @@ using namespace std;
 BOOST_AUTO_TEST_SUITE(suiteSelector);
 
 struct testedSelector : public Selector {
-	virtual void proceed() { }
+	virtual void proceed() override {}
 	using Selector::sockets;
 };
 

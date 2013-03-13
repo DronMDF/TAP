@@ -12,8 +12,8 @@ class ClientTcp: public Client {
 public:
 	ClientTcp(const in_addr &server, int port);
 
-	virtual void timeout(ClientControl *control);
-	virtual void action(ClientControl *control);
+	virtual void timeout(ClientControl *control) override;
+	virtual void action(ClientControl *control) override;
 
 	void read_notification(size_t readed);
 

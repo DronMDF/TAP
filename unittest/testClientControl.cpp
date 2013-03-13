@@ -23,7 +23,7 @@ TAP_TEST_CASE(ShouldChangeStateOfClientToOffline)
 	struct testTapManager : public testStateTapManager {
 		unsigned n;
 		testTapManager() : n(0) {};
-		virtual void setStateOffline(unsigned n) { this->n = n; }
+		virtual void setStateOffline(unsigned n) override { this->n = n; }
 	} tapm;
 	ClientControl cc(&tapm, 42);
 	// When
@@ -38,7 +38,7 @@ TAP_TEST_CASE(ShouldChangeStateOfClientToConnected)
 	struct testTapManager : public testStateTapManager {
 		unsigned n;
 		testTapManager() : n(0) {};
-		virtual void setStateConnecting(unsigned n) { this->n = n; }
+		virtual void setStateConnecting(unsigned n) override { this->n = n; }
 	} tapm;
 	ClientControl cc(&tapm, 42);
 	// When
@@ -53,7 +53,7 @@ TAP_TEST_CASE(ShouldChangeStateOfClientToOnline)
 	struct testTapManager : public testStateTapManager {
 		unsigned n;
 		testTapManager() : n(0) {};
-		virtual void setStateOnline(unsigned n) { this->n = n; }
+		virtual void setStateOnline(unsigned n) override { this->n = n; }
 	} tapm;
 	ClientControl cc(&tapm, 42);
 	// When
