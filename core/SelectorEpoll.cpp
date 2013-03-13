@@ -16,7 +16,7 @@ SelectorEpoll::SelectorEpoll()
 	}
 }
 
-SelectorEpoll::~SelectorEpoll()
+SelectorEpoll::~SelectorEpoll() noexcept
 {
 	close(epollfd);
 }

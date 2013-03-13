@@ -8,7 +8,7 @@ class Socket;
 class Selector {
 public:
 	Selector();
-	virtual ~Selector();
+	virtual ~Selector() = default;
 
 	virtual void addSocket(const std::shared_ptr<Socket> &socket);
 	virtual void removeSocket(const std::shared_ptr<Socket> &socket);

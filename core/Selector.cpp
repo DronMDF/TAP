@@ -11,10 +11,6 @@ Selector::Selector()
 {
 }
 
-Selector::~Selector()
-{
-}
-
 void Selector::addSocket(const std::shared_ptr<Socket> &socket)
 {
 	const int fd = socket->getDescriptor();
