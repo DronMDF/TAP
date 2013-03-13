@@ -28,7 +28,7 @@ libtap.a: ${OBJECTS}
 test: ${TEST_OBJECTS} libtap.a
 	${CXX} -o $@ $^ -L. -ltap -lboost_unit_test_framework
 
-examples:
+examples: libtap.a
 	${MAKE} ${MAKEFLAGS} -C example/tcp
 	${MAKE} ${MAKEFLAGS} -C example/http
 

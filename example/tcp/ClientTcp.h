@@ -16,10 +16,11 @@ public:
 	virtual void action(ClientControl *control) override;
 
 	void read_notification(size_t readed);
+	void disconnect_notification();
 
 private:
 	void setTimeout(ClientControl *control, unsigned sec) const;
-	void terminate(ClientControl* control);
+	void terminate();
 	bool isOnline() const;
 
 	const in_addr addr;

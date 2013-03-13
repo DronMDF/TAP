@@ -27,9 +27,8 @@ void ClientTcp::setTimeout(ClientControl *, unsigned sec) const
 	control.setWakeupTime(wakeup_time);
 }
 
-void ClientTcp::terminate(ClientControl *)
+void ClientTcp::terminate()
 {
-	control.removeSocket(socket);
 	socket.reset();
 	control.setStateOffline();
 	readed = 0;
@@ -51,11 +50,18 @@ void ClientTcp::read_notification(size_t rb)
 	setTimeout(0, 60);
 }
 
+void ClientTcp::disconnect_notification()
+{
+	control.trace("Closing connection by peer", readed);
+	terminate();
+}
+
 void ClientTcp::timeout(ClientControl *)
 {
 	if (socket) {
 		control.trace("Closing connection by timeout", readed);
-		terminate(0);
+		control.removeSocket(socket);
+		terminate();
 	}
 }
 

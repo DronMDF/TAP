@@ -13,3 +13,8 @@ void SocketHandlerTcp::recv(const vector<uint8_t> &data)
 {
 	client->read_notification(data.size());
 }
+
+void SocketHandlerTcp::disconnect()
+{
+	client->disconnect_notification();
+}

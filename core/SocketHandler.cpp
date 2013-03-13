@@ -3,10 +3,6 @@
 
 using namespace std;
 
-SocketHandler::~SocketHandler()
-{
-}
-
 void SocketHandler::recv(const std::vector<uint8_t> &)
 {
 }

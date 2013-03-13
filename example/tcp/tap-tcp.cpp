@@ -54,7 +54,7 @@ string timestamp_millis()
 void showStatistic(int offline, int connecting, int online, function<string ()> timestamp)
 {
 	cout << timestamp() 
-		<< "offline: " << offline
+		<< " offline: " << offline
 		<< " connecting: " << connecting
 		<< " online: " << online
 		<< endl;

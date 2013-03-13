@@ -5,7 +5,7 @@
 
 class SocketHandler {
 public:
-	virtual ~SocketHandler();
+	virtual ~SocketHandler() = default;
 
 	virtual void recv(const std::vector<uint8_t> &data);
 	virtual std::vector<uint8_t> send();
