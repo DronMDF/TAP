@@ -12,9 +12,7 @@ using namespace std;
 BOOST_AUTO_TEST_SUITE(suiteTapManager);
 
 struct ClientStub : public Client {
-	virtual int getMain() const { return -1; };
-	virtual void read(ClientControl *) {};
-	virtual void timeout(ClientControl *) {};
+	virtual void timeout(ClientControl *) override {};
 };
 
 TAP_TEST_CASE(ShouldCallBuilderNth)
@@ -36,7 +34,7 @@ TAP_TEST_CASE(ShouldCallActivate)
 	// Given
 	struct was_action {};
 	struct TestClient : public ClientStub {
-		virtual void action(ClientControl *) { throw was_action(); };
+		virtual void action(ClientControl *) override { throw was_action(); };
 	};
 	// When
 	TapManager tam(1, [](int){ return make_shared<SelectorTest>(); }, 
