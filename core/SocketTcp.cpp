@@ -15,7 +15,7 @@ SocketTcp::SocketTcp(const shared_ptr<SocketHandler> &handler)
 	: sock(socket(AF_INET, SOCK_STREAM, 0)), send_buffer(), handler(handler)
 {
 	if (sock == -1) {
-		return;
+		throw runtime_error(string("Cannot create socket: ") + strerror(errno));
 	}
 
 	const int flags = fcntl(sock, F_GETFL, 0);
@@ -33,7 +33,7 @@ SocketTcp::SocketTcp(const in_addr &addr, unsigned port, const shared_ptr<Socket
 	: sock(socket(AF_INET, SOCK_STREAM, 0)), send_buffer(), handler(handler)
 {
 	if (sock == -1) {
-		return;
+		throw runtime_error(string("Cannot create socket: ") + strerror(errno));
 	}
 
 	sockaddr_in sa;
@@ -45,7 +45,7 @@ SocketTcp::SocketTcp(const in_addr &addr, unsigned port, const shared_ptr<Socket
 		if (errno != EINPROGRESS) {
 			close(sock);
 			sock = -1;
-			return;
+			throw runtime_error(string("Cannot connect socket: ") + strerror(errno));
 		}
 	}
 

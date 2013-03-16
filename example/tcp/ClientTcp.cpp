@@ -78,6 +78,8 @@ void ClientTcp::action(ClientControl *)
 			control.trace("Goes connecting");
 		} catch (const exception &e) {
 			control.trace(e.what());
+			control.removeSocket(socket);
+			terminate();
 		}
 	}
 }

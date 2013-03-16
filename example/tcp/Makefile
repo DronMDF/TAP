@@ -14,10 +14,10 @@ clean:
 
 tap-tcp tap-tcp-server : ../../libtap.a
 
-tap-tcp: ${OBJECTS}
+tap-tcp: ${OBJECTS} ../../libtap.a
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../.. -ltap -lboost_regex -lboost_filesystem -lboost_system 
 
-tap-tcp-server: ${OBJDIR}/tap-tcp-server.o
+tap-tcp-server: ${OBJDIR}/tap-tcp-server.o ../../libtap.a
 	${CXX} ${CXXFLAGS} -o $@ $^ -L../.. -ltap
 
 ${OBJDIR}/%.o : %.cpp ${OBJDIR}/.keep

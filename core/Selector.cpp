@@ -13,6 +13,10 @@ Selector::Selector()
 
 void Selector::addSocket(const std::shared_ptr<Socket> &socket)
 {
+	if (!socket) {
+		return;
+	}
+
 	const int fd = socket->getDescriptor();
 	if (sockets.find(fd) != sockets.end()) {
 		throw runtime_error("Descriptor already in use");
@@ -22,6 +26,10 @@ void Selector::addSocket(const std::shared_ptr<Socket> &socket)
 
 void Selector::removeSocket(const std::shared_ptr<Socket> &socket)
 {
+	if (!socket) {
+		return;
+	}
+
 	const int fd = socket->getDescriptor();
 	if (sockets.find(fd) == sockets.end()) {
 		throw runtime_error("Descriptor not in use");
