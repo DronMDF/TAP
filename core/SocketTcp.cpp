@@ -36,6 +36,9 @@ SocketTcp::SocketTcp(const in_addr &addr, unsigned port, const shared_ptr<Socket
 		throw runtime_error(string("Cannot create socket: ") + strerror(errno));
 	}
 
+	const int flags = fcntl(sock, F_GETFL, 0);
+	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+
 	sockaddr_in sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sin_family = AF_INET;
@@ -48,9 +51,6 @@ SocketTcp::SocketTcp(const in_addr &addr, unsigned port, const shared_ptr<Socket
 			throw runtime_error(string("Cannot connect socket: ") + strerror(errno));
 		}
 	}
-
-	const int flags = fcntl(sock, F_GETFL, 0);
-	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 }
 
 SocketTcp::~SocketTcp() noexcept

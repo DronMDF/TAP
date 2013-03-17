@@ -1,6 +1,9 @@
 
 #include "SelectorPoll.h"
 
+#include <cstring>
+#include <stdexcept>
+#include <string>
 #include <poll.h>
 #include "Socket.h"
 
@@ -14,8 +17,13 @@ void SelectorPoll::proceed()
 		fds.push_back({ s.first, POLLIN | POLLPRI | POLLOUT, 0});
 	}
 
-	if (poll(&fds[0], fds.size(), 0) == 0) {
+	const int rv = poll(&fds[0], fds.size(), 0);
+	if (rv == 0) {
 		return;
+	}
+
+	if (rv == -1) {
+		throw runtime_error(string("Cannot poll sockets: ") + strerror(errno));
 	}
 
 	// Read all

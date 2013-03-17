@@ -11,7 +11,7 @@
 #include <netdb.h>
 #include <signal.h>
 #include <sys/resource.h>
-#include <core/SelectorPoll.h>
+#include <core/SelectorEpoll.h>
 #include <core/Tap.h>
 #include <core/TapManager.h>
 #include <core/TracerStream.h>
@@ -127,13 +127,10 @@ int main(int argc, char **argv)
 	TracerStream tracer(&cout, timestamp_millis);
 	
 	TapManager tapm(count,
-			[](int){ return make_shared<SelectorPoll>(); },
+			[](int){ return make_shared<SelectorEpoll>(); },
 			[server, port](){ return make_shared<ClientTcp>(server, port); });
 	
-	for (unsigned i = 0; i < count; i++) {
-		tapm.setTracer(i, &tracer);
-	}
-	
+	tapm.setTracer(0, &tracer);
 	tapm.setShowStatistic(bind(showStatistic, _1, _2, _3, timestamp), chrono::seconds(10));
 	tapm.pressure();
 	
