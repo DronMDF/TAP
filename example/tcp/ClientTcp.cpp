@@ -32,6 +32,7 @@ void ClientTcp::terminate()
 	socket.reset();
 	control.setStateOffline();
 	readed = 0;
+	setTimeout(0, 0);
 }
 
 bool ClientTcp::isOnline() const
@@ -74,7 +75,7 @@ void ClientTcp::action(ClientControl *)
 				make_shared<SocketHandlerTcp>(this));
 			control.addSocket(socket);
 			control.setStateConnecting();
-			setTimeout(0, 60);
+			setTimeout(0, 5);
 			control.trace("Goes connecting");
 		} catch (const exception &e) {
 			control.trace(e.what());
