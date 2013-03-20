@@ -1,7 +1,9 @@
 
 #pragma once
-#include <map>
+#include <vector>
 #include "Selector.h"
+
+struct epoll_event;
 
 class SelectorEpoll : public Selector {
 public:
@@ -14,5 +16,7 @@ public:
 
 private:
 	int epollfd;
+
+	virtual void strategy(const std::vector<epoll_event> &evs);
 };
 

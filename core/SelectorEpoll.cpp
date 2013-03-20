@@ -23,14 +23,14 @@ SelectorEpoll::~SelectorEpoll() noexcept
 
 void SelectorEpoll::addSocket(const shared_ptr<Socket> &socket)
 {
-	Selector::addSocket(socket);
-
 	const int fd = socket->getDescriptor();
 	epoll_event ev = { EPOLLIN | EPOLLOUT | EPOLLPRI, {}};
 	ev.data.fd = fd;
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev) == -1) {
 		throw runtime_error(string("epoll_ctl(EPOLL_CTL_ADD) failed: ") + strerror(errno));
 	}
+
+	Selector::addSocket(socket);
 }
 
 void SelectorEpoll::removeSocket(const shared_ptr<Socket> &socket)
@@ -38,7 +38,36 @@ void SelectorEpoll::removeSocket(const shared_ptr<Socket> &socket)
 	if (epoll_ctl(epollfd, EPOLL_CTL_DEL, socket->getDescriptor(), NULL) == -1) {
 		throw runtime_error(string("epoll_ctl(EPOLL_CTL_DEL) failed: ") + strerror(errno));
 	}
+
 	Selector::removeSocket(socket);
+}
+
+void SelectorEpoll::strategy(const vector<epoll_event> &evs)
+{
+	// This is stupid strategy... override this method if you want change strategy.
+	// We cannot live socket untouched. All event should be handled
+	// For timeboxing we can reduce evs size (its simple)
+	// Or reduce read/write data size (need pass rate to socket level)
+
+	for (auto &ev: evs) {
+		int revents = ev.events;
+
+		if ((revents & EPOLLIN) != 0) {
+			if (!sockets[ev.data.fd]->recv()) {
+				revents |= EPOLLERR;
+			}
+		}
+
+		if ((revents & EPOLLOUT) != 0) {
+			if (!sockets[ev.data.fd]->send()) {
+				revents |= EPOLLERR;
+			}
+		}
+
+		if ((revents & ~(EPOLLIN | EPOLLOUT)) != 0) {
+			removeSocket(sockets[ev.data.fd]);
+		}
+	}
 }
 
 void SelectorEpoll::proceed()
@@ -52,47 +81,8 @@ void SelectorEpoll::proceed()
 	if (count == -1) {
 		throw runtime_error(string("epoll_wait() failed: ") + strerror(errno));
 	}
+
 	evs.resize(count);
-
-	// This is stupid strategy... for all sockets.
-	// We cannot live socket untouched. All event should be handled
-	// For timeboxing we can reduce evs size (its simple)
-	// Or reduce read/write data size (need pass rate to socket level)
-
-	// Read all
-	for (int ec = 0; ec < count; ec++) {
-		if ((evs[ec].events & EPOLLIN) != 0) {
-			if (sockets[evs[ec].data.fd]->recv()) {
-				evs[ec].events &= ~EPOLLIN;
-			} else {
-				// recv failed - disconnect
-				removeSocket(sockets[evs[ec].data.fd]);
-				evs[ec].events = 0;
-			}
-		}
-	}
-
-	// Write all
-	for (int ec = 0; ec < count; ec++) {
-		if ((evs[ec].events & EPOLLOUT) != 0) {
-			if (sockets[evs[ec].data.fd]->send()) {
-				evs[ec].events &= ~EPOLLOUT;
-			} else {
-				// recv failed - disconnect
-				removeSocket(sockets[evs[ec].data.fd]);
-				evs[ec].events = 0;
-			}
-		}
-	}
-
-	// Handle all errors
-	for (int ec = 0; ec < count; ec++) {
-		if (evs[ec].events != 0) {
-			if (!sockets[evs[ec].data.fd]->recv()) {
-				// recv failed - disconnect
-				removeSocket(sockets[evs[ec].data.fd]);
-			}
-		}
-	}
+	strategy(evs);
 }
 
