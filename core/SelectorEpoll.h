@@ -14,11 +14,13 @@ public:
 	virtual void removeSocket(const std::shared_ptr<Socket> &socket) override;
 	virtual void proceed() override;
 
+protected:
+	int recv(unsigned enable, int fd, int size = 65536) const;
+	int send(unsigned enable, int fd, int size = 65536) const;
+
 private:
 	int epollfd;
 
-	int recv(unsigned enable, int fd, int size = 65536) const;
-	int send(unsigned enable, int fd, int size = 65536) const;
 	virtual void strategy(const std::vector<epoll_event> &evs);
 };
 

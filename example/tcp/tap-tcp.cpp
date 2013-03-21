@@ -11,6 +11,7 @@
 #include <netdb.h>
 #include <signal.h>
 #include <sys/resource.h>
+#include <sys/epoll.h>
 #include <core/SelectorEpoll.h>
 #include <core/Tap.h>
 #include <core/TapManager.h>
@@ -59,6 +60,27 @@ void showStatistic(int offline, int connecting, int online, function<string ()> 
 		<< " online: " << online
 		<< endl;
 }
+
+class SelectorWaiting : public SelectorEpoll {
+private:
+	const int n;
+	set<int> active;
+public:
+	SelectorWaiting(int n) : n(n), active() {}
+
+	virtual void strategy(const vector<epoll_event> &evs) override {
+		const int size = (active.size() < size_t(n)) ? 1 : 65536;
+		for (auto &ev: evs) {
+			const int rv = recv(ev.events, ev.data.fd, size);
+			if (rv == -1) {
+				active.erase(ev.data.fd);
+				removeSocket(sockets[ev.data.fd]);
+			} else if (rv > 0){
+				active.insert(ev.data.fd);
+			}
+		}
+	}
+};
 
 void usage()
 {
@@ -127,10 +149,14 @@ int main(int argc, char **argv)
 	TracerStream tracer(&cout, timestamp_millis);
 	
 	TapManager tapm(count,
-			[](int){ return make_shared<SelectorEpoll>(); },
+			[](int n){ return make_shared<SelectorWaiting>(n); },
 			[server, port](){ return make_shared<ClientTcp>(server, port); });
 	
+	//for (unsigned i = 0; i < count; i++) {
+	//	tapm.setTracer(i, &tracer);
+	//}
 	tapm.setTracer(0, &tracer);
+
 	tapm.setShowStatistic(bind(showStatistic, _1, _2, _3, timestamp), chrono::seconds(10));
 	tapm.pressure();
 	

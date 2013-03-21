@@ -88,6 +88,10 @@ int SocketTcp::recv(int size)
 	const int rv = read(sock, &data[0], data.size());
 
 	if (rv <= 0) {
+		if (errno == EAGAIN) {
+			return 0;
+		}
+
 		handler->disconnect();
 		return -1;
 	}
@@ -110,6 +114,10 @@ int SocketTcp::send(int size)
 
 	int rv = write(sock, &send_buffer[0], min(send_buffer.size(), size_t(size)));
 	if (rv <= 0) {
+		if (errno == EAGAIN) {
+			return 0;
+		}
+
 		handler->disconnect();
 		return -1;
 	}

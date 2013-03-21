@@ -82,7 +82,7 @@ void SelectorEpoll::strategy(const vector<epoll_event> &evs)
 			revents |= EPOLLERR;
 		}
 
-		if (recv(revents & ~(EPOLLIN | EPOLLOUT), ev.data.fd) == -1) {
+		if (recv(revents & ~(EPOLLIN | EPOLLOUT), ev.data.fd, 1) == -1) {
 			removeSocket(sockets[ev.data.fd]);
 		}
 	}
@@ -90,7 +90,7 @@ void SelectorEpoll::strategy(const vector<epoll_event> &evs)
 
 void SelectorEpoll::proceed()
 {
-	vector<epoll_event> evs(sockets.size());
+	vector<epoll_event> evs(1024);
 	if (evs.empty()) {
 		return;
 	}
