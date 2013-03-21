@@ -1,6 +1,7 @@
 
 #include "SocketTcp.h"
 
+#include <algorithm>
 #include <stdexcept>
 #include <arpa/inet.h>
 #include <errno.h>
@@ -81,22 +82,22 @@ void SocketTcp::bind(unsigned port)
 	}
 }
 
-bool SocketTcp::recv()
+int SocketTcp::recv(int size)
 {
-	vector<uint8_t> data(65536);
+	vector<uint8_t> data(size);
 	const int rv = read(sock, &data[0], data.size());
 
 	if (rv <= 0) {
 		handler->disconnect();
-		return false;
+		return -1;
 	}
 
 	data.resize(rv);
 	handler->recv(data);
-	return true;
+	return rv;
 }
 
-bool SocketTcp::send()
+int SocketTcp::send(int size)
 {
 	if (send_buffer.empty()) {
 		send_buffer = handler->send();
@@ -104,15 +105,15 @@ bool SocketTcp::send()
 
 	if (send_buffer.empty()) {
 		// Nothing to send
-		return true;
+		return 0;
 	}
 
-	int rv = write(sock, &send_buffer[0], send_buffer.size());
+	int rv = write(sock, &send_buffer[0], min(send_buffer.size(), size_t(size)));
 	if (rv <= 0) {
 		handler->disconnect();
-		return false;
+		return -1;
 	}
 
 	send_buffer.erase(send_buffer.begin(), send_buffer.begin() + rv);
-	return true;
+	return rv;
 }

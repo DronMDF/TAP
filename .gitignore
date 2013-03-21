@@ -10,4 +10,5 @@ tap-tcp-server
 .settings
 .project
 .cproject
+TAP.*
 

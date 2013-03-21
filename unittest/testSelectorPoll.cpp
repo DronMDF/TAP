@@ -35,8 +35,8 @@ TAP_TEST_CASE(testShouldUseAddedSocketInProceed)
 
 	struct SocketForRead : public SocketTest {
 		bool received;
-		SocketForRead(int fd) : SocketTest(fd), received(false) {};
-		virtual bool recv() override { received = true; return true; };
+		SocketForRead(int fd) : SocketTest(fd), received(false) {}
+		virtual int recv(int) override { received = true; return 0; }
 	};
 	auto socket = make_shared<SocketForRead>(pfd.in);
 
@@ -53,8 +53,8 @@ TAP_TEST_CASE(testShouldUseOutputSocketInProceed)
 	// Given
 	struct SocketForWrite : public SocketTest {
 		bool sended;
-		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
-		virtual bool send() override { sended = true; return true; };
+		SocketForWrite(int fd) : SocketTest(fd), sended(false) {}
+		virtual int send(int) override { sended = true; return 0; }
 	};
 	auto socket = make_shared<SocketForWrite>(1);
 
@@ -71,8 +71,8 @@ TAP_TEST_CASE(testShouldNotUseRemovedSocketInProceed)
 	// Given
 	struct SocketForWrite : public SocketTest {
 		bool sended;
-		SocketForWrite(int fd) : SocketTest(fd), sended(false) {};
-		virtual bool send() override { sended = true; return true; };
+		SocketForWrite(int fd) : SocketTest(fd), sended(false) {}
+		virtual int send(int) override { sended = true; return 0; }
 	};
 	auto socket = make_shared<SocketForWrite>(1);
 

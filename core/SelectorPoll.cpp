@@ -29,7 +29,7 @@ void SelectorPoll::proceed()
 	// Read all
 	for (auto &p: fds) {
 		if ((p.revents & POLLIN) != 0) {
-			if (sockets[p.fd]->recv()) {
+			if (sockets[p.fd]->recv(65536)) {
 				p.revents &= ~POLLIN;
 			} else {
 				removeSocket(sockets[p.fd]);
@@ -41,7 +41,7 @@ void SelectorPoll::proceed()
 	// Write all
 	for (auto &p: fds) {
 		if ((p.revents & POLLOUT) != 0) {
-			if (sockets[p.fd]->send()) {
+			if (sockets[p.fd]->send(65536)) {
 				p.revents &= ~POLLOUT;
 			} else {
 				removeSocket(sockets[p.fd]);
@@ -53,7 +53,7 @@ void SelectorPoll::proceed()
 	// Handle all errors
 	for (const auto &p: fds) {
 		if (p.revents != 0) {
-			if (!sockets[p.fd]->recv()) {
+			if (!sockets[p.fd]->recv(1)) {
 				removeSocket(sockets[p.fd]);
 			}
 		}

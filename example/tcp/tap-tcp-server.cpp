@@ -45,17 +45,17 @@ public:
 	{
 	}
 
-	virtual bool recv() override {
+	virtual int recv(int) override {
 		const int nfd = accept(getDescriptor(), 0, 0);
 		if (nfd == -1) {
 			throw runtime_error(string("accept failed: ") + strerror(errno));
 		}
 		auto nsock = make_shared<SocketTcp>(nfd, make_shared<WriteHandler>());
 		selector->addSocket(nsock);
-		return true;
+		return 0;
 	}
 
-	virtual bool send() override {
+	virtual int send(int) override {
 		throw "Invalid method for listening socket";
 	}
 };

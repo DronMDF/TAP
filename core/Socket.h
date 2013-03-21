@@ -10,6 +10,6 @@ public:
 
 	virtual int getDescriptor() const = 0;
 
-	virtual bool recv() = 0;
-	virtual bool send() = 0;
+	virtual int recv(int size) = 0;
+	virtual int send(int size) = 0;
 };

@@ -42,23 +42,23 @@ void SelectorEpoll::removeSocket(const shared_ptr<Socket> &socket)
 	Selector::removeSocket(socket);
 }
 
-int SelectorEpoll::recv(unsigned enable, int fd, int) const
+int SelectorEpoll::recv(unsigned enable, int fd, int size) const
 {
 	if (enable != 0) {
 		const auto s = sockets.find(fd);
 		if (s != sockets.end()) {
-			return s->second->recv() ? 0 : -1;
+			return s->second->recv(size);
 		}
 	}
 	return 0;
 }
 
-int SelectorEpoll::send(unsigned enable, int fd, int) const
+int SelectorEpoll::send(unsigned enable, int fd, int size) const
 {
 	if (enable != 0) {
 		const auto s = sockets.find(fd);
 		if (s != sockets.end()) {
-			return s->second->send() ? 0 : -1;
+			return s->second->send(size);
 		}
 	}
 	return 0;

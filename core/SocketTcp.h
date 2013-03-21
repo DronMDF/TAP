@@ -18,8 +18,8 @@ public:
 
 	virtual int getDescriptor() const override;
 
-	virtual bool recv() override;
-	virtual bool send() override;
+	virtual int recv(int size) override;
+	virtual int send(int size) override;
 
 private:
 	int sock;
