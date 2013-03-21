@@ -17,6 +17,8 @@ public:
 private:
 	int epollfd;
 
+	int recv(unsigned enable, int fd, int size = 65536) const;
+	int send(unsigned enable, int fd, int size = 65536) const;
 	virtual void strategy(const std::vector<epoll_event> &evs);
 };
 

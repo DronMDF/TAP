@@ -42,6 +42,28 @@ void SelectorEpoll::removeSocket(const shared_ptr<Socket> &socket)
 	Selector::removeSocket(socket);
 }
 
+int SelectorEpoll::recv(unsigned enable, int fd, int) const
+{
+	if (enable != 0) {
+		const auto s = sockets.find(fd);
+		if (s != sockets.end()) {
+			return s->second->recv() ? 0 : -1;
+		}
+	}
+	return 0;
+}
+
+int SelectorEpoll::send(unsigned enable, int fd, int) const
+{
+	if (enable != 0) {
+		const auto s = sockets.find(fd);
+		if (s != sockets.end()) {
+			return s->second->send() ? 0 : -1;
+		}
+	}
+	return 0;
+}
+
 void SelectorEpoll::strategy(const vector<epoll_event> &evs)
 {
 	// This is stupid strategy... override this method if you want change strategy.
@@ -52,19 +74,15 @@ void SelectorEpoll::strategy(const vector<epoll_event> &evs)
 	for (auto &ev: evs) {
 		int revents = ev.events;
 
-		if ((revents & EPOLLIN) != 0) {
-			if (!sockets[ev.data.fd]->recv()) {
-				revents |= EPOLLERR;
-			}
+		if (recv(revents & EPOLLIN, ev.data.fd) == -1) {
+			revents |= EPOLLERR;
 		}
 
-		if ((revents & EPOLLOUT) != 0) {
-			if (!sockets[ev.data.fd]->send()) {
-				revents |= EPOLLERR;
-			}
+		if (send(revents & EPOLLOUT, ev.data.fd) == -1) {
+			revents |= EPOLLERR;
 		}
 
-		if ((revents & ~(EPOLLIN | EPOLLOUT)) != 0) {
+		if (recv(revents & ~(EPOLLIN | EPOLLOUT), ev.data.fd) == -1) {
 			removeSocket(sockets[ev.data.fd]);
 		}
 	}
