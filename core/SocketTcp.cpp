@@ -13,7 +13,7 @@
 using namespace std;
 
 SocketTcp::SocketTcp(const shared_ptr<SocketHandler> &handler)
-	: sock(socket(AF_INET, SOCK_STREAM, 0)), send_buffer(), handler(handler)
+	: sock(socket(AF_INET, SOCK_STREAM, 0)), connected(true), send_buffer(), handler(handler) 
 {
 	if (sock == -1) {
 		throw runtime_error(string("Cannot create socket: ") + strerror(errno));
@@ -24,14 +24,14 @@ SocketTcp::SocketTcp(const shared_ptr<SocketHandler> &handler)
 }
 
 SocketTcp::SocketTcp(int s, const shared_ptr<SocketHandler> &handler)
-	: sock(s), send_buffer(), handler(handler)
+	: sock(s), connected(true), send_buffer(), handler(handler)
 {
 	const int flags = fcntl(sock, F_GETFL, 0);
 	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 }
 
 SocketTcp::SocketTcp(const in_addr &addr, unsigned port, const shared_ptr<SocketHandler> &handler)
-	: sock(socket(AF_INET, SOCK_STREAM, 0)), send_buffer(), handler(handler)
+	: sock(socket(AF_INET, SOCK_STREAM, 0)), connected(false), send_buffer(), handler(handler)
 {
 	if (sock == -1) {
 		throw runtime_error(string("Cannot create socket: ") + strerror(errno));
@@ -103,6 +103,16 @@ int SocketTcp::recv(int size)
 
 int SocketTcp::send(int size)
 {
+	if (!connected) {
+		int status;
+		socklen_t slen = sizeof(status);
+		if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &status, &slen) < 0 || status != 0) {
+			handler->disconnect();
+			return -1;
+		}
+		connected = true;
+	}
+
 	if (send_buffer.empty()) {
 		send_buffer = handler->send();
 	}

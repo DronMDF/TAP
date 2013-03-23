@@ -23,6 +23,7 @@ public:
 
 private:
 	int sock;
+	bool connected;
 	std::vector<uint8_t> send_buffer;
 	std::shared_ptr<SocketHandler> handler;
 
