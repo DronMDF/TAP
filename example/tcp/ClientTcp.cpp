@@ -16,6 +16,29 @@
 using namespace std;
 using namespace std::chrono;
 
+class SocketLimited : public SocketTcp
+{
+private:
+	unsigned bandwidth;
+	::time_point received_time;
+public:
+	SocketLimited(const in_addr &addr, unsigned port, const shared_ptr<SocketHandler> &handler,
+			unsigned bandwidth)
+		: SocketTcp(addr, port, handler), bandwidth(bandwidth),
+		  received_time(high_resolution_clock::now())
+	{
+	}
+
+	virtual int recv(int size) override
+	{
+		const auto now = high_resolution_clock::now();
+		const auto interval = duration_cast<milliseconds>(now - received_time).count();
+		received_time = now;
+		int limited_size = bandwidth * interval / 8000;
+		return SocketTcp::recv(max(min(size, limited_size), 1));
+	}
+};
+
 ClientTcp::ClientTcp(const in_addr &server, int port)
 	: addr(server), port(port), socket(), stamp(high_resolution_clock::now()), readed(0)
 {
@@ -48,7 +71,7 @@ void ClientTcp::read_notification(size_t rb)
 	}
 
 	readed += rb;
-	setTimeout(0, 60);
+	setTimeout(0, 120);
 }
 
 void ClientTcp::disconnect_notification()
@@ -71,8 +94,8 @@ void ClientTcp::action(ClientControl *)
 	if (!socket) {
 		try {
 			// TODO: separate connect
-			socket = make_shared<SocketTcp>(addr, port,
-				make_shared<SocketHandlerTcp>(this));
+			socket = make_shared<SocketLimited>(addr, port,
+				make_shared<SocketHandlerTcp>(this), 10000);
 			control.addSocket(socket);
 			control.setStateConnecting();
 			setTimeout(0, 60);

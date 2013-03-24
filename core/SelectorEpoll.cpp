@@ -90,7 +90,7 @@ void SelectorEpoll::strategy(const vector<epoll_event> &evs)
 
 void SelectorEpoll::proceed()
 {
-	vector<epoll_event> evs(1024);
+	vector<epoll_event> evs(sockets.size());
 	if (evs.empty()) {
 		return;
 	}
